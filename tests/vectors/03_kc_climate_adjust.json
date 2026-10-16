@@ -1,0 +1,2 @@
+{ "type": "function", "name": "Kc mid climate adjustment (Eq. 62): 1.15, u2 3, RHmin 30, h 1", "fn": "Fao56.kcClimateAdjust", "args": [1.15, 3, 30, 1.0],
+  "source": "1.15 + [0.04(3−2) − 0.004(30−45)]·(1/3)^0.3 = 1.15 + 0.10·0.7192 = 1.2219", "expect": [1.2219, 0.0005] }

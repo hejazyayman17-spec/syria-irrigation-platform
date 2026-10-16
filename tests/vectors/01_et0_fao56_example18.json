@@ -1,0 +1,6 @@
+{ "type": "et0", "name": "FAO-56 Example 18 (Uccle, 6 July)",
+  "source": "Allen et al. 1998, FAO-56, Example 18: ET0 = 3.9 mm/day; ea = 1.409 kPa; Rn = 13.28 MJ/m2/day",
+  "date": "2026-07-06",
+  "record": { "Tmin_C": 12.3, "Tmax_C": 21.5, "RHmin_pct": 63, "RHmax_pct": 84, "WindSpeed_m_s": 2.078, "WindHeight_m": 2, "SolarRadiation_MJ_m2_day": 22.07 },
+  "meta": { "Latitude": 50.8, "Elevation_m": 100, "WindHeight_m": 2 },
+  "expect": { "et0": [3.9, 0.06], "ea": [1.409, 0.002], "Rn": [13.28, 0.05] } }

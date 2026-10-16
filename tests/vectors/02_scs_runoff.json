@@ -1,0 +1,2 @@
+{ "type": "function", "name": "SCS-CN runoff, CN 80, P 50 mm", "fn": "WaterBalance.runoffSCS", "args": [50, 80],
+  "source": "S = 25400/80 − 254 = 63.5; Ia = 12.7; RO = 37.3² / 100.8 = 13.80 mm", "expect": [13.80, 0.01] }

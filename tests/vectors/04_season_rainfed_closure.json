@@ -1,0 +1,6 @@
+{ "type": "season", "name": "Rainfed wheat, synthetic season — mass conservation",
+  "input": { "cropKey": "wheat", "sowingDate": "2025-11-15", "endDate": "2026-06-15",
+    "soil": { "thetaFC": 0.29, "thetaWP": 0.15, "cn": 80, "initialDepletionFrac": 0.6, "subsoilDepletionFrac": 0.4 },
+    "irrigation": { "mode": "rainfed", "efficiency": 0.75, "triggerFrac": null, "events": [] },
+    "weatherGen": { "start": "2025-11-15", "days": 213, "tmin": 6, "tmax": 17, "amp": -6, "et0": 3.0, "et0amp": -1.8, "rain": 0, "rainEvery": 6, "rainMm": 9, "u2": 2.5, "rhmin": 40 } },
+  "expect": { "MassClosureMm": [0, 0.01], "Inet": [0, 0.001] } }

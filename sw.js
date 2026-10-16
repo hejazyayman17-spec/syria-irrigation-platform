@@ -2,7 +2,7 @@
  * App shell: cache-first with background refresh (stale-while-revalidate).
  * NASA archive (data/nasa/*): network-first, falls back to the last cached copy offline.
  * Bump VERSION on every release so phones pick up the new shell. */
-const VERSION = 'gcsar-v0.7.0';
+const VERSION = 'gcsar-v0.7.1';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './js/engine/fao56.js', './js/engine/crops.js', './js/engine/soils.js', './js/engine/waterbalance.js', './js/balance-ui.js',
@@ -21,6 +21,8 @@ self.addEventListener('fetch', e => {
   const req = e.request;
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
+  // only the platform's own files and the pinned CDN library; never intercept external APIs (NASA POWER etc.)
+  if (url.origin !== self.location.origin && !SHELL.includes(req.url)) return;
   if (url.pathname.includes('/data/nasa/')) {           // fresh data when online, last copy when offline
     e.respondWith(fetch(req).then(r => { const cp = r.clone(); caches.open(VERSION).then(c => c.put(req, cp)); return r; })
       .catch(() => caches.match(req, { ignoreSearch: true })));

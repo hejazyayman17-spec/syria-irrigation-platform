@@ -195,18 +195,23 @@
     $('wbCrop').value = 'wheat'; fillCrop('wheat'); $('wbSoil').value = 'siltLoam'; fillSoil('siltLoam'); $('wbSystem').value = 'sprinkler'; fillSystem('sprinkler');
     let saved = null; try { saved = JSON.parse(localStorage.getItem(LS_KEY) || 'null'); } catch (e) { }
     if (saved && saved.schema === 'gcsar.field/1') writeField(saved);
-    $('wbCrop').onchange = e => fillCrop(e.target.value);
+    $('wbCrop').onchange = e => { fillCrop(e.target.value); defaultDates(true); };
     $('wbSoil').onchange = e => fillSoil(e.target.value);
     $('wbSystem').onchange = e => fillSystem(e.target.value);
     $('wbRunBtn').onclick = runBalance; $('wbExportBtn').onclick = exportXlsx; $('wbSaveBtn').onclick = saveJson;
     $('wbLoadFile').onchange = e => e.target.files[0] && loadJson(e.target.files[0]);
     notice();
   }
-  function onShow() {
-    notice();
-    const w = weather();
-    if (w.length && !$('wbEnd').value) $('wbEnd').value = w[w.length - 1].date;
-    if (!$('wbSow').value) $('wbSow').value = $('sowingDate')?.value || '';
+  /** Typical sowing date of the crop's most recent season that has started before `ref` (YYYY-MM-DD) */
+  function typicalSow(key, ref) {
+    const md = E().Crops.CROPS[key].sowMonthDay || '11-20', y = +ref.slice(0, 4);
+    return `${y}-${md}` <= ref ? `${y}-${md}` : `${y - 1}-${md}`;
   }
+  function defaultDates(force) {
+    const w = weather(), lastD = w.length ? w[w.length - 1].date : dateKey(new Date());
+    if (force || !$('wbSow').value) $('wbSow').value = typicalSow($('wbCrop').value, lastD);
+    if (force || !$('wbEnd').value) $('wbEnd').value = lastD;
+  }
+  function onShow() { notice(); defaultDates(false); }
   window.WB = { init, onShow, run: runBalance, get last() { return last; }, readField, writeField };
 })();

@@ -15,7 +15,7 @@ Usage:
   python tools/nasa_power_sync.py --from-dir tests/nasa_mock   # offline test with saved responses
 Standard library only (+ tools/fao56.py).
 """
-import argparse, datetime as dt, json, os, sys, time, urllib.parse, urllib.request
+import argparse, datetime as dt, json, math, os, sys, time, urllib.parse, urllib.request
 sys.path.insert(0, os.path.dirname(__file__))
 from fao56 import et0_daily, elevation_from_pressure
 
@@ -124,7 +124,41 @@ def download(start, end, from_dir=None):
             elev.update(e)
             for cell, dv in s.items():
                 data[p].setdefault(cell, {}).update(dv)
+    regrid_to_met(data)
+    met = set(data['T2M_MAX'])
+    elev = {c: z for c, z in elev.items() if c in met}
     return data, elev, units
+
+
+SOLAR = ['ALLSKY_SFC_SW_DWN']  # POWER solar parameters come on a 1°×1° grid (CERES), meteorology on MERRA-2 0.5°×0.625°
+
+
+def regrid_to_met(data):
+    """Put solar parameters on the meteorological grid so every cell has all ET0 inputs.
+    Each solar value represents a 1° box centred on (n+0.5, m+0.5); a met cell takes the box that contains it.
+    A met cell on a box edge (integer lat and/or lon) belongs equally to 2 or 4 boxes → their mean.
+    This is nearest-box assignment, not interpolation: radiation is treated as spatially uniform inside a box."""
+    met = list(data['T2M_MAX'])
+    for p in SOLAR:
+        src = data[p]
+        if not src or set(src) <= set(met) and all(c in src for c in met):
+            continue
+        out = {}
+        for lat, lon in met:
+            boxes = []
+            for la in ({math.floor(lat) + 0.5, math.ceil(lat) - 0.5} if lat == int(lat) else {math.floor(lat) + 0.5}):
+                for lo in ({math.floor(lon) + 0.5, math.ceil(lon) - 0.5} if lon == int(lon) else {math.floor(lon) + 0.5}):
+                    if (la, lo) in src:
+                        boxes.append(src[(la, lo)])
+            if not boxes:
+                continue
+            dates = set().union(*boxes)
+            vals = {}
+            for d in dates:
+                xs = [b[d] for b in boxes if b.get(d) is not None]
+                vals[d] = round(sum(xs) / len(xs), 3) if xs else None
+            out[(lat, lon)] = vals
+        data[p] = out
 
 
 # ---------------------------------------------------------------- archive
@@ -135,7 +169,7 @@ def load_year(y):
 
 def merge_and_compute(data, elev, units):
     govs = load_governorates()
-    cells = sorted({c for p in PARAMS for c in data[p]})
+    cells = sorted(data['T2M_MAX'])  # archive grid = meteorological grid (solar regridded onto it)
     dates = sorted({d for p in PARAMS for c in data[p] for d in data[p][c]})
     by_year = {}
     for d in dates:

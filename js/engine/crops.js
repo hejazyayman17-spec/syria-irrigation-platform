@@ -14,7 +14,7 @@
 
   const CROPS = {
     wheat: {
-      key: 'wheat', name: 'قمح (شتوي)',
+      key: 'wheat', name: 'قمح (شتوي)', sowMonthDay: '11-20',
       kcIni: 0.70,   // Table 12: winter wheat, non-frozen soils (Syrian winter rains wet the surface often)
       kcMid: 1.15, kcEnd: 0.30, h: 1.0,
       zrMin: 0.20, zrMax: 1.50,   // Table 22: 1.5–1.8 m; lower bound used (calibrate to soil depth)
@@ -28,7 +28,7 @@
       note: 'حدود الأطوار مشتقة من موسم 2025/26 في سلمية (NASA POWER، زراعة 20 تشرين الثاني): الإشطاء ≈ نهاية كانون الأول، التغطية الكاملة ≈ أوائل نيسان، بداية الشيخوخة ≈ أوائل أيار، النضج ≈ أوائل حزيران. تُعاير بأرصاد فينولوجية حقلية.'
     },
     barley: {
-      key: 'barley', name: 'شعير',
+      key: 'barley', name: 'شعير', sowMonthDay: '11-15',
       kcIni: 0.70, kcMid: 1.15, kcEnd: 0.25, h: 1.0,
       zrMin: 0.20, zrMax: 1.20, p: 0.55, ky: null,
       tbase: 0, tupper: null,
@@ -36,7 +36,7 @@
       note: 'Kc ini مأخوذ مثل القمح الشتوي لنظام الأمطار الشتوية؛ حدود الأطوار أبكر من القمح بنحو أسبوعين. تُعاير محلياً.'
     },
     maize: {
-      key: 'maize', name: 'ذرة صفراء (حبية)',
+      key: 'maize', name: 'ذرة صفراء (حبية)', sowMonthDay: '04-15',
       kcIni: 0.30, kcMid: 1.20, kcEnd: 0.35, h: 2.0,
       zrMin: 0.20, zrMax: 1.30, p: 0.55, ky: 1.25,
       tbase: 10, tupper: 30,

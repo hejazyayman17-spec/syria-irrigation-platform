@@ -1,0 +1,44 @@
+# Daily NASA POWER sync for Syria — runs on GitHub's US servers (no Syria geo-block, no CORS).
+# Downloads the regional grid, computes FAO-56 ET0 per cell, commits data/nasa/*.json.
+name: NASA POWER sync
+
+on:
+  schedule:
+    - cron: '17 4 * * *'        # daily 04:17 UTC = 07:17 Damascus
+  workflow_dispatch:            # manual run from the Actions tab (also used for backfilling history)
+    inputs:
+      start:
+        description: 'Start date YYYYMMDD (empty = last 20 days)'
+        required: false
+      end:
+        description: 'End date YYYYMMDD (empty = yesterday)'
+        required: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: nasa-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate FAO-56 engine (Example 18)
+        run: python tools/fao56.py
+      - name: Download NASA POWER and compute ET0
+        run: python tools/nasa_power_sync.py ${{ inputs.start && format('--start {0}', inputs.start) || '' }} ${{ inputs.end && format('--end {0}', inputs.end) || '' }}
+      - name: Commit data
+        run: |
+          git config user.name  "nasa-sync-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/nasa
+          git diff --cached --quiet && echo "no changes" && exit 0
+          git commit -m "data: NASA POWER sync $(date -u +%Y-%m-%d)"
+          git push

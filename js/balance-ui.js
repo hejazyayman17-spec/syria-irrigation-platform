@@ -4,7 +4,8 @@
   'use strict';
   const $ = id => document.getElementById(id);
   const E = () => window.GCSAR;
-  const LS_KEY = 'gcsar.wb.field.v1';
+  const LS_KEY = 'gcsar.wb.field.v1', LS_ALERT = 'gcsar.wb.alert.v1';
+  let FC = null;   // data/forecast/latest.json (Open-Meteo on the NASA grid)
   const COL = { rain: '#3a7fc1', irr: '#c2410c', dr: '#008c99', trig: '#b7791f', taw: '#5f7a80' };
   let last = null;
 
@@ -18,7 +19,7 @@
     $('wbCropNote').textContent = c.note || '';
   }
   function fillSoil(key) { const s = E().Soils.SOILS[key]; $('wbFC').value = s.thetaFC; $('wbWP').value = s.thetaWP; $('wbCN').value = s.cn; }
-  function fillSystem(key) { $('wbEa').value = E().Soils.SYSTEMS[key].ea; }
+  function fillSystem(key) { const y = E().Soils.SYSTEMS[key]; $('wbEa').value = y.ea; $('wbMaxNet').value = y.maxNetMm ?? ''; }
   const n = id => { const v = $(id).value; return v === '' ? null : +v; };
 
   function readField() {
@@ -34,7 +35,8 @@
       soil: { texture: $('wbSoil').value, thetaFC: n('wbFC'), thetaWP: n('wbWP'), cn: n('wbCN'),
         initialDepletionFrac: (n('wbDr0') ?? 50) / 100, subsoilDepletionFrac: (n('wbDsub0') ?? 50) / 100 },
       irrigation: { system: $('wbSystem').value, mode: $('wbMode').value, efficiency: n('wbEa'),
-        triggerFrac: n('wbTrigger') === null ? null : n('wbTrigger') / 100, events: parseEvents($('wbEvents').value) }
+        triggerFrac: n('wbTrigger') === null ? null : n('wbTrigger') / 100, events: parseEvents($('wbEvents').value),
+        maxNetMm: n('wbMaxNet'), forecastRainProbMin: n('wbRainProb') ?? 60, useForecast: $('wbUseFc').value === '1' }
     };
   }
   function writeField(f) {
@@ -49,6 +51,8 @@
     $('wbSystem').value = f.irrigation.system || 'sprinkler'; $('wbMode').value = f.irrigation.mode; $('wbEa').value = f.irrigation.efficiency;
     $('wbTrigger').value = f.irrigation.triggerFrac === null ? '' : Math.round(100 * f.irrigation.triggerFrac);
     $('wbEvents').value = (f.irrigation.events || []).map(e => `${e.date}, ${e.grossMm}`).join('\n');
+    $('wbMaxNet').value = f.irrigation.maxNetMm ?? (E().Soils.SYSTEMS[f.irrigation.system || 'sprinkler'].maxNetMm ?? '');
+    $('wbRainProb').value = f.irrigation.forecastRainProbMin ?? 60; $('wbUseFc').value = f.irrigation.useForecast === false ? '0' : '1';
   }
   function parseEvents(txt) {
     return txt.split(/\n/).map(l => l.trim()).filter(Boolean).map(l => { const m = l.match(/(\d{4}-\d{2}-\d{2})\s*[,;\t ]\s*([\d.]+)/); return m ? { date: m[1], grossMm: +m[2] } : null; }).filter(Boolean);
@@ -62,6 +66,33 @@
       u2: r._res && Number.isFinite(r._res.u2) ? r._res.u2 : null, rhmin: E().Fao56.rhMin(r)
     }));
   }
+  async function loadForecast() {
+    if (FC) return FC;
+    try { const base = archiveBase(); if (!base) return null; const r = await fetch(base.replace('data/nasa/', 'data/forecast/') + 'latest.json', { cache: 'no-cache' }); if (r.ok) FC = await r.json(); }
+    catch (e) { FC = null; }
+    return FC;
+  }
+  /** Days after the last approved day: Open-Meteo recent analysis ('model') then forecast, for the cell nearest the field.
+   * ET0 is computed here with the same FAO-56 engine (RHmin/RHmax path). Returns {rows, note} or {rows:[], note}. */
+  function forecastExtension(lastObs) {
+    if (!FC) return { rows: [], note: 'التوقعات غير متاحة حالياً (تُحدَّث على الخادم مرتين يومياً).' };
+    const lat = +state.station?.Latitude, lon = +state.station?.Longitude;
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) return { rows: [], note: 'لا توجد إحداثيات للموقع.' };
+    const ci = nearestCell(FC.cells, lat, lon), cell = FC.cells[ci], V = FC.vars;
+    const next = d => { const x = new Date(d + 'T00:00:00'); x.setDate(x.getDate() + 1); return dateKey(x); };
+    const start = next(lastObs), j0 = FC.dates.indexOf(start);
+    if (j0 < 0) return { rows: [], note: start < FC.dates[0] ? `فجوة بين آخر يوم معتمد (${lastObs}) وبداية بيانات التوقع (${FC.dates[0]}): حدّث السلسلة المعتمدة من أرشيف المنصة.` : 'السلسلة المعتمدة تتجاوز فترة التوقع.' };
+    const meta = { Latitude: lat, Elevation_m: +state.station?.Elevation_m || (cell[2] ?? 0), WindHeight_m: 2 };
+    const rows = [];
+    for (let j = j0; j < FC.dates.length; j++) {
+      const d = FC.dates[j], rec = { Tmin_C: V.tmin[ci][j], Tmax_C: V.tmax[ci][j], RHmin_pct: V.rhmin[ci][j], RHmax_pct: V.rhmax[ci][j], WindSpeed_m_s: V.u2[ci][j], WindHeight_m: 2, SolarRadiation_MJ_m2_day: V.rs[ci][j] };
+      const r = E().Fao56.et0FromRecord(rec, meta, new Date(d + 'T00:00:00'));
+      rows.push({ date: d, tmin: rec.Tmin_C, tmax: rec.Tmax_C, et0: r.et0, rain: V.rain[ci][j] ?? 0, rainProb: V.rainProb[ci][j], u2: rec.WindSpeed_m_s, rhmin: rec.RHmin_pct,
+        kind: d < FC.firstForecastDate ? 'model' : 'forecast' });
+    }
+    const nModel = rows.filter(r => r.kind === 'model').length;
+    return { rows, note: `${nModel ? `${nModel} يوم من تحليل نموذج Open-Meteo لسدّ تأخر NASA، ثم ` : ''}${rows.length - nModel} أيام توقع (إصدار ${FC.issued.replace('T', ' ').replace('Z', ' UTC')}) لخلية ${cell[0]}°N, ${cell[1]}°E.` };
+  }
   function notice() {
     const el = $('wbNotice'), w = weather();
     if (!state.rows.length) { el.innerHTML = '<span class="status warn">لا توجد بيانات مناخية</span> حمّل سلسلة من «أرشيف المنصة» أو ملف محطة في شاشة المناخ، ثم راجعها واعتمدها.'; return false; }
@@ -71,37 +102,69 @@
   }
 
   // ---------- run
-  function runBalance() {
+  async function runBalance() {
     if (!notice()) { toast('اعتمد البيانات المناخية أولاً'); return; }
-    const f = readField(), w = weather();
+    const f = readField(), obs = weather();
     if (!f.sowingDate || !f.endDate) { toast('حدد تاريخ الزراعة ونهاية المحاكاة'); return; }
-    const first = w[0].date, lastD = w[w.length - 1].date;
-    if (f.sowingDate < first || f.endDate > lastD) { toast(`المناخ المعتمد يغطي ${first} → ${lastD} فقط`); }
-    const end = f.endDate > lastD ? lastD : f.endDate;
+    const first = obs[0].date, lastObs = obs[obs.length - 1].date;
+    let w = obs, end = f.endDate > lastObs ? lastObs : f.endDate, fcNote = '';
+    // forecast mode: the simulation runs to the end of the forecast when the chosen end date reaches the last approved day
+    if (f.irrigation.useForecast && f.endDate >= lastObs) {
+      await loadForecast();
+      const ext = forecastExtension(lastObs); fcNote = ext.note;
+      if (ext.rows.length) { w = obs.concat(ext.rows); end = ext.rows[ext.rows.length - 1].date; }
+    } else if (f.sowingDate < first || f.endDate > lastObs) { toast(`المناخ المعتمد يغطي ${first} → ${lastObs} فقط`); }
     try {
-      last = { field: f, out: E().WaterBalance.run({ crop: f.crop, soil: f.soil, irrigation: f.irrigation, sowingDate: f.sowingDate < first ? first : f.sowingDate, endDate: end, weather: w }) };
+      last = { field: f, fcNote, out: E().WaterBalance.run({ crop: f.crop, soil: f.soil, irrigation: f.irrigation, sowingDate: f.sowingDate < first ? first : f.sowingDate, endDate: end, weather: w }) };
     } catch (e) { toast(e.message); return; }
     persist();
-    renderRec(); renderKpis(); renderCharts(); renderTable(); $('wbExportBtn').disabled = false;
+    renderRec(); renderKpis(); renderCharts(); renderTable(); renderDashAlert(true); $('wbExportBtn').disabled = false;
   }
 
   const fmt = (v, d = 1) => v === null || v === undefined ? '—' : (+v).toFixed(d);
-  function renderRec() {
-    const r = last.out.recommendation, s = last.out.summary, area = last.field.areaDunum || 0, el = $('wbRec');
-    if (!r) { el.textContent = '—'; return; }
-    if (r.action === 'harvested') { el.innerHTML = `<div class="wb-rec"><div class="big">انتهى الموسم</div><div>بلغ التراكم الحراري حد النضج (الحصاد) في <b>${r.date}</b>؛ لا توصيات ري بعد هذا التاريخ.</div></div>`; return; }
-    if (r.action === 'irrigate') {
-      el.innerHTML = `<div class="wb-rec"><div class="big wb-go">ري الآن</div><div>بتاريخ <b>${r.date}</b>: العجز <b>${fmt(r.Dr)} مم</b> تجاوز العتبة (${fmt(r.trigger)} مم من TAW = ${fmt(r.TAW)} مم).<br>
-        الكمية الصافية <b>${fmt(r.netMm)} مم</b> — الإجمالية عند الكفاءة ${last.field.irrigation.efficiency}: <b>${fmt(r.grossMm)} مم = ${fmt(r.m3PerDunum)} م³/دونم</b>${area ? ` — <b>${fmt(r.m3PerDunum * area, 0)} م³</b> للحقل (${area} دونم)` : ''}.</div></div>`;
-    } else {
-      el.innerHTML = `<div class="wb-rec"><div class="big wb-ok">لا حاجة للري</div><div>بتاريخ <b>${r.date}</b>: العجز <b>${fmt(r.Dr)} مم</b> من عتبة ${fmt(r.trigger)} مم.<br>
-        ${r.daysUntil === null ? 'لا يمكن تقدير موعد الرية القادمة (استهلاك قريب من الصفر).' : `الرية القادمة متوقعة بعد نحو <b>${r.daysUntil} يوماً</b> بمعدل استهلاك ${fmt(r.rateMmDay, 2)} مم/يوم (متوسط آخر 7 أيام، دون احتساب أمطار قادمة).`}</div></div>`;
+  const wd = d => new Date(d + 'T00:00:00').toLocaleDateString('ar-SY', { weekday: 'long' });
+  const dm = d => `${d.slice(8, 10)}/${d.slice(5, 7)}`;
+  function headline() {
+    const r = last.out.recommendation, t = r.today, a = r.alert, f = last.field, area = f.areaDunum || 0, ea = f.irrigation.efficiency;
+    const vol = g => `${fmt(g)} مم = ${fmt(g)} م³/دونم${area ? ` (${fmt(g * area, 0)} م³ للحقل)` : ''}`;
+    if (t.action === 'harvested') return { level: 'harvested', html: `<div class="big">انتهى الموسم</div><div>بلغ التراكم الحراري حد النضج في <b>${t.date}</b>؛ لا توصيات ري بعد هذا التاريخ.</div>` };
+    if (t.action === 'irrigate') return { level: 'now', html: `<div class="big wb-alert-now">ري الآن</div><div>آخر يوم معلوم <b>${t.date}</b>: العجز <b>${fmt(t.Dr)} مم</b> تجاوز العتبة ${fmt(t.trigger)} مم (TAW ${fmt(t.TAW, 0)} مم).<br>
+      الرية: صافي <b>${fmt(t.netMm)} مم</b> — إجمالي عند Ea ${ea}: <b>${vol(t.grossMm)}</b>.${t.limited ? `<br>محدودة بأقصى عمق للنظام؛ يبقى عجز ${fmt(t.remainingMm)} مم تغطيه الرية التالية.` : ''}</div>` };
+    if (a && a.level === 'soon') {
+      const p0 = a.plan[0];
+      return { level: 'soon', html: `<div class="big wb-alert-soon">ري متوقع ${wd(a.firstNeedDate)} ${dm(a.firstNeedDate)}</div><div>العجز يبلغ عتبة الري يوم <b>${a.firstNeedDate}</b> حسب التوقعات.${p0 ? `<br>الرية المقترحة <b>${p0.date}</b>: صافي ${fmt(p0.netMm)} مم — إجمالي <b>${vol(p0.grossMm)}</b>.` : ''}${a.plan.length > 1 ? `<br>${a.plan.length} ريات مقترحة خلال الفترة.` : ''}</div>` };
     }
-    el.innerHTML += `<div class="mini" style="margin-top:8px">التوصية على آخر يوم متاح في السلسلة المناخية. بيانات NASA POWER تتأخر عدة أيام؛ التنبؤ الجوي سيُضاف في مرحلة لاحقة.</div>`;
+    if (a) return { level: 'ok', html: `<div class="big wb-ok">لا حاجة للري حتى ${dm(a.to)}</div><div>العجز يبقى دون العتبة خلال أيام التوقع (${a.days} أيام).${t.daysUntil !== null ? `<br>بمعدل الاستهلاك الحالي ${fmt(t.rateMmDay, 2)} مم/يوم تُبلغ العتبة بعد نحو ${t.daysUntil} يوماً من ${t.date}.` : ''}</div>` };
+    return { level: 'wait', html: `<div class="big wb-ok">لا حاجة للري</div><div>بتاريخ <b>${t.date}</b>: العجز <b>${fmt(t.Dr)} مم</b> من عتبة ${fmt(t.trigger)} مم.${t.daysUntil !== null ? `<br>الرية القادمة بعد نحو <b>${t.daysUntil} يوماً</b> بمعدل ${fmt(t.rateMmDay, 2)} مم/يوم (دون توقعات جوية).` : ''}</div>` };
+  }
+  function renderRec() {
+    const el = $('wbRec'), r = last.out.recommendation;
+    if (!r) { el.textContent = '—'; return; }
+    const h = headline(), a = r.alert;
+    let html = `<div class="wb-rec">${h.html}</div>`;
+    if (a) {
+      const fdays = last.out.days.filter(d => d.Kind === 'forecast');
+      html += `<div class="wb-strip">${fdays.map(d => `<div class="wb-day${d.Inet > 0 ? ' irr' : d.NeedsIrrigation ? ' need' : ''}"><div class="wd">${wd(d.Date)}</div><b>${dm(d.Date)}</b><br>
+        <span dir="ltr">ET₀ ${fmt(d.ET0, 1)} · ETc ${fmt(d.ETcAdj, 1)}</span><br>مطر ${fmt(d.RainForecast)} مم${d.RainProb !== null ? ` (${d.RainProb}%)` : ''}${d.RainForecast > 0 && d.P === 0 ? ' <span class="wb-badge">لم يُحتسب</span>' : ''}<br>
+        العجز ${fmt(d.Dr, 0)} مم<br><span class="wd">العتبة ${fmt(d.Trigger, 0)} مم</span>${d.Inet > 0 ? `<br><b style="color:#c2410c">ري ${fmt(d.Igross, 0)} مم</b>` : ''}</div>`).join('')}</div>
+        <div class="mini" style="margin-top:8px">مجموع الأيام ${a.days}: ET₀ ${fmt(a.et0Mm)} مم — مطر متوقع ${fmt(a.rainAllMm)} مم، المحتسب منه ${fmt(a.rainCountedMm)} مم (احتمال ≥ ${a.probMin}%).${a.harvestInHorizon ? ` بلوغ حد النضج متوقع ${a.harvestInHorizon}.` : ''}</div>`;
+    }
+    html += `<div class="mini" style="margin-top:6px">${last.fcNote || 'التوصية على آخر يوم في السلسلة المعتمدة.'}</div>`;
+    el.innerHTML = html;
+  }
+  /** Dashboard banner with the latest field alert (kept per browser so it shows on the next visit) */
+  function renderDashAlert(fresh) {
+    const box = $('dashAlert'); if (!box) return;
+    let item = null;
+    if (fresh && last) { const h = headline(); item = { name: last.field.name, level: h.level, html: h.html, at: new Date().toISOString().slice(0, 16).replace('T', ' ') }; try { localStorage.setItem(LS_ALERT, JSON.stringify(item)); } catch (e) { } }
+    else { try { item = JSON.parse(localStorage.getItem(LS_ALERT) || 'null'); } catch (e) { } }
+    if (!item) { box.hidden = true; return; }
+    box.hidden = false;
+    box.innerHTML = `<div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><h3>تنبيه الري — ${item.name}</h3><span class="mini">آخر حساب ${item.at} — <a href="#" onclick="showSection('balance');return false">فتح الموازنة</a></span></div><div class="wb-rec">${item.html}</div>`;
   }
   function kpi(label, value, sub) { return `<div class="kpi"><div class="label">${label}</div><div class="value">${value}</div><div class="sub">${sub || ''}</div></div>`; }
   function renderKpis() {
-    const d = last.out.days[last.out.days.length - 1];
+    const obsDays = last.out.days.filter(x => x.Kind !== 'forecast'), d = obsDays[obsDays.length - 1] || last.out.days[last.out.days.length - 1];
     $('wbKpis').innerHTML = kpi('الطور (FAO-56)', d.StageName, `GDD ${fmt(d.GDD, 0)} °C·day`) + kpi('Kc / عمق الجذور', `${fmt(d.Kc, 2)} / ${fmt(d.Zr, 2)} م`, `Kc mid معدّل مناخياً = ${fmt(last.out.kcMidAdj, 2)}`)
       + kpi('TAW / RAW', `${fmt(d.TAW, 0)} / ${fmt(d.RAW, 0)} مم`, `p معدّل = ${fmt(d.p, 2)}`) + kpi('Dr / Ks', `${fmt(d.Dr, 0)} مم / ${fmt(d.Ks, 2)}`, d.Ks < 1 ? 'إجهاد مائي' : 'دون إجهاد');
     const s = last.out.summary;
@@ -110,7 +173,7 @@
       + kpi('التسرب العميق DP', `${fmt(s.DP, 0)} مم`, s.YieldReductionPct === null ? `إغلاق التوازن ${fmt(s.MassClosureMm, 3)} مم` : `نقص غلة تقديري ${fmt(s.YieldReductionPct, 0)}% (Ky) — إغلاق ${fmt(s.MassClosureMm, 3)} مم`);
   }
   function renderTable() {
-    const rows = last.out.days.slice().reverse().map(d => `<tr${d.Inet > 0 ? ' style="background:#fff4ec"' : ''}><td>${d.Date}</td><td>${d.StageName}</td><td>${fmt(d.GDD, 0)}</td><td>${fmt(d.Kc, 2)}</td><td>${fmt(d.Zr, 2)}</td><td>${fmt(d.ET0, 2)}</td><td>${fmt(d.ETc, 2)}</td><td>${fmt(d.Ks, 2)}</td><td>${fmt(d.ETcAdj, 2)}</td><td>${fmt(d.P)}</td><td>${fmt(d.RO)}</td><td>${fmt(d.Inet)}</td><td>${fmt(d.DP)}</td><td>${fmt(d.TAW, 0)}</td><td>${fmt(d.RAW, 0)}</td><td>${fmt(d.Dr)}</td></tr>`);
+    const rows = last.out.days.slice().reverse().map(d => `<tr${d.Inet > 0 ? ' style="background:#fff4ec"' : ''}><td>${d.Date}${d.Kind === 'forecast' ? '<span class="wb-badge">توقع</span>' : d.Kind === 'model' ? '<span class="wb-badge">نموذج</span>' : ''}</td><td>${d.StageName}</td><td>${fmt(d.GDD, 0)}</td><td>${fmt(d.Kc, 2)}</td><td>${fmt(d.Zr, 2)}</td><td>${fmt(d.ET0, 2)}</td><td>${fmt(d.ETc, 2)}</td><td>${fmt(d.Ks, 2)}</td><td>${fmt(d.ETcAdj, 2)}</td><td>${fmt(d.P)}</td><td>${fmt(d.RO)}</td><td>${fmt(d.Inet)}</td><td>${fmt(d.DP)}</td><td>${fmt(d.TAW, 0)}</td><td>${fmt(d.RAW, 0)}</td><td>${fmt(d.Dr)}</td></tr>`);
     $('wbTable').querySelector('tbody').innerHTML = rows.join('');
   }
 
@@ -136,6 +199,10 @@
       let g = '';
       for (let k = 0; k <= 4; k++) { const t = mx * k / 4; g += `<line x1="${L}" y1="${y(t)}" x2="${W - R}" y2="${y(t)}" stroke="#eef3f4"/><text x="${L - 8}" y="${y(t) + 4}" text-anchor="end" font-size="11" fill="#6b8086">${t.toFixed(0)}</text>`; }
       const path = f => days.map((d, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)},${y(f(d)).toFixed(1)}`).join('');
+      // background bands: Open-Meteo analysis days and forecast days
+      const band = (kind, fill, label) => { const ix = days.map((d, i) => d.Kind === kind ? i : -1).filter(i => i >= 0); if (!ix.length) return '';
+        const x0 = x(ix[0]) - bw / 2, x1 = x(ix[ix.length - 1]) + bw / 2; return `<rect x="${x0}" y="${T}" width="${Math.max(2, x1 - x0)}" height="${ph}" fill="${fill}"/><text x="${(x0 + x1) / 2}" y="${T + 12}" text-anchor="middle" font-size="10" fill="#6b8086">${label}</text>`; };
+      g += band('model', '#f1f4f5', 'نموذج') + band('forecast', '#e8eef0', 'توقع');
       // stress zone shading between trigger and TAW
       g += `<path d="${path(d => d.Trigger)}${days.map((d, i) => `L${x(days.length - 1 - i).toFixed(1)},${y(days[days.length - 1 - i].TAW).toFixed(1)}`).join('')}Z" fill="${COL.trig}" fill-opacity=".08"/>`;
       g += `<path d="${path(d => d.TAW)}" fill="none" stroke="${COL.taw}" stroke-width="1.5"/>`;
@@ -200,7 +267,7 @@
     $('wbSystem').onchange = e => fillSystem(e.target.value);
     $('wbRunBtn').onclick = runBalance; $('wbExportBtn').onclick = exportXlsx; $('wbSaveBtn').onclick = saveJson;
     $('wbLoadFile').onchange = e => e.target.files[0] && loadJson(e.target.files[0]);
-    notice();
+    notice(); renderDashAlert(false);
   }
   /** Typical sowing date of the crop's most recent season that has started before `ref` (YYYY-MM-DD) */
   function typicalSow(key, ref) {

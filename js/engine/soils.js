@@ -19,11 +19,15 @@
     clay:            { name: 'طينية',              thetaFC: 0.36,  thetaWP: 0.22,  cn: 85 }
   };
 
-  // Typical application efficiencies Ea (fraction of applied water stored in the root zone)
+  // Typical application efficiency Ea (fraction of applied water stored in the root zone) and the largest
+  // NET depth one irrigation normally applies (maxNetMm). INITIAL planning values — replace with the station's practice:
+  //  surface:   furrow/basin sets usually apply 60–100 mm gross; 80 mm net is a practical upper bound on medium soils
+  //  sprinkler: limited by soil intake rate and set time; 30–50 mm net per set is common for field crops
+  //  drip:      high-frequency, small applications; 15–25 mm net per irrigation
   const SYSTEMS = {
-    surface:   { name: 'ري سطحي (أثلام/أحواض)', ea: 0.60 },
-    sprinkler: { name: 'ري بالرذاذ',             ea: 0.75 },
-    drip:      { name: 'ري بالتنقيط',            ea: 0.90 }
+    surface:   { name: 'ري سطحي (أثلام/أحواض)', ea: 0.60, maxNetMm: 80 },
+    sprinkler: { name: 'ري بالرذاذ',             ea: 0.75, maxNetMm: 45 },
+    drip:      { name: 'ري بالتنقيط',            ea: 0.90, maxNetMm: 20 }
   };
 
   /** Total available water in the root zone [mm] — FAO-56 Eq. 82 */

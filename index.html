@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>المنصة السورية لإدارة وجدولة الري — Prototype v0.7</title>
+<title>المنصة السورية لإدارة وجدولة الري — Prototype v0.8</title>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#103941">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -47,12 +47,13 @@ button,input,select{font:inherit}.app{display:grid;grid-template-columns:270px 1
 .nasa-panel{border:1px solid #cfe0e3;background:linear-gradient(180deg,#f8fcfc,#eef7f7);border-radius:14px;padding:14px}.nasa-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.nasa-params{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}.nasa-param{display:flex;align-items:center;gap:7px;background:#fff;border:1px solid #dbe6e8;border-radius:9px;padding:8px 10px;font-size:12px}.nasa-param input{width:auto}.nasa-queue{display:grid;gap:6px;margin-top:10px}.nasa-job{display:grid;grid-template-columns:150px 1fr 90px;gap:8px;align-items:center;padding:7px 9px;background:#fff;border:1px solid #dce7e9;border-radius:9px;font-size:12px}.nasa-job .bar{height:7px;background:#e9f0f1;border-radius:999px;overflow:hidden}.nasa-job .bar>span{display:block;height:100%;background:#0a6f77;width:0%;transition:width .25s ease}.nasa-job.ok .bar>span{width:100%}.nasa-job.bad .bar>span{background:#c53030}.nasa-plan{margin-top:10px;padding:10px 12px;border:1px dashed #a9c7cb;border-radius:10px;background:#fff;font-size:12px;color:#456068}.hidden{display:none!important}@media(max-width:980px){.nasa-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.nasa-params{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:640px){.nasa-grid,.nasa-params{grid-template-columns:1fr}.nasa-job{grid-template-columns:110px 1fr 70px}}
 .wb-tip{position:absolute;top:8px;pointer-events:none;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);padding:8px 10px;font-size:12px;line-height:1.6;min-width:170px;z-index:5}.wb-tip b{color:var(--ink)}.wb-rec{display:flex;gap:16px;align-items:center;flex-wrap:wrap}.wb-rec .big{font-size:30px;font-weight:900}.wb-ok{color:#2f6f3e}.wb-go{color:#c2410c}
 @media(max-width:650px){.sidebar{position:sticky;top:0;z-index:30;padding:8px 10px;height:auto}.brand{padding:2px 4px 6px}.brand small,.side-note{display:none}.brand h1{font-size:14px}.nav{display:flex!important;overflow-x:auto;gap:6px;margin-top:2px;scrollbar-width:none}.nav::-webkit-scrollbar{display:none}.nav button{flex:0 0 auto;white-space:nowrap;padding:8px 12px;font-size:13px}}
+.wb-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:8px;margin-top:12px}.wb-day{border:1px solid var(--line);border-radius:11px;padding:8px 10px;font-size:12px;line-height:1.7;background:#fbfdfd}.wb-day.irr{border-color:#c2410c;background:#fff6f0}.wb-day.need{border-color:#b7791f}.wb-day b{font-size:13px}.wb-day .wd{color:var(--muted);font-size:11px}.wb-badge{display:inline-block;font-size:10px;padding:1px 6px;border-radius:8px;background:#eef3f4;color:#4b6066;margin-inline-start:4px}.wb-alert-now{color:#c2410c}.wb-alert-soon{color:#b7791f}
 </style>
 </head>
 <body>
 <div class="app">
   <aside class="sidebar">
-    <div class="brand"><div class="drop"></div><div><h1>المنصة السورية لإدارة وجدولة الري</h1><small>Prototype v0.7 — وثيقة اختبار حيّة</small></div></div>
+    <div class="brand"><div class="drop"></div><div><h1>المنصة السورية لإدارة وجدولة الري</h1><small>Prototype v0.8 — وثيقة اختبار حيّة</small></div></div>
     <div class="nav">
       <button class="active" data-section="dashboard">▦ لوحة التحكم</button>
       <button data-section="climate">☁ المناخ و ET₀</button>
@@ -68,6 +69,7 @@ button,input,select{font:inherit}.app{display:grid;grid-template-columns:270px 1
 
     <section id="dashboard" class="section active">
       <div class="grid">
+        <div class="card span12" id="dashAlert" hidden></div>
         <div class="card span12">
           <div class="kpis">
             <div class="kpi"><div class="label">حالة ملف المناخ</div><div class="value" id="kpiFile">—</div><div class="sub" id="kpiFileSub">لم يتم رفع ملف</div></div>
@@ -198,6 +200,12 @@ button,input,select{font:inherit}.app{display:grid;grid-template-columns:270px 1
             <div class="field"><label>المساحة (دونم)</label><input id="wbArea" type="number" step="1" value="10"></div>
             <div class="field"><label>&nbsp;</label><button class="btn primary" id="wbRunBtn" style="width:100%">احسب الموازنة</button></div>
           </div>
+          <div class="form-row" style="margin-top:10px">
+            <div class="field"><label>أقصى عمق صافٍ للرية الواحدة (مم)</label><input id="wbMaxNet" type="number" step="5" placeholder="فارغ = تعبئة كاملة إلى السعة الحقلية"></div>
+            <div class="field"><label>التوقعات الجوية (7 أيام)</label><select id="wbUseFc"><option value="1">إدراج التوقعات والتنبيه</option><option value="0">دون توقعات</option></select></div>
+            <div class="field"><label>يُحتسب مطر التوقع إذا كان احتماله ≥ %</label><input id="wbRainProb" type="number" step="5" value="60"></div>
+            <div class="field"><label>&nbsp;</label><div class="mini" style="padding-top:6px">العجز الأكبر من الحد يُقسم على ريات متتالية بدل رية واحدة كبيرة.</div></div>
+          </div>
           <details style="margin-top:12px"><summary style="cursor:pointer;font-weight:700;font-size:13px">معاملات المحصول (FAO-56) — للمعايرة</summary>
             <div class="form-row" style="margin-top:10px">
               <div class="field"><label>Kc ini</label><input id="wbKcIni" type="number" step="0.05"></div>
@@ -224,7 +232,7 @@ button,input,select{font:inherit}.app{display:grid;grid-template-columns:270px 1
             <textarea id="wbEvents" rows="4" style="width:100%;border:1px solid #cfdde0;border-radius:9px;padding:9px;font-family:monospace;direction:ltr"></textarea>
           </details>
         </div>
-        <div class="card span12" id="wbRecCard"><h3>توصية الري</h3><div id="wbRec" class="mini">احسب الموازنة لعرض التوصية.</div></div>
+        <div class="card span12" id="wbRecCard"><h3>توصية الري والتنبيه للأيام القادمة</h3><div id="wbRec" class="mini">احسب الموازنة لعرض التوصية.</div></div>
         <div class="card span12"><div class="kpis" id="wbKpis"></div></div>
         <div class="card span12">
           <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><h3>الهطول والري اليومي (مم/يوم)</h3><div class="legend" id="wbLegendTop"></div></div>
@@ -251,7 +259,7 @@ button,input,select{font:inherit}.app{display:grid;grid-template-columns:270px 1
       <div class="grid"><div class="card span12"><h3>سجل البيانات والمسار النقطي</h3><p>هذا العرض يبين كيف تُحفظ القيمة مع مصدرها وحالة اعتمادها. في النسخ القادمة سيصبح هذا الجدول أساس Field-Point Daily Record وقاعدة البيانات.</p><div class="table-wrap"><table id="dataLedger"><thead><tr><th>التاريخ</th><th>Field/Point</th><th>المتغير</th><th>القيمة</th><th>المصدر</th><th>QC</th><th>الحالة</th></tr></thead><tbody><tr><td colspan="7">لا توجد بيانات معتمدة بعد.</td></tr></tbody></table></div></div></div>
     </section>
 
-    <div class="footer">المنصة السورية لإدارة وجدولة الري — Prototype v0.7 — للاختبار والتطوير المشترك</div>
+    <div class="footer">المنصة السورية لإدارة وجدولة الري — Prototype v0.8 — للاختبار والتطوير المشترك</div>
   </main>
 </div>
 <div class="toast" id="toast"></div>

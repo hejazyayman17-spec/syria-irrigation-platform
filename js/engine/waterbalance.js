@@ -60,10 +60,14 @@
    * input = {
    *   crop:  CropParameters (see crops.js),
    *   soil:  { thetaFC, thetaWP, cn, initialDepletionFrac, subsoilDepletionFrac },
-   *   irrigation: { mode: 'scheduled'|'actual'|'rainfed', efficiency, triggerFrac|null (null = RAW i.e. p), events:[{date,grossMm}] },
+   *   irrigation: { mode: 'scheduled'|'actual'|'rainfed', efficiency, triggerFrac|null (null = RAW i.e. p), events:[{date,grossMm}],
+   *                 maxNetMm|null (largest net depth one irrigation can apply; null = refill to FC),
+   *                 forecastRainProbMin (%; forecast rain counts only when its probability ≥ this, default 60) },
    *   sowingDate: 'YYYY-MM-DD', endDate: 'YYYY-MM-DD',
-   *   weather: [{ date, tmin, tmax, et0, rain, u2, rhmin }]   (u2, rhmin optional; used for Kc climate adjustment)
+   *   weather: [{ date, tmin, tmax, et0, rain, u2, rhmin, kind, rainProb }]
+   *            u2, rhmin optional (Kc climate adjustment); kind: 'obs' (default) | 'model' (recent analysis) | 'forecast'
    * }
+   * Forecast days continue the same balance; their totals are reported separately (summary = observed + model days only).
    * returns { days:[DailyBalance], summary, recommendation, kcMidAdj, kcEndAdj }
    */
   function run(input) {
@@ -74,6 +78,8 @@
     if (!(dTheta > 0)) throw new Error('θFC يجب أن يكون أكبر من θWP');
     const ea = clamp(irr.efficiency || 1, 0.3, 1);
     const events = new Map((irr.events || []).map(e => [String(e.date).slice(0, 10), +e.grossMm || 0]));
+    const maxNet = Number.isFinite(irr.maxNetMm) && irr.maxNetMm > 0 ? irr.maxNetMm : Infinity;
+    const probMin = Number.isFinite(irr.forecastRainProbMin) ? irr.forecastRainProbMin : 60;
 
     // ---- pass 1: thermal time per day → mean u2 & RHmin over mid and late stages → adjusted Kc mid/end (Eq. 62)
     const dates = [];
@@ -94,11 +100,13 @@
     let Dsub = clamp(soil.subsoilDepletionFrac ?? 0, 0, 1) * 1000 * dTheta * Math.max(0, c.zrMax - zrPrev);
     const store0 = Dr + Dsub;
     const days = [];
-    const tot = { P: 0, RO: 0, Inet: 0, Igross: 0, ETc: 0, ETcAdj: 0, DP: 0, stressDays: 0, missing: 0, irrigations: 0 };
+    const tot = { P: 0, RO: 0, Inet: 0, Igross: 0, ETc: 0, ETcAdj: 0, DP: 0, stressDays: 0, missing: 0, irrigations: 0 };   // observed + model days
+    const fc = { P: 0, RO: 0, Inet: 0, Igross: 0, ETc: 0, ETcAdj: 0, DP: 0, stressDays: 0, missing: 0, irrigations: 0 };    // forecast days
     let pendingAuto = 0; // net mm decided at the end of yesterday, applied today
 
     dates.forEach((k, i) => {
       const w = wx.get(k);
+      const kind = (w && w.kind) || 'obs', isFc = kind === 'forecast';
       const G_ = g[i], st = stageOf(G_, c.gdd), kc = st === 4 ? null : kcAt(G_, c, kcMidAdj, kcEndAdj);
       const zr = zrAt(G_, c);
       // root growth: bring the new slice's share of subsoil depletion into the root zone
@@ -110,13 +118,15 @@
       zrPrev = zr;
       const TAW = 1000 * dTheta * zr;
       const et0 = w && Number.isFinite(w.et0) ? w.et0 : null;
-      if (!w || et0 === null) tot.missing++;
       const ETc = kc !== null && et0 !== null ? kc * et0 : 0;
       const p = clamp(c.p + 0.04 * (5 - ETc), 0.1, 0.8);
       const RAW = p * TAW;
       const Ks = Dr <= RAW ? 1 : clamp((TAW - Dr) / ((1 - p) * TAW), 0, 1);
       const ETcAdj = Ks * ETc;
-      const P = w && Number.isFinite(w.rain) ? Math.max(0, w.rain) : 0;
+      const rainRaw = w && Number.isFinite(w.rain) ? Math.max(0, w.rain) : 0;
+      const rainProb = w && Number.isFinite(w.rainProb) ? w.rainProb : null;
+      // forecast rain enters the balance only when likely enough (decision rule, not a probability-weighted amount)
+      const P = isFc && rainProb !== null && rainProb < probMin ? 0 : rainRaw;
       const RO = runoffSCS(P, soil.cn);
       // irrigation today: recorded events (gross → net with Ea) + automatic recommendation from yesterday
       let Igross = 0, Inet = 0, auto = false;
@@ -132,20 +142,24 @@
       // decision for tomorrow (crop still in the field)
       const trig = (irr.triggerFrac ?? p) * TAW;
       const needs = st < 4 && Dr >= trig;
-      if (irr.mode === 'scheduled' && needs) pendingAuto = Dr;   // refill the root zone to field capacity
-      if (Ks < 1) tot.stressDays++;
-      if (Inet > 0) tot.irrigations++;
-      tot.P += P; tot.RO += RO; tot.Inet += Inet; tot.Igross += Igross; tot.ETc += ETc; tot.ETcAdj += ETcAdj; tot.DP += DP;
+      if (irr.mode === 'scheduled' && needs) pendingAuto = Math.min(Dr, maxNet);   // refill to FC, limited by the system's max net depth
+      const T = isFc ? fc : tot;
+      if (Ks < 1) T.stressDays++;
+      if (Inet > 0) T.irrigations++;
+      if (!w || et0 === null) T.missing++;
+      T.P += P; T.RO += RO; T.Inet += Inet; T.Igross += Igross; T.ETc += ETc; T.ETcAdj += ETcAdj; T.DP += DP;
       days.push({ Date: k, GDD: +G_.toFixed(1), Stage: st, StageName: STAGE_NAMES[st], Kc: kc === null ? null : +kc.toFixed(3),
         Zr: +zr.toFixed(3), TAW: +TAW.toFixed(1), RAW: +RAW.toFixed(1), p: +p.toFixed(3), ET0: et0 === null ? null : +et0.toFixed(2),
         ETc: +ETc.toFixed(2), Ks: +Ks.toFixed(3), ETcAdj: +ETcAdj.toFixed(2), P: +P.toFixed(1), RO: +RO.toFixed(1),
         Inet: +Inet.toFixed(1), Igross: +Igross.toFixed(1), AutoIrrigation: auto, DP: +DP.toFixed(1), Recharge: +recharge.toFixed(1),
-        Dr: +Dr.toFixed(1), Dsub: +Dsub.toFixed(1), Trigger: +trig.toFixed(1), NeedsIrrigation: needs, MissingWeather: et0 === null });
+        Dr: +Dr.toFixed(1), Dsub: +Dsub.toFixed(1), Trigger: +trig.toFixed(1), NeedsIrrigation: needs, MissingWeather: et0 === null,
+        Kind: kind, RainForecast: isFc ? +rainRaw.toFixed(1) : null, RainProb: rainProb });
     });
 
     // mass closure: water gained by the profile (= decrease of total depletion) must equal inputs − outputs
     const store1 = Dr + Dsub;
-    const closure = (store0 - store1) - ((tot.P - tot.RO) + tot.Inet - tot.ETcAdj - tot.DP);
+    const all = k => tot[k] + fc[k];
+    const closure = (store0 - store1) - ((all('P') - all('RO')) + all('Inet') - all('ETcAdj') - all('DP'));
     const ratio = tot.ETc > 0 ? tot.ETcAdj / tot.ETc : 1;
     const summary = {
       ...Object.fromEntries(Object.entries(tot).map(([k, v]) => [k, typeof v === 'number' ? +v.toFixed(1) : v])),
@@ -154,23 +168,46 @@
       MassClosureMm: +closure.toFixed(3),
       KcMidAdj: +kcMidAdj.toFixed(3), KcEndAdj: +kcEndAdj.toFixed(3)
     };
-    return { days, summary, recommendation: recommend(days, ea), kcMidAdj, kcEndAdj };
+    const forecast = Object.fromEntries(Object.entries(fc).map(([k, v]) => [k, +v.toFixed(1)]));
+    return { days, summary, forecast, recommendation: recommend(days, ea, maxNet, probMin), kcMidAdj, kcEndAdj };
   }
 
-  /** Irrigation advice on the last simulated day: irrigate now (net/gross/m³ per dunum) or days until the trigger */
-  function recommend(days, ea) {
-    const last = days[days.length - 1];
-    if (!last) return null;
-    if (last.Stage === 4) return { action: 'harvested', date: last.Date };
+  /** Irrigation advice.
+   *  today  — on the last non-forecast day ("now"): irrigate (net limited by maxNet) or days until the trigger.
+   *  alert  — over the forecast days: first date the trigger is reached, the planned irrigations (scheduled mode),
+   *           forecast rain (counted / all) and ET0 over the horizon.  level: 'now' | 'soon' | 'ok' | 'harvested' */
+  function recommend(days, ea, maxNet = Infinity, probMin = 60) {
+    if (!days.length) return null;
     const m3PerDunum = mm => mm * 1.0;   // 1 mm over 1 dunum (1000 m²) = 1 m³
-    if (last.NeedsIrrigation) {
-      const net = last.Dr, gross = net / ea;
-      return { action: 'irrigate', date: last.Date, netMm: +net.toFixed(1), grossMm: +gross.toFixed(1), m3PerDunum: +m3PerDunum(gross).toFixed(1), Dr: last.Dr, trigger: last.Trigger, TAW: last.TAW };
+    let li = days.length - 1; while (li > 0 && days[li].Kind === 'forecast') li--;
+    const last = days[li], fdays = days.slice(li + 1).filter(d => d.Kind === 'forecast');
+    const harvestDay = days.find(d => d.Stage === 4);
+    let today;
+    if (last.Stage === 4) today = { action: 'harvested', date: last.Date };
+    else if (last.NeedsIrrigation) {
+      const net = Math.min(last.Dr, maxNet), gross = net / ea;
+      today = { action: 'irrigate', date: last.Date, netMm: +net.toFixed(1), grossMm: +gross.toFixed(1), m3PerDunum: +m3PerDunum(gross).toFixed(1),
+        remainingMm: +(last.Dr - net).toFixed(1), limited: last.Dr > maxNet, Dr: last.Dr, trigger: last.Trigger, TAW: last.TAW };
+    } else {
+      const recent = days.slice(Math.max(0, li - 6), li + 1).map(d => d.ETcAdj).filter(x => x > 0);
+      const rate = recent.length ? recent.reduce((a, b) => a + b, 0) / recent.length : null;
+      today = { action: 'wait', date: last.Date, daysUntil: rate ? Math.max(0, Math.floor((last.Trigger - last.Dr) / rate)) : null,
+        rateMmDay: rate === null ? null : +rate.toFixed(2), Dr: last.Dr, trigger: last.Trigger, TAW: last.TAW };
     }
-    const recent = days.slice(-7).map(d => d.ETcAdj).filter(x => x > 0);
-    const rate = recent.length ? recent.reduce((a, b) => a + b, 0) / recent.length : null;
-    const daysLeft = rate ? Math.max(0, Math.floor((last.Trigger - last.Dr) / rate)) : null;
-    return { action: 'wait', date: last.Date, daysUntil: daysLeft, rateMmDay: rate === null ? null : +rate.toFixed(2), Dr: last.Dr, trigger: last.Trigger, TAW: last.TAW };
+    let alert = null;
+    if (fdays.length) {
+      const sum = f => +fdays.reduce((a, d) => a + (f(d) || 0), 0).toFixed(1);
+      const need = fdays.find(d => d.NeedsIrrigation);
+      const plan = fdays.filter(d => d.AutoIrrigation && d.Inet > 0).map(d => ({ date: d.Date, netMm: d.Inet, grossMm: d.Igross, m3PerDunum: +m3PerDunum(d.Igross).toFixed(1) }));
+      const level = today.action === 'harvested' ? 'harvested' : today.action === 'irrigate' ? 'now' : need ? 'soon' : 'ok';
+      alert = { level, from: fdays[0].Date, to: fdays[fdays.length - 1].Date, days: fdays.length,
+        firstNeedDate: need ? need.Date : null, plan,
+        rainCountedMm: sum(d => d.P), rainAllMm: sum(d => d.RainForecast), probMin,
+        rainDays: fdays.filter(d => (d.RainForecast || 0) >= 1).map(d => ({ date: d.Date, mm: d.RainForecast, prob: d.RainProb })),
+        et0Mm: sum(d => d.ET0), etcAdjMm: sum(d => d.ETcAdj), stressDays: fdays.filter(d => d.Ks < 1).length,
+        harvestInHorizon: harvestDay && harvestDay.Kind === 'forecast' ? harvestDay.Date : null };
+    }
+    return { ...today, today, alert };
   }
 
   G.WaterBalance = { run, gdd, kcAt, zrAt, stageOf, runoffSCS, STAGE_NAMES };

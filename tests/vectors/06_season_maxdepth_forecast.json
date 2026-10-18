@@ -1,0 +1,7 @@
+{ "type": "season", "name": "Scheduled, max net depth 40 mm, last 10 days forecast — closure and depth limit",
+  "input": { "cropKey": "wheat", "sowingDate": "2025-11-15", "endDate": "2026-06-15",
+    "soil": { "thetaFC": 0.29, "thetaWP": 0.15, "cn": 80, "initialDepletionFrac": 0.6, "subsoilDepletionFrac": 0.4 },
+    "irrigation": { "mode": "scheduled", "efficiency": 0.75, "triggerFrac": null, "events": [], "maxNetMm": 40, "forecastRainProbMin": 60 },
+    "weatherGen": { "start": "2025-11-15", "days": 213, "tmin": 6, "tmax": 17, "amp": -6, "et0": 3.0, "et0amp": -1.8, "rain": 0, "rainEvery": 6, "rainMm": 9, "u2": 2.5, "rhmin": 40,
+                    "forecastLastDays": 10, "rainProb": 30 } },
+  "expect": { "MassClosureMm": [0, 0.01], "MaxSingleNetMm": [40, 0.05], "ForecastRainCountedMm": [0, 0.001] } }

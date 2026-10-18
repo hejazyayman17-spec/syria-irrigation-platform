@@ -112,6 +112,60 @@ def build(cells, responses):
             'vars': vars_}
 
 
+def governorate_summary(fc):
+    """Per-governorate ET0 for the map: last complete NASA day, previous 7 days (ending yesterday), next 7 days.
+    Previous week: NASA POWER where the day is complete, else the Open-Meteo recent-analysis value for that cell/day
+    (NASA radiation lags several days) — the share of model days is reported. Next week: forecast from today.
+    Governorate value = mean of cells whose centre lies inside it; governorates smaller than a cell take the cell
+    nearest to their centroid (same rule as the NASA map)."""
+    from nasa_power_sync import load_governorates
+    latest = json.load(open(os.path.join(NASA, 'latest.json')))
+    today = dt.date.fromisoformat(fc['firstForecastDate'])
+    past = [(today - dt.timedelta(days=k)).isoformat() for k in range(7, 0, -1)]
+    nxt = [(today + dt.timedelta(days=k)).isoformat() for k in range(0, 7)]
+    fpos = {d: j for j, d in enumerate(fc['dates'])}
+    arch = {}
+    for y in {int(d[:4]) for d in past}:
+        path = os.path.join(NASA, f'{y}.json')
+        if os.path.exists(path):
+            a = json.load(open(path)); arch[y] = (a, {d: j for j, d in enumerate(a['dates'])})
+    cells = fc['cells']
+    def cell_val(i, day, prefer_nasa):
+        if prefer_nasa and int(day[:4]) in arch:
+            a, pos = arch[int(day[:4])]; j = pos.get(day.replace('-', ''))
+            if j is not None and a['vars']['ET0'][i][j] is not None:
+                return a['vars']['ET0'][i][j], 'nasa'
+        j = fpos.get(day)
+        return (fc['vars']['et0'][i][j], 'model') if j is not None and fc['vars']['et0'][i][j] is not None else (None, None)
+    members = {}
+    for i, c in enumerate(cells):
+        if c[3]: members.setdefault(c[3], []).append(i)
+    for key, polys in load_governorates():
+        if key not in members:
+            ring = max((poly[0] for poly in polys), key=len)
+            cx, cy = sum(p[0] for p in ring) / len(ring), sum(p[1] for p in ring) / len(ring)
+            members[key] = [min(range(len(cells)), key=lambda i: (cells[i][0] - cy) ** 2 + ((cells[i][1] - cx) * 0.82) ** 2)]
+    out = {}
+    for key, idx in members.items():
+        def period(days, prefer_nasa):
+            daily, model = [], 0
+            for day in days:
+                vals = []
+                for i in idx:
+                    v, src = cell_val(i, day, prefer_nasa)
+                    if v is not None: vals.append(v); model += src == 'model'
+                if vals: daily.append(sum(vals) / len(vals))
+            if len(daily) < len(days) - 1: return None          # allow one missing day at most
+            n = len(idx) * len(days)
+            return {'mean': round(sum(daily) / len(daily), 2), 'sum': round(sum(daily) * len(days) / len(daily), 1),
+                    'modelShare': round(model / n, 2) if prefer_nasa else 1.0}
+        g = latest['governorates'].get(key)
+        out[key] = {'day': {'mean': g['et0'], 'method': g.get('method')} if g else None,
+                    'past7': period(past, True), 'next7': period(nxt, False)}
+    return {'issued': fc['issued'], 'nasaDay': latest['date'], 'past7': [past[0], past[-1]], 'next7': [nxt[0], nxt[-1]],
+            'governorates': out}
+
+
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument('--from-file'); a = ap.parse_args()
     cells = grid_cells()
@@ -127,6 +181,9 @@ def main():
     out = build(cells, responses)
     os.makedirs(OUT, exist_ok=True)
     json.dump(out, open(os.path.join(OUT, 'latest.json'), 'w'), ensure_ascii=False, separators=(',', ':'))
+    summ = governorate_summary(out)
+    json.dump(summ, open(os.path.join(OUT, 'map.json'), 'w'), ensure_ascii=False, separators=(',', ':'))
+    print('map summary (Hama):', summ['governorates'].get('hama'))
     print(f"wrote forecast: {len(cells)} cells × {len(out['dates'])} days ({out['dates'][0]} → {out['dates'][-1]}), forecast from {out['firstForecastDate']}")
 
 

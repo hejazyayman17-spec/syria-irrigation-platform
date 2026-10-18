@@ -263,6 +263,26 @@ button,input,select{font:inherit}.app{display:grid;grid-template-columns:270px 1
   </main>
 </div>
 <div class="toast" id="toast"></div>
+<script>
+// Access window for the exploration link (access.json). This is a CLIENT-SIDE gate: it hides the platform after
+// accessUntil for ordinary visitors; it does not protect the data files (real accounts come with the auth backend).
+// Owner bypass: open the link once with ?key=<owner key>; the browser remembers it.
+(async function accessGate(){
+ const FALLBACK={accessUntil:'2026-10-21T23:59:00+03:00',title:'نسخة استكشافية للباحثين'};
+ let cfg=FALLBACK;
+ try{const r=await fetch('access.json',{cache:'no-store'});if(r.ok)cfg={...FALLBACK,...await r.json()}}catch(e){}
+ const sha=async t=>{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')};
+ const qk=new URLSearchParams(location.search).get('key');
+ if(qk&&cfg.ownerKeySha256&&window.crypto?.subtle&&await sha(qk)===cfg.ownerKeySha256){try{localStorage.setItem('gcsar.owner',cfg.ownerKeySha256)}catch(e){}history.replaceState(null,'',location.pathname)}
+ let owner=false;try{owner=!!cfg.ownerKeySha256&&localStorage.getItem('gcsar.owner')===cfg.ownerKeySha256}catch(e){}
+ const until=new Date(cfg.accessUntil),d=`${String(until.getDate()).padStart(2,'0')}/${String(until.getMonth()+1).padStart(2,'0')}/${until.getFullYear()}`;
+ if(Date.now()>until.getTime()&&!owner){
+  document.querySelector('.app').innerHTML=`<div style="grid-column:1/-1;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:#f4faf9"><div class="card" style="max-width:560px;text-align:center"><div class="drop" style="margin:0 auto 14px"></div><h2 style="margin:0 0 10px">المنصة السورية لإدارة وجدولة الري</h2><p style="line-height:1.9">${cfg.expiredMessage||'انتهت فترة الاستكشاف.'}</p><div class="mini">انتهت الإتاحة في ${d}</div></div></div>`;
+  return}
+ const tag=document.querySelector('.topbar .tag');if(tag)tag.textContent=owner?`وضع المالك — الإتاحة العامة حتى ${d}`:`${cfg.title} — متاحة حتى ${d}`;
+})();
+</script>
+
 <script src="data/syria_gov.js"></script>
 <script src="js/engine/fao56.js"></script>
 <script src="js/engine/crops.js"></script>

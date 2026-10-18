@@ -1,0 +1,29 @@
+# Afternoon forecast refresh (the morning run of nasa-power-sync.yml also updates the forecast).
+name: Forecast sync
+on:
+  schedule:
+    - cron: '23 13 * * *'       # 13:23 UTC = 16:23 Damascus
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: data-sync
+  cancel-in-progress: false
+jobs:
+  forecast:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python tools/forecast_sync.py
+      - name: Commit
+        run: |
+          git config user.name  "nasa-sync-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/forecast
+          git diff --cached --quiet && echo "no changes" && exit 0
+          git commit -m "data: forecast sync $(date -u +%Y-%m-%dT%H:%MZ)"
+          git pull --rebase && git push

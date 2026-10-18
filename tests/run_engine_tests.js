@@ -18,7 +18,8 @@ for (const file of fs.readdirSync(path.join(__dirname, 'vectors')).sort()) {
   } else if (v.type === 'season') {
     const input = { ...v.input, crop: { ...Crops.get(v.input.cropKey), ...(v.input.cropOverride || {}) }, weather: expandWeather(v.input.weatherGen) };
     const out = WaterBalance.run(input);
-    for (const [k, [exp, tol]] of Object.entries(v.expect)) near(`${v.name} summary.${k}`, out.summary[k], exp, tol);
+    const derived = { MaxSingleNetMm: Math.max(...out.days.map(d => d.Inet)), ForecastRainCountedMm: out.forecast.P };
+    for (const [k, [exp, tol]] of Object.entries(v.expect)) near(`${v.name} ${k}`, k in derived ? derived[k] : out.summary[k], exp, tol);
   }
 }
 /* deterministic synthetic weather: constant or sinusoidal season */
@@ -28,7 +29,8 @@ function expandWeather(g) {
     const d = new Date(d0); d.setDate(d.getDate() + i);
     const ph = Math.sin(2 * Math.PI * i / g.days);
     out.push({ date: d.toISOString().slice(0, 10), tmin: g.tmin + g.amp * ph, tmax: g.tmax + g.amp * ph, et0: g.et0 + g.et0amp * ph,
-      rain: (i % g.rainEvery === 0) ? g.rainMm : 0, u2: g.u2, rhmin: g.rhmin });
+      rain: (i % g.rainEvery === 0) ? g.rainMm : 0, u2: g.u2, rhmin: g.rhmin,
+      ...(g.forecastLastDays && i >= g.days - g.forecastLastDays ? { kind: 'forecast', rainProb: g.rainProb } : {}) });
   }
   return out;
 }

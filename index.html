@@ -48,6 +48,7 @@ button,input,select{font:inherit}.app{display:grid;grid-template-columns:270px 1
 .wb-tip{position:absolute;top:8px;pointer-events:none;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);padding:8px 10px;font-size:12px;line-height:1.6;min-width:170px;z-index:5}.wb-tip b{color:var(--ink)}.wb-rec{display:flex;gap:16px;align-items:center;flex-wrap:wrap}.wb-rec .big{font-size:30px;font-weight:900}.wb-ok{color:#2f6f3e}.wb-go{color:#c2410c}
 @media(max-width:650px){.sidebar{position:sticky;top:0;z-index:30;padding:8px 10px;height:auto}.brand{padding:2px 4px 6px}.brand small,.side-note{display:none}.brand h1{font-size:14px}.nav{display:flex!important;overflow-x:auto;gap:6px;margin-top:2px;scrollbar-width:none}.nav::-webkit-scrollbar{display:none}.nav button{flex:0 0 auto;white-space:nowrap;padding:8px 12px;font-size:13px}}
 .wb-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:8px;margin-top:12px}.wb-day{border:1px solid var(--line);border-radius:11px;padding:8px 10px;font-size:12px;line-height:1.7;background:#fbfdfd}.wb-day.irr{border-color:#c2410c;background:#fff6f0}.wb-day.need{border-color:#b7791f}.wb-day b{font-size:13px}.wb-day .wd{color:var(--muted);font-size:11px}.wb-badge{display:inline-block;font-size:10px;padding:1px 6px;border-radius:8px;background:#eef3f4;color:#4b6066;margin-inline-start:4px}.wb-alert-now{color:#c2410c}.wb-alert-soon{color:#b7791f}
+.ex-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}.ex-card{display:flex;flex-direction:column;gap:6px;text-align:right;border:1px solid var(--line);background:#f8fbfb;border-radius:13px;padding:14px;cursor:pointer;font:inherit;color:var(--ink)}.ex-card:hover{border-color:#008c99;background:#f0f8f8}.ex-card span{font-size:12px;color:var(--muted);line-height:1.7}.guide-steps{margin:0;padding-inline-start:22px;line-height:2}.guide-steps li{margin-bottom:6px}.guide-list{margin:0;padding-inline-start:20px;line-height:1.9;font-size:13px}.btn.sm{padding:3px 10px;font-size:12px;margin-inline-start:6px}.welcome{background:linear-gradient(180deg,#f2fafa,#fff);border-color:#cfe5e7}.fb-fab{position:fixed;left:18px;bottom:18px;z-index:40;border:0;border-radius:24px;padding:11px 16px;background:#103941;color:#fff;font-weight:700;box-shadow:0 6px 18px rgba(0,0,0,.18);cursor:pointer}.fb-modal{position:fixed;inset:0;background:rgba(16,57,65,.35);z-index:50;display:flex;align-items:center;justify-content:center;padding:16px}.fb-modal[hidden]{display:none}.fb-dialog{width:min(720px,100%);max-height:92vh;overflow:auto}.fb-preview{white-space:pre-wrap;background:#f6f9f9;border:1px solid var(--line);border-radius:9px;padding:8px 10px;font-size:11px;color:#4b6066;max-height:140px;overflow:auto;margin-top:8px;font-family:inherit}@media(max-width:650px){.fb-dialog .form-row{grid-template-columns:1fr!important}.fb-fab{left:12px;bottom:12px;padding:9px 13px}}
 </style>
 </head>
 <body>
@@ -61,6 +62,7 @@ button,input,select{font:inherit}.app{display:grid;grid-template-columns:270px 1
       <button data-section="balance">💧 الموازنة المائية والري</button>
       <button data-section="map">◉ خريطة سورية</button>
       <button data-section="data">≋ سجل البيانات</button>
+      <button data-section="guide">📘 الدليل والملاحظات</button>
     </div>
     <div class="side-note"><b>قاعدة النسخة التجريبية:</b><br>المعادلات المعتمدة موسومة بوضوح، أما معاملات الأطوار والمحطات التجريبية فتبقى قابلة للمعايرة قبل اعتمادها وطنياً.</div>
   </aside>
@@ -69,6 +71,14 @@ button,input,select{font:inherit}.app{display:grid;grid-template-columns:270px 1
 
     <section id="dashboard" class="section active">
       <div class="grid">
+        <div class="card span12 welcome" id="welcomeBox" hidden>
+          <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap">
+            <div><h3 style="margin-top:0">أهلاً بكم في النسخة الاستكشافية</h3>
+              <div class="mini" style="line-height:1.9">منصة لحساب البخر-نتح المرجعي وفق FAO-56 والموازنة المائية في منطقة الجذور وتنبيهات الري لسورية، ببيانات NASA POWER وتوقعات جوية لسبعة أيام. ابدأ بمثال جاهز أو اقرأ الدليل المختصر، ونرجو إرسال ملاحظاتكم.</div></div>
+            <button class="btn ghost" id="welcomeClose">إخفاء</button>
+          </div>
+          <div class="actions" style="margin-top:12px"><button class="btn primary" data-go="guide">الدليل المختصر</button><button class="btn secondary js-feedback">أرسل ملاحظة</button></div>
+        </div>
         <div class="card span12" id="dashAlert" hidden></div>
         <div class="card span12">
           <div class="kpis">
@@ -249,6 +259,48 @@ button,input,select{font:inherit}.app{display:grid;grid-template-columns:270px 1
       </div>
     </section>
 
+    <section id="guide" class="section">
+      <div class="grid">
+        <div class="card span12">
+          <h3>جرّب مثالاً جاهزاً</h3>
+          <div class="mini" style="margin-bottom:12px">ضغطة واحدة تحمّل المناخ من أرشيف المنصة وتحسب الموازنة. في الأمثلة فقط يُعدّ الاعتماد منجزاً تلقائياً لعرض المسار كاملاً.</div>
+          <div class="ex-grid">
+            <button class="ex-card" id="exWheat"><b>🌾 قمح سلمية — موسم 2025/26</b><span>موسم كامل من الزراعة إلى النضج: الهطول، والعجز المائي، وجدولة الري بالرذاذ، والاستهلاك الموسمي.</span></button>
+            <button class="ex-card" id="exMaize"><b>🌽 ذرة تكثيفية في الغاب — 2026</b><span>حقل قائم الآن: آخر الأيام المعلومة، ثم توقعات الأسبوع القادم وتنبيه الري.</span></button>
+          </div>
+        </div>
+        <div class="card span12">
+          <h3>دليل مختصر — خمس خطوات</h3>
+          <ol class="guide-steps">
+            <li><b>المناخ:</b> في «المناخ و ET₀» اختر <i>أرشيف المنصة — نقطة</i>، وأدخل إحداثيات الحقل والفترة، ثم اضغط «تحميل». يمكن بدلاً من ذلك رفع ملف محطة بقالب Excel الموحد. <button class="btn ghost sm" data-go="climate">فتح</button></li>
+            <li><b>المراجعة والاعتماد:</b> راجع السلسلة بصرياً، وانتبه للقيم المعلّمة بالأحمر. ضع إشارة «تمت المراجعة البصرية» ثم اضغط «اعتماد البيانات». لا تُحسب الموازنة إلا على سلسلة معتمدة.</li>
+            <li><b>بطاقة الحقل:</b> في «الموازنة المائية والري» حدد المحصول، وتاريخ الزراعة، والتربة، ونظام الري وحد الرية، ثم اضغط «احسب الموازنة». معاملات المحصول قابلة للتعديل تحت «معاملات المحصول». <button class="btn ghost sm" data-go="balance">فتح</button></li>
+            <li><b>التنبيه:</b> اقرأ البطاقة العليا، وهي واحدة من ثلاث: «ري الآن» مع الكمية، أو «ري متوقع يوم كذا»، أو «لا حاجة حتى تاريخ كذا». وتحتها شريط الأيام السبعة بالبخر-نتح والمطر والعجز. احفظ الحقل كملف JSON أو صدّر النتائج إلى Excel.</li>
+            <li><b>الخريطة:</b> قيم ET₀ للمحافظات، وتُختار بين آخر يوم، أو متوسط الأسبوع الماضي، أو الأسبوع القادم. يمكن تصديرها صورة PNG. <button class="btn ghost sm" data-go="map">فتح</button></li>
+          </ol>
+        </div>
+        <div class="card span6">
+          <h3>ما نرجو تقييمه</h3>
+          <ul class="guide-list">
+            <li>واقعية قيم ET₀ مقارنة بمحطاتكم أو خبرتكم في المنطقة.</li>
+            <li>واقعية مواعيد الري وكمياته المقترحة للمحاصيل التي تعرفونها.</li>
+            <li>وضوح الواجهة على الحاسب والموبايل.</li>
+            <li>المحاصيل والمناطق التي تحتاجون إضافتها، ومعاملات محلية متاحة لديكم.</li>
+          </ul>
+        </div>
+        <div class="card span6">
+          <h3>حدود هذه النسخة</h3>
+          <ul class="guide-list">
+            <li>معاملات المحاصيل قيم أولية من FAO-56، وحدود الأطوار مشتقة من موسم واحد في سلمية.</li>
+            <li>بيانات NASA POWER شبكية (نحو 50 كم) دون تصحيح محلي بعد.</li>
+            <li>التوقعات لسبعة أيام من Open-Meteo، ولا يُحتسب مطرها إلا إذا بلغ احتماله 60%.</li>
+            <li>الحقول تُحفظ في متصفحك فقط، ولا توجد حسابات مستخدمين في هذه النسخة.</li>
+          </ul>
+        </div>
+        <div class="card span12" style="text-align:center"><h3>ملاحظتك تصنع الفرق</h3><div class="mini" style="margin-bottom:10px">تُرسل الملاحظة مع سياقها تلقائياً: الشاشة، وإعدادات الحقل، والنتائج. هكذا نفهم ما رأيته بالضبط.</div><button class="btn primary js-feedback">أرسل ملاحظة</button></div>
+      </div>
+    </section>
+
     <section id="map" class="section">
       <div class="grid">
         <div class="card span12"><div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><div><h3>خريطة سورية — قيم ET₀ داخل دوائر</h3><div class="mini">خريطة سورية الفعلية على مستوى الحد الوطني. يمكنك اختيار محافظة أو منطقة بيئية من القائمة أو بالنقر على اسمها داخل الخريطة.</div></div><div class="actions"><button class="btn secondary" id="exportPng">تصدير PNG</button><button class="btn ghost" onclick="window.print()">طباعة / PDF</button></div></div><div class="map-toolbar"><div class="field"><label>قيمة ET₀ في الدائرة</label><select id="mapEt0Period"><option value="day">يومي — آخر يوم مكتمل (NASA)</option><option value="past7">متوسط الأسبوع الماضي</option><option value="next7">متوسط الأسبوع القادم (توقع)</option></select></div><div class="field"><label>نطاق العرض</label><select id="mapRegion"><option value="all">سورية كاملة</option><optgroup label="المحافظات"><option value="gov:damascus">دمشق</option><option value="gov:rif-dimashq">ريف دمشق</option><option value="gov:aleppo">حلب</option><option value="gov:idlib">إدلب</option><option value="gov:hama">حماة</option><option value="gov:homs">حمص</option><option value="gov:latakia">اللاذقية</option><option value="gov:tartus">طرطوس</option><option value="gov:daraa">درعا</option><option value="gov:suwayda">السويداء</option><option value="gov:quneitra">القنيطرة</option><option value="gov:raqqa">الرقة</option><option value="gov:deir-ez-zor">دير الزور</option><option value="gov:hasakah">الحسكة</option></optgroup><optgroup label="مناطق التحقق البيئي المقترحة"><option value="eco:ghab">سهل الغاب</option><option value="eco:salamiyah">سلمية</option><option value="eco:rif-dimashq">ريف دمشق/الغوطة</option><option value="eco:hauran">حوران</option><option value="eco:jazeera">الجزيرة السورية</option><option value="eco:euphrates">حوض الفرات — مرشح</option></optgroup></select></div><div class="field"><label>طبقة أسماء المحافظات</label><select id="showGovLabels"><option value="yes">إظهار</option><option value="no">إخفاء</option></select></div><button class="btn secondary" id="resetMapRegion">عرض سورية كاملة</button></div><div class="map-info" id="mapRegionInfo"><b>النطاق:</b> سورية كاملة — جميع نقاط ET₀ الظاهرة.</div><div class="map-wrap" id="fullMap" style="margin-top:10px"></div><div class="legend"><span><i style="border-color:#0a6f77"></i>بيانات المستخدم المعتمدة</span><span><i style="border-color:#b7791f"></i>نقاط تجريبية/مرجعية</span><span><i style="border-color:#8faea5"></i>مراكز محافظات قابلة للاختيار</span><span>الوحدة: mm/day</span></div></div>
@@ -261,6 +313,21 @@ button,input,select{font:inherit}.app{display:grid;grid-template-columns:270px 1
 
     <div class="footer">المنصة السورية لإدارة وجدولة الري — Prototype v0.8 — للاختبار والتطوير المشترك</div>
   </main>
+</div>
+<button class="fb-fab js-feedback" title="أرسل ملاحظة">✉ ملاحظة</button>
+<div class="fb-modal" id="fbModal" hidden>
+  <div class="fb-dialog card" role="dialog" aria-label="إرسال ملاحظة">
+    <div style="display:flex;justify-content:space-between;align-items:center"><h3 style="margin:0">أرسل ملاحظة</h3><button class="btn ghost" id="fbClose">✕</button></div>
+    <div class="form-row" style="margin-top:12px;grid-template-columns:repeat(3,minmax(0,1fr))">
+      <div class="field" style="min-width:0"><label>الاسم (اختياري)</label><input id="fbName"></div>
+      <div class="field" style="min-width:0"><label>الجهة / المحطة (اختياري)</label><input id="fbOrg"></div>
+      <div class="field" style="min-width:0"><label>نوع الملاحظة</label><select id="fbType"><option>ملاحظة على النتائج العلمية</option><option>خطأ أو مشكلة تقنية</option><option>اقتراح تحسين</option><option>سؤال</option><option>طلب محصول أو منطقة</option></select></div>
+    </div>
+    <div class="field" style="margin-top:10px"><label>الملاحظة</label><textarea id="fbText" rows="5" style="width:100%;border:1px solid #cfdde0;border-radius:9px;padding:9px;font:inherit"></textarea></div>
+    <label class="mini" style="display:flex;gap:6px;align-items:center;margin-top:8px"><input type="checkbox" id="fbCtx" checked> إرفاق السياق التلقائي (الشاشة، إعدادات الحقل، النتائج)</label>
+    <pre id="fbPreview" class="fb-preview"></pre>
+    <div class="actions" style="margin-top:10px"><button class="btn primary" id="fbWa">إرسال عبر واتساب</button><button class="btn secondary" id="fbMail">إرسال بالبريد</button><button class="btn ghost" id="fbCopy">نسخ النص</button></div>
+  </div>
 </div>
 <div class="toast" id="toast"></div>
 <script>
@@ -289,6 +356,7 @@ button,input,select{font:inherit}.app{display:grid;grid-template-columns:270px 1
 <script src="js/engine/soils.js"></script>
 <script src="js/engine/waterbalance.js"></script>
 <script src="js/balance-ui.js"></script>
+<script src="js/guide-ui.js"></script>
 <script>
 const state={rows:[],station:{},qc:null,approved:false,demo:false,mapRegion:'all',showGovLabels:true,visualReviewed:false,sourceLabel:'',nasaGridLatest:[],nasaJobs:[]};
 const demoStations=[
@@ -324,7 +392,7 @@ const cropPresets={
  custom:{base:0,upper:'',stages:[['مرحلة 1',0,200],['مرحلة 2',200,500],['مرحلة 3',500,800],['مرحلة 4',800,1100],['مرحلة 5',1100,1500]]}
 };
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
-function showSection(id){document.querySelectorAll('.section').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.section===id));const titles={dashboard:'لوحة التحكم',climate:'المناخ وحساب ET₀',crop:'المحصول والفينولوجيا',balance:'الموازنة المائية في منطقة الجذور وتوصيات الري',map:'خريطة سورية',data:'سجل البيانات'};document.getElementById('pageTitle').textContent=titles[id]; if(id==='map')renderMaps();if(id==='balance'&&window.WB)WB.onShow();}
+function showSection(id){document.querySelectorAll('.section').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.section===id));const titles={dashboard:'لوحة التحكم',climate:'المناخ وحساب ET₀',crop:'المحصول والفينولوجيا',balance:'الموازنة المائية في منطقة الجذور وتوصيات الري',map:'خريطة سورية',data:'سجل البيانات',guide:'دليل الاستخدام والملاحظات'};document.getElementById('pageTitle').textContent=titles[id]; if(id==='map')renderMaps();if(id==='balance'&&window.WB)WB.onShow();}
 document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>{showSection(b.dataset.section);window.scrollTo({top:0});b.scrollIntoView({inline:'center',block:'nearest'})});
 document.getElementById('todayBox').textContent='جلسة الاختبار: '+new Date().toLocaleDateString('ar-SY',{year:'numeric',month:'long',day:'numeric'});
 
@@ -509,7 +577,7 @@ document.getElementById('nasaMode').addEventListener('change',nasaModeChanged);d
 document.getElementById('climateVariable').addEventListener('change',()=>updateVisualReview(false));document.getElementById('chartAggregation').addEventListener('change',()=>updateVisualReview(false));document.getElementById('visualStart').addEventListener('change',()=>{state.visualReviewed=false;document.getElementById('visualReviewed').checked=false;updateVisualReview(false)});document.getElementById('visualEnd').addEventListener('change',()=>{state.visualReviewed=false;document.getElementById('visualReviewed').checked=false;updateVisualReview(false)});document.getElementById('fullPeriodBtn').onclick=()=>{state.visualReviewed=false;document.getElementById('visualReviewed').checked=false;setVisualDateBounds(true);updateVisualReview(false)};document.getElementById('visualReviewed').addEventListener('change',e=>{state.visualReviewed=e.target.checked;updateApprovalState()});
 document.getElementById('climateFile').addEventListener('change',e=>e.target.files[0]&&handleFile(e.target.files[0]));document.getElementById('demoBtn').onclick=loadDemo;document.getElementById('approveBtn').onclick=approve;document.getElementById('resetBtn').onclick=resetAll;document.getElementById('cropSelect').onchange=updateCropPreset;['sowingDate','evalDate','tbase','tupper'].forEach(id=>document.getElementById(id).addEventListener('change',updateCrop));document.getElementById('exportPng').onclick=exportMap;document.getElementById('mapRegion').addEventListener('change',e=>{state.mapRegion=e.target.value;renderMaps()});document.getElementById('mapEt0Period').addEventListener('change',()=>renderMaps());document.getElementById('showGovLabels').addEventListener('change',e=>{state.showGovLabels=e.target.value==='yes';renderMaps()});document.getElementById('resetMapRegion').onclick=()=>{state.mapRegion='all';document.getElementById('mapRegion').value='all';renderMaps()};
 const nasaEndDefault=new Date();nasaEndDefault.setDate(nasaEndDefault.getDate()-2);const nasaStartDefault=new Date(nasaEndDefault);nasaStartDefault.setFullYear(nasaStartDefault.getFullYear()-1);document.getElementById('nasaStart').value=dateKey(nasaStartDefault);document.getElementById('nasaEnd').value=dateKey(nasaEndDefault);nasaModeChanged();
-const defSow=new Date();defSow.setDate(defSow.getDate()-90);document.getElementById('sowingDate').value=dateKey(defSow);document.getElementById('evalDate').value=dateKey(new Date());renderMaps();updateCropPreset();loadNasaLatest();WB.init();
+const defSow=new Date();defSow.setDate(defSow.getDate()-90);document.getElementById('sowingDate').value=dateKey(defSow);document.getElementById('evalDate').value=dateKey(new Date());renderMaps();updateCropPreset();loadNasaLatest();WB.init();GUIDE.init();
 // PWA: offline + install (service workers run only over http/https, e.g. GitHub Pages)
 if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js').catch(e=>console.info('SW:',e.message));
 </script>

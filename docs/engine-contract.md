@@ -1,6 +1,6 @@
 # عقد المحرك العلمي — جسر HTML ↔ .NET
 
-**الإصدار:** 0.7 — 16 تشرين الأول 2026
+**الإصدار:** 0.8 — 18 تشرين الأول 2026
 
 ## المبدأ
 المحرك العلمي مفصول تماماً عن الواجهة. كل ملف في `js/engine/` دوالّه نقية: لا تقرأ من الصفحة ولا تكتب إليها.
@@ -15,6 +15,7 @@
 | `js/engine/crops.js` | `GCSAR.Irrigation.Core.CropLibrary` + `CropParameters` | معاملات المحاصيل (Kc، Zr، p، h، Ky، حدود الأطوار بـ GDD) |
 | `js/engine/soils.js` | `GCSAR.Irrigation.Core.SoilLibrary` | θFC وθWP وCN للقوامات، وكفاءات أنظمة الري |
 | `js/engine/waterbalance.js` | `GCSAR.Irrigation.Core.WaterBalanceEngine` | الموازنة اليومية، وKs، والتوصية |
+| `tools/forecast_sync.py` | `GCSAR.Irrigation.Data.ForecastService` | توقعات Open-Meteo على شبكة ناسا: سدّ التأخر + 7 أيام، وملخص المحافظات للخريطة |
 | `tools/nasa_power_sync.py` | `GCSAR.Irrigation.Data.NasaPowerService` (خدمة خلفية) | التنزيل والأرشفة؛ يبقى على GitHub Actions حتى في نسخة .NET |
 | `js/balance-ui.js` وباقي `index.html` | Blazor pages / WPF views | واجهة فقط |
 | `localStorage` + ملف JSON | SQLite / ملفات مشروع على الحاسب | الحفظ؛ نفس مخطط JSON |
@@ -32,11 +33,14 @@
             "ky": 1.05, "tbase": 0, "tupper": null, "gdd": { "iniEnd": 550, "devEnd": 1600, "midEnd": 2100, "lateEnd": 2600 } },
   "soil": { "texture": "siltLoam", "thetaFC": 0.29, "thetaWP": 0.15, "cn": 80, "initialDepletionFrac": 0.5, "subsoilDepletionFrac": 0.5 },
   "irrigation": { "system": "sprinkler", "mode": "scheduled", "efficiency": 0.75, "triggerFrac": null,
-                  "events": [ { "date": "2026-03-15", "grossMm": 60 } ] }
+                  "events": [ { "date": "2026-03-15", "grossMm": 60 } ],
+                  "maxNetMm": 45, "forecastRainProbMin": 60, "useForecast": true }
 }
 ```
 `mode`: يأخذ إحدى ثلاث قيم: `scheduled` (ري تلقائي عند العتبة إضافة إلى الريات المسجلة)، `actual` (الريات المسجلة فقط)، `rainfed` (بعلي).
 `triggerFrac = null` تعني أن العتبة هي RAW، أي p معدّل يومياً.
+`maxNetMm` هو أقصى عمق صافٍ للرية الواحدة، وقيمته `null` تعني التعبئة الكاملة إلى السعة الحقلية.
+`forecastRainProbMin` (%): مطر التوقع يُحتسب كاملاً إذا بلغ احتماله هذه القيمة، ولا يُحتسب إطلاقاً إذا كان دونها. هذه قاعدة قرار، لا ضرب في الاحتمال.
 
 ## سجل الطقس اليومي (مدخل المحرك)
 | الحقل | الوحدة | المصدر |
@@ -47,9 +51,17 @@
 | `rain` | mm/day | المحطة أو PRECTOTCORR |
 | `u2` | m/s | محسوبة عند ارتفاع 2 م (اختياري، لتعديل Kc) |
 | `rhmin` | % | مقاسة، أو مقدّرة من Tdew وTmax (اختياري) |
+| `kind` | — | `obs` (افتراضي) أو `model` (تحليل نموذج حديث) أو `forecast` (توقع) |
+| `rainProb` | % | احتمال المطر، لأيام التوقع فقط |
 
 ## سجل الموازنة اليومية (مخرج المحرك) — `DailyBalance`
-`Date, GDD, Stage, StageName, Kc, Zr, TAW, RAW, p, ET0, ETc, Ks, ETcAdj, P, RO, Inet, Igross, AutoIrrigation, DP, Recharge, Dr, Dsub, Trigger, NeedsIrrigation, MissingWeather`
+`Date, GDD, Stage, StageName, Kc, Zr, TAW, RAW, p, ET0, ETc, Ks, ETcAdj, P, RO, Inet, Igross, AutoIrrigation, DP, Recharge, Dr, Dsub, Trigger, NeedsIrrigation, MissingWeather, Kind, RainForecast, RainProb`
+
+مخرجات `run()` الأخرى:
+- `summary`: يغطي أيام الرصد والنموذج فقط.
+- `forecast`: مجاميع أيام التوقع.
+- `recommendation.today`: التوصية في آخر يوم غير متوقَّع.
+- `recommendation.alert`: التنبيه، ويتضمن `level` (`now` أو `soon` أو `ok` أو `harvested`)، و`firstNeedDate`، و`plan[]`، ومجموعَي ET₀ والمطر.
 
 الوحدات: mm، m، °C·day. وتُستخدم أسماء الحقول نفسها كخصائص لـ `record DailyBalance` في C#.
 
@@ -61,6 +73,8 @@
 5. **Kc mid/end:** يُعدّلان بمتوسط u2 وRHmin خلال الطور المعني (Eq. 62). ولا يُعدّل Kc end إذا كان أقل من 0.45.
 6. **p:** يُعدّل يومياً وفق p = p_tab + 0.04(5 − ETc)، ويُحصر بين 0.1 و0.8.
 7. **الري التلقائي:** إذا بلغ Dr العتبة في نهاية يوم، يُضاف في اليوم التالي ري صافٍ يساوي Dr (تعبئة إلى السعة الحقلية)، ويُحسب الإجمالي بقسمته على Ea.
+7b. **حد الرية:** الري التلقائي يساوي min(Dr, maxNetMm). العجز الزائد يبقى، وتغطيه رية تالية حين يبلغ العتبة من جديد.
+7c. **أيام التوقع:** تكمل الموازنة نفسها دون انقطاع، ومجاميعها منفصلة عن الملخص الموسمي. وإغلاق الكتلة يشمل كل الأيام.
 8. **نهاية الموسم:** تنتهي المحاكاة عند بلوغ GDD حد الحصاد.
 9. **إغلاق الكتلة:** الملخص يتضمن `MassClosureMm`، ويجب أن يساوي صفراً.
 

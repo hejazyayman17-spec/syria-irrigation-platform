@@ -1,0 +1,681 @@
+<title>حقل العرض «السنبلة ٧»</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Reem+Kufi:wght@500;700&display=swap">
+<style>
+/* Layout: a field "control room" — passport + season scrubber on top, the live decision (alert + soil column) as the centre,
+   then the evidence (charts), the comparison and the provenance strip. Time runs left→right in every chart. */
+:root{
+  --bg:#EEF2EC; --surface:#FFFFFF; --sunk:#F5F8F3; --ink:#15261E; --ink2:#43564C; --muted:#75867D; --line:#D6E0D8;
+  --accent:#145C4A; --accent-soft:#DCEBE4;
+  --rain:#2F6FB3; --irr:#2E8B57; --dep:#C0571B; --wheat:#B7791F;
+  --ok:#2E7D4F; --ok-bg:#E3F2E8; --warn:#9A5B00; --warn-bg:#FBEFD9; --crit:#B42318; --crit-bg:#FBE4E1;
+  --soil1:#D9C9AC; --soil2:#C2A881; --soil3:#A68B66; --sky:#E7EFF4;
+  --st0:#E4EFE8; --st1:#C9E0D2; --st2:#9DC7AE; --st3:#E9D6A8; --st4:#E6E6E1;
+  --f-display:"Reem Kufi","IBM Plex Sans Arabic",Tahoma,"Segoe UI",sans-serif;
+  --f-body:"IBM Plex Sans Arabic",Tahoma,"Segoe UI",Arial,sans-serif;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0F1713; --surface:#16211B; --sunk:#1B2821; --ink:#E5EEE8; --ink2:#B4C4BB; --muted:#8A9B92; --line:#2A3A31;
+  --accent:#62C49D; --accent-soft:#1E3A2F;
+  --rain:#5B8FDB; --irr:#3A9E66; --dep:#D9773A; --wheat:#D3A04A;
+  --ok:#5CC98A; --ok-bg:#16301F; --warn:#E8AE4A; --warn-bg:#33270F; --crit:#F27B6C; --crit-bg:#3A1714;
+  --soil1:#4E4232; --soil2:#433829; --soil3:#382E21; --sky:#17242A;
+  --st0:#1B2E25; --st1:#22402F; --st2:#2C5540; --st3:#4A3E1F; --st4:#2A2D2A; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F1713; --surface:#16211B; --sunk:#1B2821; --ink:#E5EEE8; --ink2:#B4C4BB; --muted:#8A9B92; --line:#2A3A31;
+  --accent:#62C49D; --accent-soft:#1E3A2F;
+  --rain:#5B8FDB; --irr:#3A9E66; --dep:#D9773A; --wheat:#D3A04A;
+  --ok:#5CC98A; --ok-bg:#16301F; --warn:#E8AE4A; --warn-bg:#33270F; --crit:#F27B6C; --crit-bg:#3A1714;
+  --soil1:#4E4232; --soil2:#433829; --soil3:#382E21; --sky:#17242A;
+  --st0:#1B2E25; --st1:#22402F; --st2:#2C5540; --st3:#4A3E1F; --st4:#2A2D2A; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.6;direction:rtl;margin:0}
+.wrap{max-width:1240px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:18px 40px;display:grid;gap:18px}
+.num{font-variant-numeric:tabular-nums;direction:ltr;unicode-bidi:isolate}
+h1,h2,h3{margin:0;text-wrap:balance}
+h2{font-family:var(--f-display);font-weight:500;font-size:19px;color:var(--ink)}
+.eyebrow{font-size:12px;letter-spacing:.04em;color:var(--muted);font-weight:600}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px;min-width:0}
+.panel-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.panel-head p{margin:0;color:var(--muted);font-size:13px}
+
+/* demo ribbon */
+.ribbon{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:space-between;background:repeating-linear-gradient(135deg,var(--warn-bg) 0 14px,var(--surface) 14px 28px);border:1px dashed var(--warn);border-radius:var(--r);padding:8px 14px;font-size:13px;color:var(--ink)}
+.ribbon b{color:var(--warn)}
+
+/* header */
+.head{display:grid;grid-template-columns:1fr auto;gap:18px;align-items:end}
+.brand{display:flex;gap:14px;align-items:center}
+.mark{width:52px;height:52px;flex:none}
+.head h1{font-family:var(--f-display);font-weight:700;font-size:clamp(24px,3.4vw,34px);line-height:1.25}
+.head .sub{color:var(--ink2);font-size:14px}
+.today{text-align:left;direction:rtl}
+.today .eyebrow{display:block}
+.today .d{font-family:var(--f-display);font-size:22px;font-weight:500}
+
+/* passport */
+.passport{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:0;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);overflow:hidden}
+.passport div{padding:10px 14px;border-inline-start:1px solid var(--line);min-width:0}
+.passport div:first-child{border-inline-start:0}
+.passport dt{font-size:12px;color:var(--muted)}
+.passport dd{margin:0;font-weight:600;font-size:14px}
+
+/* scrubber */
+.scrub{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 16px 10px;box-shadow:0 6px 18px -14px rgba(0,0,0,.45)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.scrub-top{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:space-between}
+.controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+button{font-family:var(--f-body);font-size:13px;cursor:pointer;border-radius:999px;border:1px solid var(--line);background:var(--sunk);color:var(--ink);padding:5px 12px}
+button:hover{border-color:var(--accent)}
+button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--surface);font-weight:600;padding:6px 16px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chips button{font-size:12px;padding:3px 10px}
+.tl{width:100%;height:auto;display:block;margin-top:8px;direction:ltr;touch-action:none;cursor:pointer}
+#dayRange{width:100%;margin:4px 0 0;accent-color:var(--accent);direction:ltr}
+
+/* main decision row */
+.decide{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:18px}
+.alert{border-radius:var(--r);padding:18px;border:1px solid var(--line);background:var(--surface);display:grid;gap:14px;align-content:start}
+.alert .state{display:flex;gap:14px;align-items:center}
+.alert .icon{width:54px;height:54px;border-radius:50%;display:grid;place-items:center;flex:none}
+.alert .icon svg{width:30px;height:30px}
+.alert .say{font-family:var(--f-display);font-size:clamp(22px,2.6vw,30px);font-weight:700;line-height:1.3}
+.alert .why{color:var(--ink2);font-size:14px}
+.lv-now .icon{background:var(--crit-bg);color:var(--crit)} .lv-now .say{color:var(--crit)}
+.lv-soon .icon{background:var(--warn-bg);color:var(--warn)} .lv-soon .say{color:var(--warn)}
+.lv-ok .icon{background:var(--ok-bg);color:var(--ok)} .lv-ok .say{color:var(--ok)}
+.lv-harvested .icon{background:var(--sunk);color:var(--muted)}
+.pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:2px 10px;font-size:12px;font-weight:600}
+.lv-now .pill.lv{background:var(--crit-bg);color:var(--crit)} .lv-soon .pill.lv{background:var(--warn-bg);color:var(--warn)}
+.lv-ok .pill.lv{background:var(--ok-bg);color:var(--ok)} .lv-harvested .pill.lv{background:var(--sunk);color:var(--muted)}
+.facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.facts div{background:var(--sunk);border-radius:8px;padding:8px 10px;min-width:0}
+.facts dt{font-size:11.5px;color:var(--muted)} .facts dd{margin:0;font-weight:700;font-size:17px}
+.week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.day{border:1px solid var(--line);border-radius:8px;padding:6px 4px;text-align:center;font-size:12px;display:grid;gap:2px;min-width:0;position:relative}
+.day .wd{font-weight:600;color:var(--ink2)}
+.day .dm{color:var(--muted);font-size:11px}
+.day .et{font-weight:600}
+.day .rn{color:var(--rain);font-size:11.5px;min-height:18px}
+.day .rn.off{color:var(--muted)}
+.day .bar{height:6px;border-radius:3px;background:var(--sunk);overflow:hidden;direction:ltr}
+.day .bar i{display:block;height:100%;background:var(--dep)}
+.day.need{border-color:var(--warn)}
+.day.irr{border-color:var(--irr);background:var(--ok-bg)}
+.day .tag{font-size:10.5px;font-weight:700;color:var(--irr);min-height:16px}
+.note{font-size:12px;color:var(--muted)}
+
+/* soil column */
+.column{display:grid;grid-template-columns:minmax(0,1fr);gap:8px}
+.column svg{width:100%;height:auto;display:block;direction:ltr}
+
+/* KPIs */
+.kpis{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;min-width:0}
+.kpi dt{font-size:12.5px;color:var(--muted)}
+.kpi dd{margin:2px 0 0;font-family:var(--f-display);font-size:26px;font-weight:500;line-height:1.2}
+.kpi dd small{font-family:var(--f-body);font-size:12px;color:var(--muted);font-weight:500;margin-inline-start:4px}
+.kpi .sub{font-size:12px;color:var(--ink2)}
+
+/* charts */
+.charts{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:18px}
+.chart svg{width:100%;height:auto;display:block;direction:ltr;overflow:visible}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--ink2)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{display:inline-block;width:14px;height:4px;border-radius:2px}
+.legend i.dash{background:repeating-linear-gradient(90deg,currentColor 0 4px,transparent 4px 7px);height:2px}
+.axis text{fill:var(--muted);font-size:11px;font-family:var(--f-body)}
+.grid line{stroke:var(--line);stroke-width:1}
+.tip{position:fixed;z-index:20;pointer-events:none;background:var(--ink);color:var(--surface);border-radius:8px;padding:8px 10px;font-size:12.5px;line-height:1.5;min-width:150px;box-shadow:0 8px 20px -10px rgba(0,0,0,.5)}
+.tip b{display:block;font-size:13px;margin-bottom:2px}
+.tip .r{display:flex;justify-content:space-between;gap:14px}
+
+/* comparison */
+.cmp{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:22px;align-items:center}
+.cmp-rows{display:grid;gap:14px}
+.cmp-row .lbl{display:flex;justify-content:space-between;font-size:13px;color:var(--ink2);margin-bottom:4px}
+.cmp-row .track{display:grid;gap:4px}
+.hb{height:22px;border-radius:0 4px 4px 0;display:flex;align-items:center;padding:0 8px;font-size:12px;font-weight:600;color:var(--surface);white-space:nowrap;direction:ltr;min-width:max-content;max-width:100%}
+.hb.p{background:var(--irr)} .hb.t{background:var(--muted)}
+.saving{font-family:var(--f-display);font-size:clamp(30px,4vw,44px);font-weight:700;color:var(--irr);line-height:1.15}
+.cmp p{margin:6px 0 0;color:var(--ink2);font-size:14px}
+.key{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--ink2)}
+.key i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-inline-end:6px;vertical-align:-1px}
+
+/* bottom row */
+.bottom{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:18px}
+.map svg{width:100%;height:auto;display:block;direction:ltr}
+.prov{display:grid;gap:8px;font-size:13.5px;color:var(--ink2)}
+.prov ul{margin:0;padding-inline-start:18px;display:grid;gap:4px}
+.check{display:flex;flex-wrap:wrap;gap:8px}
+.check span{background:var(--ok-bg);color:var(--ok);border-radius:999px;padding:3px 10px;font-size:12px;font-weight:600}
+footer{text-align:center;color:var(--muted);font-size:12.5px}
+
+@media (max-width:980px){
+  .decide,.charts,.cmp,.bottom{grid-template-columns:minmax(0,1fr)}
+  .kpis{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .passport{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .passport div:nth-child(4){border-inline-start:0}
+  .passport div:nth-child(n+4){border-top:1px solid var(--line)}
+}
+@media (max-width:560px){
+  .head{grid-template-columns:1fr}.today{text-align:right}
+  .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .passport{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .passport div{border-inline-start:0;border-top:1px solid var(--line)}
+  .facts{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .week{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .chips{display:none}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+  <div class="ribbon" role="note"><span><b>نسخة عرض</b> — الحقل افتراضي، والطقس حقيقي من أرشيف NASA POWER لموسم 2025/26، والحسابات كلها من محرك المنصة.</span><span class="num">Prototype v0.8 · demo</span></div>
+
+  <header class="head">
+    <div class="brand">
+      <svg class="mark" viewBox="0 0 52 52" aria-hidden="true"><rect width="52" height="52" rx="12" fill="var(--accent)"/><path d="M26 10c-6 9-10 14-10 20a10 10 0 0 0 20 0c0-6-4-11-10-20z" fill="var(--surface)"/><path d="M26 22v18M26 30l-5-4M26 35l5-4" stroke="var(--accent)" stroke-width="2.2" stroke-linecap="round" fill="none"/></svg>
+      <div>
+        <h1>المنصة السورية لإدارة وجدولة الري</h1>
+        <div class="sub">حقل العرض «السنبلة ٧» — قمح شتوي بالري بالرذاذ، سلمية</div>
+      </div>
+    </div>
+    <div class="today"><span class="eyebrow">تاريخ العرض</span><span class="d" id="todayTxt">—</span></div>
+  </header>
+
+  <dl class="passport" id="passport"></dl>
+
+  <section class="scrub" aria-label="الموسم الزراعي">
+    <div class="scrub-top">
+      <div class="controls">
+        <button class="primary" id="playBtn" type="button">▶ تشغيل الموسم</button>
+        <button id="stepBack" type="button" aria-label="أسبوع للخلف">− أسبوع</button>
+        <button id="stepFwd" type="button" aria-label="أسبوع للأمام">+ أسبوع</button>
+      </div>
+      <div class="chips" id="chips"></div>
+    </div>
+    <svg class="tl" id="tl" viewBox="0 0 1000 74" role="img" aria-label="شريط الموسم: الأطوار والمطر والريات"></svg>
+    <input type="range" id="dayRange" min="0" max="1" value="0" aria-label="تاريخ العرض">
+  </section>
+
+  <section class="decide">
+    <div class="alert" id="alert" aria-live="polite"></div>
+    <div class="panel column">
+      <div class="panel-head"><h2>مقطع التربة الآن</h2><p id="colNote">عمق الجذور والماء المتاح فيها</p></div>
+      <svg id="soil" viewBox="0 0 340 430" role="img" aria-label="مقطع التربة ومخزون الماء"></svg>
+    </div>
+  </section>
+
+  <dl class="kpis" id="kpis"></dl>
+
+  <section class="charts">
+    <div class="panel chart">
+      <div class="panel-head"><h2>الموازنة المائية في منطقة الجذور</h2>
+        <div class="legend"><span><i style="background:var(--rain)"></i>مطر فعّال</span><span><i style="background:var(--irr)"></i>ري صافٍ</span><span><i style="background:var(--dep)"></i>الاستنزاف Dr</span><span style="color:var(--warn)"><i class="dash"></i>عتبة الري RAW</span><span style="color:var(--muted)"><i class="dash"></i>الماء المتاح الكلي TAW</span></div></div>
+      <svg id="wbChart" viewBox="0 0 760 330" role="img" aria-label="مخطط الموازنة المائية"></svg>
+      <div class="note">الاستنزاف يُرسم نحو الأسفل: الصفر هو السعة الحقلية، وخط TAW هو نقطة الذبول. المنطقة المظللة يمين المؤشر هي أيام التوقع السبعة.</div>
+    </div>
+    <div class="panel chart">
+      <div class="panel-head"><h2>التراكم الحراري والأطوار</h2><p>GDD، الحرارة الأساس 0 °م</p></div>
+      <svg id="gddChart" viewBox="0 0 460 330" role="img" aria-label="منحنى التراكم الحراري"></svg>
+      <div class="note" id="gddNote"></div>
+    </div>
+  </section>
+
+  <section class="charts">
+    <div class="panel chart">
+      <div class="panel-head"><h2>الطلب المائي اليومي</h2>
+        <div class="legend"><span><i style="background:var(--muted);height:8px"></i>ET₀ المرجعي</span><span><i style="background:var(--ink)"></i>ETc,adj للمحصول</span></div></div>
+      <svg id="etChart" viewBox="0 0 760 220" role="img" aria-label="مخطط التبخر-نتح"></svg>
+    </div>
+    <div class="panel chart">
+      <div class="panel-head"><h2>معامل المحصول Kc</h2><p>منحنى FAO-56 على الزمن الحراري</p></div>
+      <svg id="kcChart" viewBox="0 0 460 220" role="img" aria-label="منحنى معامل المحصول"></svg>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head"><h2>ماذا تغيّر الجدولة؟</h2><p id="cmpScope">حتى تاريخ العرض</p></div>
+    <div class="cmp">
+      <div>
+        <div class="eyebrow">الماء الموفَّر في الحقل (25 دونماً)</div>
+        <div class="saving" id="saving">—</div>
+        <p id="cmpText"></p>
+        <div class="key" style="margin-top:10px"><span><i style="background:var(--irr)"></i>جدولة المنصة</span><span><i style="background:var(--muted)"></i>جدول تقليدي افتراضي</span></div>
+      </div>
+      <div class="cmp-rows" id="cmpRows"></div>
+    </div>
+  </section>
+
+  <section class="bottom">
+    <div class="panel map">
+      <div class="panel-head"><h2>موقع الحقل</h2><p>خلية ناسا <span class="num" id="cellTxt"></span></p></div>
+      <svg id="map" viewBox="0 0 420 380" role="img" aria-label="خريطة سورية وموقع الحقل"></svg>
+    </div>
+    <div class="panel prov">
+      <div class="panel-head"><h2>من أين تأتي هذه الأرقام؟</h2></div>
+      <div class="check" id="checks"></div>
+      <ul>
+        <li><b>المحرك:</b> ملفات المحرك العلمي للمنصة نفسها، مضمّنة كما هي: ET₀ بمعادلة FAO-56 Penman–Monteith، والموازنة اليومية (Eq. 85) مع Ks (Eq. 84)، والجريان بطريقة SCS-CN، والأطوار بالزمن الحراري.</li>
+        <li><b>الطقس:</b> سلسلة يومية حقيقية من NASA POWER (مجتمع AG) لخلية سلمية، من 1 تشرين الثاني 2025 حتى 30 حزيران 2026، و ET₀ يُحسب منها داخل الصفحة.</li>
+        <li><b>الحقل:</b> افتراضي بالكامل: الاسم والمساحة والتربة (لومية سلتية، θFC 0.29 و θWP 0.15) ونظام الري (رذاذ، Ea 0.75، حد الرية 45 مم).</li>
+        <li><b>التوقع:</b> في هذه النسخة تُؤخذ الأيام السبعة التالية لتاريخ العرض من الأرشيف نفسه وتُعامل كتوقع، ويُحتسب المطر فيها إذا كان احتماله 60% فأكثر. في المنصة الحية يأتي التوقع من Open-Meteo.</li>
+        <li><b>الجدول التقليدي:</b> افتراضي للمقارنة: رية زراعة، ثم 60 مم إجمالي كل 10–12 يوماً من آذار إلى منتصف أيار.</li>
+      </ul>
+    </div>
+  </section>
+
+  <footer>الهيئة العامة للبحوث العلمية الزراعية — إدارة بحوث الموارد الطبيعية · نسخة عرض لا تُستخدم لاتخاذ قرارات ري فعلية</footer>
+</div>
+<div class="tip" id="tip" hidden></div>
+
+<script>
+/*@@ENGINE@@*/
+</script>
+<script>
+/*@@MAP@@*/
+</script>
+<script>
+/*@@WEATHER@@*/
+</script>
+<script>
+(function(){
+'use strict';
+const E = window.GCSAR, $ = id => document.getElementById(id);
+const NS = 'http://www.w3.org/2000/svg';
+const MONTHS = ['كانون الثاني','شباط','آذار','نيسان','أيار','حزيران','تموز','آب','أيلول','تشرين الأول','تشرين الثاني','كانون الأول'];
+const MSHORT = ['ك٢','شباط','آذار','نيسان','أيار','حزيران','تموز','آب','أيلول','ت١','ت٢','ك١'];
+
+// ---------- the virtual field (gcsar.field/1 shape)
+const FIELD = { name:'حقل العرض «السنبلة ٧»', place:'سلمية — حماة', lat:35.01, lon:37.05, areaDunum:25, sow:'2025-11-20', start:'2026-04-20' };
+const crop = { ...E.Crops.get('wheat') };
+const S = E.Soils.SOILS.siltLoam, SYS = E.Soils.SYSTEMS.sprinkler;
+const soil = { texture:'siltLoam', thetaFC:S.thetaFC, thetaWP:S.thetaWP, cn:S.cn, initialDepletionFrac:0.5, subsoilDepletionFrac:0.5 };
+const SCHED = { system:'sprinkler', mode:'scheduled', efficiency:SYS.ea, triggerFrac:null, events:[], maxNetMm:SYS.maxNetMm, forecastRainProbMin:60, useForecast:true };
+const TRAD = { system:'sprinkler', mode:'actual', efficiency:SYS.ea, triggerFrac:null, maxNetMm:SYS.maxNetMm, forecastRainProbMin:60, useForecast:true,
+  events:['2025-11-22','2026-03-01','2026-03-13','2026-03-25','2026-04-06','2026-04-16','2026-04-26','2026-05-06','2026-05-16'].map(date => ({ date, grossMm:60 })) };
+
+// ---------- weather: real NASA POWER rows → ET0 with the platform's FAO-56 engine
+const META = { Latitude:FIELD.lat, Elevation_m:DEMO_WX.cell[2], WindHeight_m:2 };
+const WX = DEMO_WX.rows.map(r => {
+  const o = {}; DEMO_WX.cols.forEach((c, i) => o[c] = r[i]);
+  const date = `${o.date.slice(0,4)}-${o.date.slice(4,6)}-${o.date.slice(6,8)}`;
+  const e = E.Fao56.et0FromRecord({ ...o, WindHeight_m:2 }, META, new Date(date + 'T00:00:00'));
+  return { date, tmin:o.Tmin_C, tmax:o.Tmax_C, et0:e.et0, rain:o.Rain_mm ?? 0, u2:o.WindSpeed_m_s, rhmin:E.Fao56.rhMin(o) };
+});
+const LASTWX = WX[WX.length - 1].date;
+const add = (d, n) => { const x = new Date(d + 'T00:00:00Z'); x.setUTCDate(x.getUTCDate() + n); return x.toISOString().slice(0, 10); };
+const dayN = d => Math.round((Date.parse(d + 'T00:00:00Z') - Date.parse(FIELD.sow + 'T00:00:00Z')) / 864e5);
+
+/** One engine run as seen on date D: observed days up to D, the next 7 days as a forecast (rain counted when prob ≥ 60 %). */
+function sim(D, irrigation) {
+  let f = add(D, 7); if (f > LASTWX) f = LASTWX;
+  const w = WX.filter(r => r.date <= f).map(r => r.date > D ? { ...r, kind:'forecast', rainProb: r.rain >= 1 ? 75 : 10 } : r);
+  return E.WaterBalance.run({ crop, soil, irrigation, sowingDate:FIELD.sow, endDate:f, weather:w });
+}
+
+// full-season runs: phenology projection, timeline, traditional comparison
+const FULL = sim(add(LASTWX, -7), SCHED), TRADF = sim(add(LASTWX, -7), TRAD);
+const SEASON = FULL.days.map(d => d.Date), SEASON_END = SEASON[SEASON.length - 1], NDAYS = SEASON.length;
+const stageStart = k => (FULL.days.find(d => d.Stage >= k) || {}).Date;
+const HARVEST = stageStart(4) || SEASON_END;
+const MAXDAY = SEASON.indexOf(HARVEST) >= 0 ? SEASON.indexOf(HARVEST) + 3 : NDAYS - 1;
+
+// ---------- formatting
+const f0 = v => v == null || !isFinite(v) ? '—' : Math.round(v).toLocaleString('en-US');
+const f1 = v => v == null || !isFinite(v) ? '—' : (+v).toFixed(1);
+const dTxt = d => { const [y, m, dd] = d.split('-'); return `${+dd} ${MONTHS[+m - 1]} ${y}`; };
+const dShort = d => { const [, m, dd] = d.split('-'); return `${+dd} ${MONTHS[+m - 1]}`; };
+const wd = d => new Date(d + 'T00:00:00').toLocaleDateString('ar-SY', { weekday:'long' });
+const N = n => `<span class="num">${n}</span>`;
+function el(tag, attrs, parent) { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; }
+function txt(parent, x, y, s, attrs = {}) { const t = el('text', { x, y, ...attrs }, parent); t.textContent = s; return t; }
+const STAGES = ['أولي','تطور','منتصف الموسم','نهاية الموسم','بعد الحصاد'];
+const STC = ['var(--st0)','var(--st1)','var(--st2)','var(--st3)','var(--st4)'];
+
+// ---------- passport
+$('passport').innerHTML = [
+  ['المحصول', crop.name || 'قمح شتوي'], ['الزراعة', dTxt(FIELD.sow)], ['المساحة', `${FIELD.areaDunum} دونماً`],
+  ['التربة', `${S.name} — CN ${S.cn}`], ['نظام الري', `${SYS.name} · Ea ${SYS.ea}`], ['الموقع', `${FIELD.place} · ${N(FIELD.lat + '°N ' + FIELD.lon + '°E')}`]
+].map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('');
+$('cellTxt').textContent = `${DEMO_WX.cell[0]}°N, ${DEMO_WX.cell[1]}°E · ${Math.round(DEMO_WX.cell[2])} م`;
+
+// ---------- state
+let D = FIELD.start, OUT = null, timer = null;
+const range = $('dayRange'); range.max = MAXDAY; range.value = SEASON.indexOf(D);
+
+// ---------- timeline (season strip)
+const TL = { w:1000, l:8, r:8 };
+const tx = i => TL.l + (TL.w - TL.l - TL.r) * i / (NDAYS - 1);
+function drawTimeline() {
+  const s = $('tl'); s.innerHTML = '';
+  const iD = SEASON.indexOf(D);
+  // stage bands
+  let k0 = 0;
+  for (let i = 1; i <= NDAYS; i++) {
+    if (i === NDAYS || FULL.days[i].Stage !== FULL.days[k0].Stage) {
+      const st = FULL.days[k0].Stage, x0 = tx(k0), x1 = tx(i - 1);
+      el('rect', { x:x0, y:30, width:Math.max(1, x1 - x0), height:18, fill:STC[st] }, s);
+      if (x1 - x0 > 60) txt(s, (x0 + x1) / 2, 43, STAGES[st], { 'text-anchor':'middle', 'font-size':11, fill:'var(--ink2)', 'font-family':'var(--f-body)' });
+      k0 = i;
+    }
+  }
+  // months
+  SEASON.forEach((d, i) => { if (d.endsWith('-01')) { el('line', { x1:tx(i), x2:tx(i), y1:48, y2:56, stroke:'var(--line)' }, s); txt(s, tx(i) + 3, 68, MSHORT[+d.slice(5, 7) - 1], { 'font-size':11, fill:'var(--muted)', 'font-family':'var(--f-body)' }); } });
+  // rain (up from the band) — real data, whole season
+  FULL.days.forEach((d, i) => { if (d.P > 0.5) el('rect', { x:tx(i) - 1, y:30 - Math.min(26, d.P * 1.1), width:2.2, height:Math.min(26, d.P * 1.1), fill:'var(--rain)', opacity: i <= iD ? 1 : .35 }, s); });
+  // platform irrigations up to D
+  OUT.days.forEach((d) => { if (d.Inet > 0 && d.Kind !== 'forecast') { const i = SEASON.indexOf(d.Date); el('path', { d:`M${tx(i)} 50 l5 8 h-10z`, fill:'var(--irr)' }, s); } });
+  // future shade + cursor
+  el('rect', { x:tx(iD), y:2, width:TL.w - TL.r - tx(iD), height:54, fill:'var(--surface)', opacity:.45 }, s);
+  el('line', { x1:tx(iD), x2:tx(iD), y1:2, y2:58, stroke:'var(--ink)', 'stroke-width':2 }, s);
+  el('circle', { cx:tx(iD), cy:39, r:7, fill:'var(--ink)', stroke:'var(--surface)', 'stroke-width':2 }, s);
+}
+function setFromX(clientX) {
+  const s = $('tl'), b = s.getBoundingClientRect(), x = (clientX - b.left) / b.width * TL.w;
+  const i = Math.round((x - TL.l) / (TL.w - TL.l - TL.r) * (NDAYS - 1));
+  setDay(Math.max(0, Math.min(MAXDAY, i)));
+}
+$('tl').addEventListener('pointerdown', e => { stop(); setFromX(e.clientX); $('tl').setPointerCapture(e.pointerId); });
+$('tl').addEventListener('pointermove', e => { if (e.buttons) setFromX(e.clientX); });
+range.addEventListener('input', () => { stop(); setDay(+range.value); });
+
+// key moments
+const firstSpring = (FULL.days.find(d => d.Date >= '2026-02-01' && d.Inet > 0) || {}).Date;
+const MOMENTS = [['الزراعة', add(FIELD.sow, 1)], ['الإشطاء', stageStart(1)], ['أول رية ربيعية', firstSpring && add(firstSpring, -1)], ['منتصف الموسم', stageStart(2)], ['النضج', stageStart(3)], ['الحصاد', HARVEST]].filter(m => m[1]);
+$('chips').innerHTML = MOMENTS.map(([n, d]) => `<button type="button" data-d="${d}">${n}</button>`).join('');
+$('chips').querySelectorAll('button').forEach(b => b.onclick = () => { stop(); setDay(SEASON.indexOf(b.dataset.d)); });
+
+// play
+function stop() { if (timer) { clearInterval(timer); timer = null; $('playBtn').textContent = '▶ تشغيل الموسم'; } }
+$('playBtn').onclick = () => {
+  if (timer) { stop(); return; }
+  let i = SEASON.indexOf(D); if (i >= MAXDAY) i = 0;
+  $('playBtn').textContent = '⏸ إيقاف';
+  timer = setInterval(() => { i += 1; if (i >= MAXDAY) { setDay(MAXDAY); stop(); return; } setDay(i); }, 90);
+};
+$('stepBack').onclick = () => { stop(); setDay(Math.max(0, SEASON.indexOf(D) - 7)); };
+$('stepFwd').onclick = () => { stop(); setDay(Math.min(MAXDAY, SEASON.indexOf(D) + 7)); };
+
+function setDay(i) { D = SEASON[i]; range.value = i; render(); }
+
+// ---------- alert card
+const ICONS = {
+  now:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c-4 6-7 9.5-7 13a7 7 0 0 0 14 0c0-3.5-3-7-7-13z"/></svg>',
+  soon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/></svg>',
+  ok:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+  harvested:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22V8M12 8c-3 0-4-3-4-6 3 0 4 3 4 6zM12 8c3 0 4-3 4-6-3 0-4 3-4 6zM12 14c-3 0-4-3-4-6M12 14c3 0 4-3 4-6"/></svg>'
+};
+function renderAlert() {
+  const r = OUT.recommendation, a = r.alert, last = OUT.days.filter(d => d.Kind !== 'forecast').pop();
+  const level = a ? a.level : (r.action === 'harvested' ? 'harvested' : r.action === 'irrigate' ? 'now' : 'ok');
+  const area = FIELD.areaDunum;
+  let say, why;
+  if (level === 'now') { say = `ري اليوم: ${f0(r.grossMm)} مم إجمالي`; why = `الاستنزاف ${f1(last.Dr)} مم بلغ عتبة الري ${f1(last.Trigger)} مم. الرية الصافية ${f1(r.netMm)} مم${r.limited ? ' (محدودة بحد الرذاذ 45 مم)' : ''}، أي ${f0(r.m3PerDunum)} م³/دونم و${f0(r.m3PerDunum * area)} م³ للحقل.`; }
+  else if (level === 'soon') { const p = a.plan[0]; say = `رية متوقعة ${wd(a.firstNeedDate)} ${dShort(a.firstNeedDate)}`; why = `يصل الاستنزاف إلى العتبة خلال ${dayN(a.firstNeedDate) - dayN(D)} أيام.${p ? ` الرية المخططة ${f0(p.grossMm)} مم إجمالي (${f0(p.m3PerDunum * area)} م³ للحقل) في ${dShort(p.date)}.` : ''}`; }
+  else if (level === 'ok') { say = 'لا حاجة للري هذا الأسبوع'; why = `المخزون في منطقة الجذور يكفي${r.daysUntil != null ? ` نحو ${r.daysUntil} يوماً بمعدل الاستهلاك الحالي ${f1(r.rateMmDay)} مم/يوم` : ''}${a && a.rainCountedMm > 0 ? `، ومطر التوقع المحتسب ${f1(a.rainCountedMm)} مم` : ''}.`; }
+  else { say = 'انتهى الموسم'; why = `بلغ المحصول النضج الفيزيولوجي وحُسب الحصاد في ${dTxt(HARVEST)}.`; }
+  const lbl = { now:'ري الآن', soon:'ري متوقع', ok:'وضع آمن', harvested:'محصود' }[level];
+  const fc = OUT.days.filter(d => d.Kind === 'forecast');
+  const week = fc.map(d => {
+    const frac = d.TAW ? Math.min(1, d.Dr / d.TAW) : 0, irr = d.Inet > 0, rf = d.RainForecast || 0;
+    return `<div class="day${irr ? ' irr' : d.NeedsIrrigation ? ' need' : ''}">
+      <span class="wd">${wd(d.Date).replace('ال', '')}</span><span class="dm">${dShort(d.Date)}</span>
+      <span class="et">${N(f1(d.ET0))}<small style="color:var(--muted);font-weight:400"> مم</small></span>
+      <span class="rn${rf >= 1 ? '' : ' off'}">${rf >= 1 ? `${N(f0(rf))} مم · ${N(d.RainProb + '%')}` : 'جاف'}</span>
+      <span class="bar" title="الاستنزاف من TAW"><i style="width:${(frac * 100).toFixed(0)}%"></i></span>
+      <span class="tag">${irr ? `رية ${f0(d.Igross)} مم` : ''}</span></div>`;
+  }).join('');
+  $('alert').className = `alert lv-${level}`;
+  $('alert').innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><span class="eyebrow">تنبيه الري — ${wd(D)} ${dTxt(D)}</span><span class="pill lv">${lbl}</span></div>
+    <div class="state"><div class="icon">${ICONS[level]}</div><div><div class="say">${say}</div><div class="why">${why}</div></div></div>
+    <dl class="facts">
+      <div><dt>الطور</dt><dd style="font-size:15px">${STAGES[last.Stage]}</dd></div>
+      <div><dt>الاستنزاف Dr</dt><dd>${N(f1(last.Dr))} <small>مم</small></dd></div>
+      <div><dt>عتبة الري RAW</dt><dd>${N(f1(last.Trigger))} <small>مم</small></dd></div>
+      <div><dt>معامل الإجهاد Ks</dt><dd>${N((+last.Ks).toFixed(2))}</dd></div>
+    </dl>
+    ${fc.length ? `<div><div class="eyebrow" style="margin-bottom:6px">الأيام السبعة القادمة — ET₀ والمطر واحتماله والاستنزاف</div><div class="week">${week}</div></div>` : ''}
+    <div class="note">${a ? `مطر التوقع الكلي ${f1(a.rainAllMm)} مم، المحتسب منه ${f1(a.rainCountedMm)} مم (احتمال ≥ 60%). ET₀ للأسبوع ${f1(a.et0Mm)} مم.` : ''}</div>`;
+}
+
+// ---------- soil column (signature visual)
+const RNG = (() => { let s = 7; return () => (s = (s * 16807) % 2147483647) / 2147483647; })();
+const ROOTS = Array.from({ length: 9 }, (_, k) => { const x0 = 120 + (k - 4) * 3, pts = []; let x = x0; for (let j = 1; j <= 10; j++) { x += (RNG() - .5) * 14 + (k - 4) * 1.6; pts.push([x, j / 10]); } return { x0, pts }; });
+function renderSoil() {
+  const s = $('soil'); s.innerHTML = '';
+  const last = OUT.days.filter(d => d.Kind !== 'forecast').pop();
+  const G0 = 150, PXM = 165, ZMAX = 1.6;   // ground line, px per metre
+  const y = z => G0 + z * PXM;
+  // sky and soil layers
+  el('rect', { x:0, y:0, width:340, height:G0, fill:'var(--sky)' }, s);
+  [[0, .3, 'var(--soil1)'], [.3, .9, 'var(--soil2)'], [.9, ZMAX, 'var(--soil3)']].forEach(([a, b, c]) => el('rect', { x:0, y:y(a), width:240, height:(b - a) * PXM, fill:c }, s));
+  // root zone water tint
+  const avail = last.TAW ? Math.max(0, 1 - last.Dr / last.TAW) : 0;
+  el('rect', { x:0, y:G0, width:240, height:last.Zr * PXM, fill:'var(--rain)', opacity:(0.08 + 0.32 * avail).toFixed(2) }, s);
+  el('line', { x1:0, x2:240, y1:y(last.Zr), y2:y(last.Zr), stroke:'var(--ink)', 'stroke-dasharray':'5 4', 'stroke-width':1.2 }, s);
+  txt(s, 6, y(last.Zr) - 6, `عمق الجذور Zr = ${last.Zr.toFixed(2)} م`, { 'font-size':12, fill:'var(--ink)', 'font-weight':600, 'font-family':'var(--f-body)' });
+  // depth ticks
+  for (let z = 0.5; z < ZMAX; z += 0.5) { el('line', { x1:232, x2:240, y1:y(z), y2:y(z), stroke:'var(--ink2)' }, s); txt(s, 228, y(z) + 4, `${z} م`, { 'font-size':10, fill:'var(--ink2)', 'text-anchor':'end', 'font-family':'var(--f-body)' }); }
+  // roots
+  ROOTS.forEach(r => { const d = `M${r.x0} ${G0}` + r.pts.map(([x, f]) => ` L${x.toFixed(1)} ${(G0 + f * last.Zr * PXM).toFixed(1)}`).join(''); el('path', { d, fill:'none', stroke:'var(--ink2)', 'stroke-width':1.1, opacity:.7 }, s); });
+  // plant: height follows thermal time to full cover, colour turns to straw in late season
+  const g = crop.gdd, gd = last.GDD;
+  const hf = last.Stage >= 4 ? 0 : Math.min(1, Math.max(0.06, gd / g.devEnd));
+  const H = 125 * hf, late = gd > g.midEnd, ear = gd > g.devEnd * 0.85 && last.Stage < 4;
+  const stem = late ? 'var(--wheat)' : 'var(--irr)';
+  if (last.Stage < 4) for (let k = -4; k <= 4; k++) {
+    const bx = 120 + k * 4, tipx = 120 + k * 11 * hf, ty = G0 - H * (1 - Math.abs(k) * 0.04);
+    el('path', { d:`M${bx} ${G0} Q${bx + k * 2} ${G0 - H * .5} ${tipx} ${ty}`, fill:'none', stroke:stem, 'stroke-width':2.2, 'stroke-linecap':'round' }, s);
+    if (hf > .25) el('path', { d:`M${(bx + tipx) / 2} ${G0 - H * .45} q${k >= 0 ? 16 : -16} -4 ${k >= 0 ? 22 : -22} 6`, fill:'none', stroke:stem, 'stroke-width':1.6, 'stroke-linecap':'round' }, s);
+    if (ear) el('ellipse', { cx:tipx, cy:ty - 8, rx:3.4, ry:10, fill:late ? 'var(--wheat)' : 'var(--accent)', transform:`rotate(${k * 4} ${tipx} ${ty - 8})` }, s);
+  } else { for (let k = -4; k <= 4; k++) el('line', { x1:120 + k * 6, x2:120 + k * 6, y1:G0, y2:G0 - 10, stroke:'var(--wheat)', 'stroke-width':2 }, s); }
+  el('line', { x1:0, x2:240, y1:G0, y2:G0, stroke:'var(--ink2)', 'stroke-width':1.5 }, s);
+  txt(s, 6, 20, `GDD ${f0(gd)} °م·يوم`, { 'font-size':12, fill:'var(--ink2)', 'font-family':'var(--f-body)' });
+  txt(s, 6, 38, STAGES[last.Stage], { 'font-size':14, fill:'var(--ink)', 'font-weight':700, 'font-family':'var(--f-body)' });
+  // water gauge: full = field capacity, empty = wilting point, both for the current root zone
+  const gx = 262, gw = 44, gt = 40, gh = 360;
+  el('rect', { x:gx, y:gt, width:gw, height:gh, rx:8, fill:'var(--sunk)', stroke:'var(--line)' }, s);
+  const wh = gh * avail; el('rect', { x:gx + 3, y:gt + gh - wh + 3, width:gw - 6, height:Math.max(0, wh - 6), rx:6, fill:'var(--rain)' }, s);
+  const yr = gt + gh * Math.min(1, last.Trigger / last.TAW);
+  el('line', { x1:gx - 6, x2:gx + gw + 6, y1:yr, y2:yr, stroke:'var(--warn)', 'stroke-width':2, 'stroke-dasharray':'4 3' }, s);
+  txt(s, gx - 8, yr + 4, 'عتبة الري', { 'font-size':11, fill:'var(--warn)', 'text-anchor':'end', 'font-weight':600, 'font-family':'var(--f-body)' });
+  txt(s, gx + gw / 2, gt - 22, 'الماء المتاح', { 'font-size':12, fill:'var(--ink)', 'text-anchor':'middle', 'font-weight':600, 'font-family':'var(--f-body)' });
+  txt(s, gx + gw / 2, gt - 7, `${Math.round(avail * 100)}%`, { 'font-size':12, fill:'var(--ink2)', 'text-anchor':'middle', 'font-family':'var(--f-body)' });
+  txt(s, gx + gw / 2, gt + gh + 16, `TAW ${f0(last.TAW)} مم`, { 'font-size':11, fill:'var(--ink2)', 'text-anchor':'middle', 'font-family':'var(--f-body)' });
+  $('colNote').textContent = `يحتفظ قطاع الجذور بـ ${f0(last.TAW - last.Dr)} مم من أصل ${f0(last.TAW)} مم`;
+}
+
+// ---------- KPIs (season to date)
+function renderKpis() {
+  const s = OUT.summary, last = OUT.days.filter(d => d.Kind !== 'forecast').pop();
+  const k = [
+    ['التراكم الحراري', f0(last.GDD), '°م·يوم', `من أصل ${f0(crop.gdd.lateEnd)} حتى النضج`],
+    ['المطر منذ الزراعة', f0(s.P), 'مم', `الجريان السطحي ${f1(s.RO)} مم`],
+    ['استهلاك المحصول', f0(s.ETcAdj), 'مم', `ETc,adj / ETc = ${(+s.ETcAdjOverETc).toFixed(2)}`],
+    ['الري المضاف', f0(s.Igross), 'مم', `${s.irrigations} ريات · ${f0(s.Igross * FIELD.areaDunum)} م³ للحقل`],
+    ['أيام الإجهاد المائي', f0(s.stressDays), 'يوم', 'أيام Ks < 1'],
+    ['إغلاق الكتلة', f1(s.MassClosureMm), 'مم', 'الموازنة مغلقة تماماً']
+  ];
+  $('kpis').innerHTML = k.map(([a, b, u, c]) => `<div class="kpi"><dt>${a}</dt><dd>${N(b)}<small>${u}</small></dd><div class="sub">${c}</div></div>`).join('');
+}
+
+// ---------- generic chart frame on the season axis
+function frame(svg, W, H, m) {
+  svg.innerHTML = '';
+  const X = i => m.l + (W - m.l - m.r) * i / (NDAYS - 1);
+  const axis = el('g', { class:'axis' }, svg);
+  SEASON.forEach((d, i) => { if (d.endsWith('-01')) { el('line', { x1:X(i), x2:X(i), y1:m.t, y2:H - m.b, stroke:'var(--line)', 'stroke-dasharray':'2 4' }, svg); txt(axis, X(i) + 3, H - m.b + 15, MSHORT[+d.slice(5, 7) - 1]); } });
+  const iD = SEASON.indexOf(D), iF = Math.min(NDAYS - 1, iD + 7);
+  el('rect', { x:X(iD), y:m.t, width:Math.max(0, X(iF) - X(iD)), height:H - m.t - m.b, fill:'var(--accent-soft)', opacity:.7 }, svg);
+  return { X, iD, iF };
+}
+function cursor(svg, X, iD, y0, y1) { el('line', { x1:X(iD), x2:X(iD), y1:y0, y2:y1, stroke:'var(--ink)', 'stroke-width':1.5 }, svg); }
+const pathOf = (pts) => pts.map((p, j) => (j ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join('');
+
+// hover: crosshair + tooltip on any season chart
+function hover(svg, W, X, m, H, rows) {
+  const tip = $('tip'), hl = el('line', { y1:m.t, y2:H - m.b, stroke:'var(--muted)', 'stroke-width':1, visibility:'hidden' }, svg);
+  const hit = el('rect', { x:m.l, y:m.t, width:W - m.l - m.r, height:H - m.t - m.b, fill:'transparent' }, svg);
+  hit.addEventListener('pointermove', e => {
+    const b = svg.getBoundingClientRect(), x = (e.clientX - b.left) / b.width * W;
+    const i = Math.round((x - m.l) / (W - m.l - m.r) * (NDAYS - 1)), r = rows(i);
+    if (!r) { tip.hidden = true; hl.setAttribute('visibility', 'hidden'); return; }
+    hl.setAttribute('x1', X(i)); hl.setAttribute('x2', X(i)); hl.setAttribute('visibility', 'visible');
+    tip.innerHTML = `<b>${dTxt(SEASON[i])}${r.fc ? ' · توقع' : ''}</b>` + r.lines.map(([k, v]) => `<div class="r"><span>${k}</span><span class="num">${v}</span></div>`).join('');
+    tip.hidden = false;
+    const tw = tip.offsetWidth, th = tip.offsetHeight;
+    tip.style.left = Math.min(window.innerWidth - tw - 8, Math.max(8, e.clientX + 14)) + 'px';
+    tip.style.top = Math.max(8, e.clientY - th - 12) + 'px';
+  });
+  hit.addEventListener('pointerleave', () => { tip.hidden = true; hl.setAttribute('visibility', 'hidden'); });
+}
+const dayAt = i => OUT.days.find(d => d.Date === SEASON[i]);
+
+// ---------- water balance chart: inputs strip (top) + depletion panel (below, downward)
+function renderWB() {
+  const svg = $('wbChart'), W = 760, H = 330, m = { l:44, r:12, t:8, b:24 };
+  const { X, iD, iF } = frame(svg, W, H, m);
+  const top0 = m.t, top1 = 92, dep0 = 112, dep1 = H - m.b;
+  const maxIn = 50, yi = v => top1 - Math.min(maxIn, v) / maxIn * (top1 - top0 - 4);
+  const maxD = Math.ceil(Math.max(...FULL.days.map(d => d.TAW)) / 50) * 50, yd = v => dep0 + v / maxD * (dep1 - dep0);
+  const ax = el('g', { class:'axis' }, svg);
+  [0, 25, 50].forEach(v => { txt(ax, m.l - 6, yi(v) + 4, v, { 'text-anchor':'end' }); el('line', { x1:m.l, x2:W - m.r, y1:yi(v), y2:yi(v), stroke:'var(--line)' }, svg); });
+  for (let v = 0; v <= maxD; v += 50) { txt(ax, m.l - 6, yd(v) + 4, v, { 'text-anchor':'end' }); el('line', { x1:m.l, x2:W - m.r, y1:yd(v), y2:yd(v), stroke:'var(--line)' }, svg); }
+  txt(svg, W - m.r - 4, top0 + 10, 'المدخلات (مم)', { 'text-anchor':'end', 'font-size':11, fill:'var(--muted)', 'font-family':'var(--f-body)' });
+  txt(svg, m.l + 6, dep1 - 8, 'الاستنزاف من السعة الحقلية (مم)', { 'font-size':11, fill:'var(--muted)', 'font-family':'var(--f-body)' });
+  const bw = Math.max(1.5, (W - m.l - m.r) / NDAYS - 0.6);
+  OUT.days.forEach(d => {
+    const i = SEASON.indexOf(d.Date); if (i < 0) return;
+    const pe = d.P - d.RO;
+    if (pe > 0.2) el('rect', { x:X(i) - bw / 2, y:yi(pe), width:bw, height:top1 - yi(pe), rx:1, fill:'var(--rain)', opacity:d.Kind === 'forecast' ? .5 : 1 }, svg);
+    if (d.Inet > 0) el('rect', { x:X(i) - bw / 2 - .5, y:yi(d.Inet), width:bw + 1, height:top1 - yi(d.Inet), rx:1, fill:'var(--irr)' }, svg);
+  });
+  const days = OUT.days.filter(d => SEASON.includes(d.Date));
+  const P = f => days.map(d => [X(SEASON.indexOf(d.Date)), yd(f(d))]);
+  el('path', { d:pathOf(P(d => d.TAW)), fill:'none', stroke:'var(--muted)', 'stroke-width':1.5, 'stroke-dasharray':'5 4' }, svg);
+  el('path', { d:pathOf(P(d => d.Trigger)), fill:'none', stroke:'var(--warn)', 'stroke-width':2, 'stroke-dasharray':'6 4' }, svg);
+  const obs = days.filter(d => d.Kind !== 'forecast'), fc = days.filter(d => d.Kind === 'forecast');
+  const dr = obs.map(d => [X(SEASON.indexOf(d.Date)), yd(d.Dr)]);
+  if (dr.length) el('path', { d:pathOf([[dr[0][0], dep0], ...dr, [dr[dr.length - 1][0], dep0]]) + 'Z', fill:'var(--dep)', opacity:.12 }, svg);
+  el('path', { d:pathOf(dr), fill:'none', stroke:'var(--dep)', 'stroke-width':2, 'stroke-linejoin':'round' }, svg);
+  if (fc.length && obs.length) el('path', { d:pathOf([dr[dr.length - 1], ...fc.map(d => [X(SEASON.indexOf(d.Date)), yd(d.Dr)])]), fill:'none', stroke:'var(--dep)', 'stroke-width':2, 'stroke-dasharray':'3 3' }, svg);
+  const lastO = obs[obs.length - 1];
+  if (lastO) { el('circle', { cx:X(iD), cy:yd(lastO.Dr), r:4.5, fill:'var(--dep)', stroke:'var(--surface)', 'stroke-width':2 }, svg); }
+  cursor(svg, X, iD, m.t, H - m.b);
+  hover(svg, W, X, m, H, i => { const d = dayAt(i); if (!d) return null; return { fc:d.Kind === 'forecast', lines:[['المطر الفعّال', f1(d.P - d.RO) + ' مم'], ['الري الصافي', f1(d.Inet) + ' مم'], ['الاستنزاف Dr', f1(d.Dr) + ' مم'], ['عتبة الري', f1(d.Trigger) + ' مم'], ['TAW', f0(d.TAW) + ' مم'], ['Ks', (+d.Ks).toFixed(2)]] }; });
+}
+
+// ---------- GDD chart (y = °C·day), observed to D, projection faint
+function renderGDD() {
+  const svg = $('gddChart'), W = 460, H = 330, m = { l:46, r:10, t:10, b:24 };
+  const { X, iD } = frame(svg, W, H, m);
+  const g = crop.gdd, maxG = 2800, y = v => H - m.b - v / maxG * (H - m.t - m.b);
+  const ax = el('g', { class:'axis' }, svg);
+  for (let v = 0; v <= maxG; v += 700) { txt(ax, m.l - 6, y(v) + 4, v, { 'text-anchor':'end' }); }
+  [['iniEnd', 'نهاية الطور الأولي'], ['devEnd', 'التغطية الكاملة'], ['midEnd', 'بداية النضج'], ['lateEnd', 'الحصاد']].forEach(([k, n]) => {
+    el('line', { x1:m.l, x2:W - m.r, y1:y(g[k]), y2:y(g[k]), stroke:'var(--muted)', 'stroke-dasharray':'3 4' }, svg);
+    txt(svg, m.l + 4, y(g[k]) - 4, `${n} · ${g[k]}`, { 'font-size':10.5, fill:'var(--ink2)', 'font-family':'var(--f-body)' });
+  });
+  const pts = FULL.days.map((d, i) => [X(i), y(d.GDD)]);
+  el('path', { d:pathOf(pts), fill:'none', stroke:'var(--wheat)', 'stroke-width':1.5, 'stroke-dasharray':'2 4', opacity:.7 }, svg);
+  const obs = OUT.days.filter(d => d.Kind !== 'forecast').map(d => [X(SEASON.indexOf(d.Date)), y(d.GDD)]);
+  el('path', { d:pathOf(obs) , fill:'none', stroke:'var(--wheat)', 'stroke-width':2.5, 'stroke-linecap':'round' }, svg);
+  const lo = obs[obs.length - 1]; if (lo) el('circle', { cx:lo[0], cy:lo[1], r:5, fill:'var(--wheat)', stroke:'var(--surface)', 'stroke-width':2 }, svg);
+  cursor(svg, X, iD, m.t, H - m.b);
+  const lastO = OUT.days.filter(d => d.Kind !== 'forecast').pop();
+  const left = g.lateEnd - lastO.GDD;
+  $('gddNote').innerHTML = lastO.Stage >= 4 ? `اكتمل التراكم الحراري، وحُصد الحقل في ${dTxt(HARVEST)}.` :
+    `المتبقي حتى الحصاد ${N(f0(left))} °م·يوم. الإسقاط بمناخ الموسم (الخط المنقط) يضع الحصاد قرب ${dTxt(HARVEST)}.`;
+  hover(svg, W, X, m, H, i => { const d = FULL.days[i]; return d ? { fc:i > iD, lines:[['GDD', f0(d.GDD)], ['الطور', STAGES[d.Stage]], ['Tmin / Tmax', `${f1(WX.find(w => w.date === d.Date)?.tmin)} / ${f1(WX.find(w => w.date === d.Date)?.tmax)} °م`]] } : null; });
+}
+
+// ---------- ET chart
+function renderET() {
+  const svg = $('etChart'), W = 760, H = 220, m = { l:44, r:12, t:10, b:24 };
+  const { X, iD } = frame(svg, W, H, m);
+  const maxE = 10, y = v => H - m.b - Math.min(maxE, v) / maxE * (H - m.t - m.b);
+  const ax = el('g', { class:'axis' }, svg);
+  [0, 2, 4, 6, 8, 10].forEach(v => { txt(ax, m.l - 6, y(v) + 4, v, { 'text-anchor':'end' }); el('line', { x1:m.l, x2:W - m.r, y1:y(v), y2:y(v), stroke:'var(--line)' }, svg); });
+  txt(ax, m.l - 6, m.t - 0, 'مم/يوم', { 'text-anchor':'end' });
+  const bw = Math.max(1.2, (W - m.l - m.r) / NDAYS - 0.8);
+  OUT.days.forEach(d => { const i = SEASON.indexOf(d.Date); if (i >= 0 && d.ET0 > 0) el('rect', { x:X(i) - bw / 2, y:y(d.ET0), width:bw, height:H - m.b - y(d.ET0), fill:'var(--muted)', opacity:d.Kind === 'forecast' ? .25 : .45 }, svg); });
+  const pts = OUT.days.filter(d => SEASON.includes(d.Date)).map(d => [X(SEASON.indexOf(d.Date)), y(d.ETcAdj)]);
+  el('path', { d:pathOf(pts), fill:'none', stroke:'var(--ink)', 'stroke-width':2, 'stroke-linejoin':'round' }, svg);
+  cursor(svg, X, iD, m.t, H - m.b);
+  hover(svg, W, X, m, H, i => { const d = dayAt(i); if (!d) return null; return { fc:d.Kind === 'forecast', lines:[['ET₀', f1(d.ET0) + ' مم'], ['Kc', (+d.Kc).toFixed(2)], ['ETc,adj', f1(d.ETcAdj) + ' مم']] }; });
+}
+
+// ---------- Kc chart (whole season curve, observed part bold)
+function renderKc() {
+  const svg = $('kcChart'), W = 460, H = 220, m = { l:40, r:10, t:10, b:24 };
+  const { X, iD } = frame(svg, W, H, m);
+  const y = v => H - m.b - v / 1.4 * (H - m.t - m.b);
+  const ax = el('g', { class:'axis' }, svg);
+  [0, 0.35, 0.7, 1.05, 1.4].forEach(v => { txt(ax, m.l - 6, y(v) + 4, v.toFixed(2), { 'text-anchor':'end' }); el('line', { x1:m.l, x2:W - m.r, y1:y(v), y2:y(v), stroke:'var(--line)' }, svg); });
+  el('path', { d:pathOf(FULL.days.map((d, i) => [X(i), y(d.Kc)])), fill:'none', stroke:'var(--accent)', 'stroke-width':1.5, 'stroke-dasharray':'2 4' }, svg);
+  el('path', { d:pathOf(OUT.days.filter(d => d.Kind !== 'forecast').map(d => [X(SEASON.indexOf(d.Date)), y(d.Kc)])), fill:'none', stroke:'var(--accent)', 'stroke-width':2.5 }, svg);
+  txt(svg, W - m.r - 4, y(OUT.kcMidAdj || crop.kcMid) - 6, `Kc mid معدّل = ${(+(OUT.kcMidAdj || crop.kcMid)).toFixed(2)}`, { 'font-size':10.5, fill:'var(--ink2)', 'text-anchor':'end', 'font-family':'var(--f-body)' });
+  cursor(svg, X, iD, m.t, H - m.b);
+  hover(svg, W, X, m, H, i => { const d = FULL.days[i]; return d ? { fc:i > iD, lines:[['Kc', (+d.Kc).toFixed(2)], ['Zr', d.Zr.toFixed(2) + ' م'], ['الطور', STAGES[d.Stage]]] } : null; });
+}
+
+// ---------- comparison (season to date, both runs by the same engine)
+function sumTo(days, f) { return days.filter(d => d.Date <= D && d.Kind !== 'forecast').reduce((a, d) => a + (f(d) || 0), 0); }
+function renderCmp() {
+  const P = OUT.days, T = TRADF.days, A = FIELD.areaDunum;
+  const p = { g:sumTo(P, d => d.Igross), dp:sumTo(P, d => d.DP), st:sumTo(P, d => d.Ks < 1 ? 1 : 0), et:sumTo(P, d => d.ETcAdj), n:sumTo(P, d => d.Inet > 0 ? 1 : 0) };
+  const t = { g:sumTo(T, d => d.Igross), dp:sumTo(T, d => d.DP), st:sumTo(T, d => d.Ks < 1 ? 1 : 0), et:sumTo(T, d => d.ETcAdj), n:sumTo(T, d => d.Igross > 0 ? 1 : 0) };
+  const save = (t.g - p.g) * A;
+  $('saving').innerHTML = `${N(f0(Math.max(0, save)))} م³`;
+  $('cmpScope').textContent = `من الزراعة حتى ${dTxt(D)}`;
+  $('cmpText').innerHTML = save > 0
+    ? `استهلك المحصول في الحالتين كمية متقاربة (${N(f0(p.et))} مقابل ${N(f0(t.et))} مم)، فالماء الإضافي في الجدول التقليدي لم يذهب إلى النبات: ${N(f0(t.dp))} مم منه رشحت تحت منطقة الجذور.`
+    : 'لم يبدأ الجدول التقليدي رياته الربيعية بعد؛ تظهر الفروق مع بداية آذار.';
+  const rows = [['الري الإجمالي', 'مم', p.g, t.g], ['عدد الريات', '', p.n, t.n], ['الرشح العميق (فاقد)', 'مم', p.dp, t.dp], ['أيام الإجهاد المائي', 'يوم', p.st, t.st]];
+  $('cmpRows').innerHTML = rows.map(([n, u, a, b]) => { const mx = Math.max(a, b, 1);
+    return `<div class="cmp-row"><div class="lbl"><span>${n}</span><span>${u}</span></div><div class="track">
+      <div class="hb p" style="width:${Math.max(4, a / mx * 100)}%">${f0(a)}</div><div class="hb t" style="width:${Math.max(4, b / mx * 100)}%">${f0(b)}</div></div></div>`; }).join('');
+}
+
+// ---------- map
+function renderMap() {
+  const svg = $('map'), W = 420, H = 380, pad = 14;
+  const all = SYRIA_OUTLINE.flat ? SYRIA_OUTLINE.flat(1) : [];
+  const lons = all.map(p => p[0]), lats = all.map(p => p[1]);
+  const lo0 = Math.min(...lons), lo1 = Math.max(...lons), la0 = Math.min(...lats), la1 = Math.max(...lats), k = Math.cos(35 * Math.PI / 180);
+  const sc = Math.min((W - 2 * pad) / ((lo1 - lo0) * k), (H - 2 * pad) / (la1 - la0));
+  const P = ([lo, la]) => [pad + (lo - lo0) * k * sc, H - pad - (la - la0) * sc];
+  const ring = r => r.map((p, j) => (j ? 'L' : 'M') + P(p).map(v => v.toFixed(1)).join(' ')).join('') + 'Z';
+  svg.innerHTML = '';
+  for (const [key, g] of Object.entries(SYRIA_GOV)) el('path', { d:g.rings.map(ring).join(''), fill:key === 'hama' ? 'var(--accent-soft)' : 'var(--sunk)', stroke:'var(--line)', 'stroke-width':1 }, svg);
+  el('path', { d:SYRIA_OUTLINE.map(ring).join(''), fill:'none', stroke:'var(--ink2)', 'stroke-width':1.4 }, svg);
+  const c = P([DEMO_WX.cell[1], DEMO_WX.cell[0]]), f = P([FIELD.lon, FIELD.lat]);
+  const half = [0.3125 * k * sc, 0.25 * sc];
+  el('rect', { x:c[0] - half[0], y:c[1] - half[1], width:2 * half[0], height:2 * half[1], fill:'var(--rain)', opacity:.18, stroke:'var(--rain)', 'stroke-dasharray':'3 2' }, svg);
+  el('circle', { cx:f[0], cy:f[1], r:11, fill:'var(--irr)', opacity:.25 }, svg);
+  el('circle', { cx:f[0], cy:f[1], r:5.5, fill:'var(--irr)', stroke:'var(--surface)', 'stroke-width':2 }, svg);
+  txt(svg, f[0] + 12, f[1] - 10, 'حقل العرض — سلمية', { 'font-size':13, fill:'var(--ink)', 'font-weight':700, 'font-family':'var(--f-body)' });
+  txt(svg, f[0] + 12, f[1] + 6, 'المربع: خلية ناسا', { 'font-size':11, fill:'var(--ink2)', 'font-family':'var(--f-body)' });
+}
+
+// ---------- live engine checks (shown, not asserted silently)
+(function checks() {
+  const ex = E.Fao56.et0FromRecord({ Tmin_C:12.3, Tmax_C:21.5, RHmin_pct:63, RHmax_pct:84, WindSpeed_m_s:2.078, WindHeight_m:2, SolarRadiation_MJ_m2_day:22.07 }, { Latitude:50.8, Elevation_m:100, WindHeight_m:2 }, new Date('2026-07-06T00:00:00'));
+  const items = [`مثال FAO-56 رقم 18: ET₀ = ${ex.et0.toFixed(2)} مم (المرجع 3.9)`, `إغلاق الكتلة للموسم: ${f1(FULL.summary.MassClosureMm)} مم`, `${WX.length} يوماً من NASA POWER`, `ET₀ الموسمي ${f0(WX.filter(w => w.date >= FIELD.sow && w.date <= HARVEST).reduce((a, w) => a + w.et0, 0))} مم`];
+  $('checks').innerHTML = items.map(s => `<span>${s}</span>`).join('');
+})();
+
+function render() {
+  OUT = sim(D, SCHED);
+  $('todayTxt').textContent = `${wd(D)} ${dTxt(D)}`;
+  drawTimeline(); renderAlert(); renderSoil(); renderKpis(); renderWB(); renderGDD(); renderET(); renderKc(); renderCmp();
+}
+renderMap(); render();
+})();
+</script>

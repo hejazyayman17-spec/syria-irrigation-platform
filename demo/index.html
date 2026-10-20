@@ -1,0 +1,1077 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+</head>
+<body>
+<title>حقل العرض «السنبلة ٧»</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Reem+Kufi:wght@500;700&display=swap">
+<style>
+/* Layout: a field "control room" — passport + season scrubber on top, the live decision (alert + soil column) as the centre,
+   then the evidence (charts), the comparison and the provenance strip. Time runs left→right in every chart. */
+:root{
+  --bg:#EEF2EC; --surface:#FFFFFF; --sunk:#F5F8F3; --ink:#15261E; --ink2:#43564C; --muted:#75867D; --line:#D6E0D8;
+  --accent:#145C4A; --accent-soft:#DCEBE4;
+  --rain:#2F6FB3; --irr:#2E8B57; --dep:#C0571B; --wheat:#B7791F;
+  --ok:#2E7D4F; --ok-bg:#E3F2E8; --warn:#9A5B00; --warn-bg:#FBEFD9; --crit:#B42318; --crit-bg:#FBE4E1;
+  --soil1:#D9C9AC; --soil2:#C2A881; --soil3:#A68B66; --sky:#E7EFF4;
+  --st0:#E4EFE8; --st1:#C9E0D2; --st2:#9DC7AE; --st3:#E9D6A8; --st4:#E6E6E1;
+  --f-display:"Reem Kufi","IBM Plex Sans Arabic",Tahoma,"Segoe UI",sans-serif;
+  --f-body:"IBM Plex Sans Arabic",Tahoma,"Segoe UI",Arial,sans-serif;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0F1713; --surface:#16211B; --sunk:#1B2821; --ink:#E5EEE8; --ink2:#B4C4BB; --muted:#8A9B92; --line:#2A3A31;
+  --accent:#62C49D; --accent-soft:#1E3A2F;
+  --rain:#5B8FDB; --irr:#3A9E66; --dep:#D9773A; --wheat:#D3A04A;
+  --ok:#5CC98A; --ok-bg:#16301F; --warn:#E8AE4A; --warn-bg:#33270F; --crit:#F27B6C; --crit-bg:#3A1714;
+  --soil1:#4E4232; --soil2:#433829; --soil3:#382E21; --sky:#17242A;
+  --st0:#1B2E25; --st1:#22402F; --st2:#2C5540; --st3:#4A3E1F; --st4:#2A2D2A; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F1713; --surface:#16211B; --sunk:#1B2821; --ink:#E5EEE8; --ink2:#B4C4BB; --muted:#8A9B92; --line:#2A3A31;
+  --accent:#62C49D; --accent-soft:#1E3A2F;
+  --rain:#5B8FDB; --irr:#3A9E66; --dep:#D9773A; --wheat:#D3A04A;
+  --ok:#5CC98A; --ok-bg:#16301F; --warn:#E8AE4A; --warn-bg:#33270F; --crit:#F27B6C; --crit-bg:#3A1714;
+  --soil1:#4E4232; --soil2:#433829; --soil3:#382E21; --sky:#17242A;
+  --st0:#1B2E25; --st1:#22402F; --st2:#2C5540; --st3:#4A3E1F; --st4:#2A2D2A; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.6;direction:rtl;margin:0}
+.wrap{max-width:1240px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:18px 40px;display:grid;gap:18px}
+.num{font-variant-numeric:tabular-nums;direction:ltr;unicode-bidi:isolate}
+h1,h2,h3{margin:0;text-wrap:balance}
+h2{font-family:var(--f-display);font-weight:500;font-size:19px;color:var(--ink)}
+.eyebrow{font-size:12px;letter-spacing:.04em;color:var(--muted);font-weight:600}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px;min-width:0}
+.panel-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.panel-head p{margin:0;color:var(--muted);font-size:13px}
+
+/* demo ribbon */
+.ribbon{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:space-between;background:repeating-linear-gradient(135deg,var(--warn-bg) 0 14px,var(--surface) 14px 28px);border:1px dashed var(--warn);border-radius:var(--r);padding:8px 14px;font-size:13px;color:var(--ink)}
+.ribbon b{color:var(--warn)}
+
+/* header */
+.head{display:grid;grid-template-columns:1fr auto;gap:18px;align-items:end}
+.brand{display:flex;gap:14px;align-items:center}
+.mark{width:52px;height:52px;flex:none}
+.head h1{font-family:var(--f-display);font-weight:700;font-size:clamp(24px,3.4vw,34px);line-height:1.25}
+.head .sub{color:var(--ink2);font-size:14px}
+.today{text-align:left;direction:rtl}
+.today .eyebrow{display:block}
+.today .d{font-family:var(--f-display);font-size:22px;font-weight:500}
+
+/* passport */
+.passport{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:0;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);overflow:hidden}
+.passport div{padding:10px 14px;border-inline-start:1px solid var(--line);min-width:0}
+.passport div:first-child{border-inline-start:0}
+.passport dt{font-size:12px;color:var(--muted)}
+.passport dd{margin:0;font-weight:600;font-size:14px}
+
+/* scrubber */
+.scrub{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 16px 10px;box-shadow:0 6px 18px -14px rgba(0,0,0,.45)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.scrub-top{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:space-between}
+.controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+button{font-family:var(--f-body);font-size:13px;cursor:pointer;border-radius:999px;border:1px solid var(--line);background:var(--sunk);color:var(--ink);padding:5px 12px}
+button:hover{border-color:var(--accent)}
+button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--surface);font-weight:600;padding:6px 16px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chips button{font-size:12px;padding:3px 10px}
+.tl{width:100%;height:auto;display:block;margin-top:8px;direction:ltr;touch-action:none;cursor:pointer}
+#dayRange{width:100%;margin:4px 0 0;accent-color:var(--accent);direction:ltr}
+
+/* main decision row */
+.decide{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:18px}
+.alert{border-radius:var(--r);padding:18px;border:1px solid var(--line);background:var(--surface);display:grid;gap:14px;align-content:start}
+.alert .state{display:flex;gap:14px;align-items:center}
+.alert .icon{width:54px;height:54px;border-radius:50%;display:grid;place-items:center;flex:none}
+.alert .icon svg{width:30px;height:30px}
+.alert .say{font-family:var(--f-display);font-size:clamp(22px,2.6vw,30px);font-weight:700;line-height:1.3}
+.alert .why{color:var(--ink2);font-size:14px}
+.lv-now .icon{background:var(--crit-bg);color:var(--crit)} .lv-now .say{color:var(--crit)}
+.lv-soon .icon{background:var(--warn-bg);color:var(--warn)} .lv-soon .say{color:var(--warn)}
+.lv-ok .icon{background:var(--ok-bg);color:var(--ok)} .lv-ok .say{color:var(--ok)}
+.lv-harvested .icon{background:var(--sunk);color:var(--muted)}
+.pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:2px 10px;font-size:12px;font-weight:600}
+.lv-now .pill.lv{background:var(--crit-bg);color:var(--crit)} .lv-soon .pill.lv{background:var(--warn-bg);color:var(--warn)}
+.lv-ok .pill.lv{background:var(--ok-bg);color:var(--ok)} .lv-harvested .pill.lv{background:var(--sunk);color:var(--muted)}
+.facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.facts div{background:var(--sunk);border-radius:8px;padding:8px 10px;min-width:0}
+.facts dt{font-size:11.5px;color:var(--muted)} .facts dd{margin:0;font-weight:700;font-size:17px}
+.week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.day{border:1px solid var(--line);border-radius:8px;padding:6px 4px;text-align:center;font-size:12px;display:grid;gap:2px;min-width:0;position:relative}
+.day .wd{font-weight:600;color:var(--ink2)}
+.day .dm{color:var(--muted);font-size:11px}
+.day .et{font-weight:600}
+.day .rn{color:var(--rain);font-size:11.5px;min-height:18px}
+.day .rn.off{color:var(--muted)}
+.day .bar{height:6px;border-radius:3px;background:var(--sunk);overflow:hidden;direction:ltr}
+.day .bar i{display:block;height:100%;background:var(--dep)}
+.day.need{border-color:var(--warn)}
+.day.irr{border-color:var(--irr);background:var(--ok-bg)}
+.day .tag{font-size:10.5px;font-weight:700;color:var(--irr);min-height:16px}
+.note{font-size:12px;color:var(--muted)}
+
+/* soil column */
+.column{display:grid;grid-template-columns:minmax(0,1fr);gap:8px}
+.column svg{width:100%;height:auto;display:block;direction:ltr}
+
+/* KPIs */
+.kpis{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;min-width:0}
+.kpi dt{font-size:12.5px;color:var(--muted)}
+.kpi dd{margin:2px 0 0;font-family:var(--f-display);font-size:26px;font-weight:500;line-height:1.2}
+.kpi dd small{font-family:var(--f-body);font-size:12px;color:var(--muted);font-weight:500;margin-inline-start:4px}
+.kpi .sub{font-size:12px;color:var(--ink2)}
+
+/* charts */
+.charts{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:18px}
+.chart svg{width:100%;height:auto;display:block;direction:ltr;overflow:visible}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--ink2)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{display:inline-block;width:14px;height:4px;border-radius:2px}
+.legend i.dash{background:repeating-linear-gradient(90deg,currentColor 0 4px,transparent 4px 7px);height:2px}
+.axis text{fill:var(--muted);font-size:11px;font-family:var(--f-body)}
+.grid line{stroke:var(--line);stroke-width:1}
+.tip{position:fixed;z-index:20;pointer-events:none;background:var(--ink);color:var(--surface);border-radius:8px;padding:8px 10px;font-size:12.5px;line-height:1.5;min-width:150px;box-shadow:0 8px 20px -10px rgba(0,0,0,.5)}
+.tip b{display:block;font-size:13px;margin-bottom:2px}
+.tip .r{display:flex;justify-content:space-between;gap:14px}
+
+/* comparison */
+.cmp{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:22px;align-items:center}
+.cmp-rows{display:grid;gap:14px}
+.cmp-row .lbl{display:flex;justify-content:space-between;font-size:13px;color:var(--ink2);margin-bottom:4px}
+.cmp-row .track{display:grid;gap:4px}
+.hb{height:22px;border-radius:0 4px 4px 0;display:flex;align-items:center;padding:0 8px;font-size:12px;font-weight:600;color:var(--surface);white-space:nowrap;direction:ltr;min-width:max-content;max-width:100%}
+.hb.p{background:var(--irr)} .hb.t{background:var(--muted)}
+.saving{font-family:var(--f-display);font-size:clamp(30px,4vw,44px);font-weight:700;color:var(--irr);line-height:1.15}
+.cmp p{margin:6px 0 0;color:var(--ink2);font-size:14px}
+.key{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--ink2)}
+.key i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-inline-end:6px;vertical-align:-1px}
+
+/* bottom row */
+.bottom{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:18px}
+.map svg{width:100%;height:auto;display:block;direction:ltr}
+.prov{display:grid;gap:8px;font-size:13.5px;color:var(--ink2)}
+.prov ul{margin:0;padding-inline-start:18px;display:grid;gap:4px}
+.check{display:flex;flex-wrap:wrap;gap:8px}
+.check span{background:var(--ok-bg);color:var(--ok);border-radius:999px;padding:3px 10px;font-size:12px;font-weight:600}
+footer{text-align:center;color:var(--muted);font-size:12.5px}
+
+@media (max-width:980px){
+  .decide,.charts,.cmp,.bottom{grid-template-columns:minmax(0,1fr)}
+  .kpis{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .passport{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .passport div:nth-child(4){border-inline-start:0}
+  .passport div:nth-child(n+4){border-top:1px solid var(--line)}
+}
+@media (max-width:560px){
+  .head{grid-template-columns:1fr}.today{text-align:right}
+  .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .passport{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .passport div{border-inline-start:0;border-top:1px solid var(--line)}
+  .facts{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .week{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .chips{display:none}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+  <div class="ribbon" role="note"><span><b>نسخة عرض</b> — الحقل افتراضي، والطقس حقيقي من أرشيف NASA POWER لموسم 2025/26، والحسابات كلها من محرك المنصة.</span><span class="num">Prototype v0.8 · demo</span></div>
+
+  <header class="head">
+    <div class="brand">
+      <svg class="mark" viewBox="0 0 52 52" aria-hidden="true"><rect width="52" height="52" rx="12" fill="var(--accent)"/><path d="M26 10c-6 9-10 14-10 20a10 10 0 0 0 20 0c0-6-4-11-10-20z" fill="var(--surface)"/><path d="M26 22v18M26 30l-5-4M26 35l5-4" stroke="var(--accent)" stroke-width="2.2" stroke-linecap="round" fill="none"/></svg>
+      <div>
+        <h1>المنصة السورية لإدارة وجدولة الري</h1>
+        <div class="sub">حقل العرض «السنبلة ٧» — قمح شتوي بالري بالرذاذ، سلمية</div>
+      </div>
+    </div>
+    <div class="today"><span class="eyebrow">تاريخ العرض</span><span class="d" id="todayTxt">—</span></div>
+  </header>
+
+  <dl class="passport" id="passport"></dl>
+
+  <section class="scrub" aria-label="الموسم الزراعي">
+    <div class="scrub-top">
+      <div class="controls">
+        <button class="primary" id="playBtn" type="button">▶ تشغيل الموسم</button>
+        <button id="stepBack" type="button" aria-label="أسبوع للخلف">− أسبوع</button>
+        <button id="stepFwd" type="button" aria-label="أسبوع للأمام">+ أسبوع</button>
+      </div>
+      <div class="chips" id="chips"></div>
+    </div>
+    <svg class="tl" id="tl" viewBox="0 0 1000 74" role="img" aria-label="شريط الموسم: الأطوار والمطر والريات"></svg>
+    <input type="range" id="dayRange" min="0" max="1" value="0" aria-label="تاريخ العرض">
+  </section>
+
+  <section class="decide">
+    <div class="alert" id="alert" aria-live="polite"></div>
+    <div class="panel column">
+      <div class="panel-head"><h2>مقطع التربة الآن</h2><p id="colNote">عمق الجذور والماء المتاح فيها</p></div>
+      <svg id="soil" viewBox="0 0 340 430" role="img" aria-label="مقطع التربة ومخزون الماء"></svg>
+    </div>
+  </section>
+
+  <dl class="kpis" id="kpis"></dl>
+
+  <section class="charts">
+    <div class="panel chart">
+      <div class="panel-head"><h2>الموازنة المائية في منطقة الجذور</h2>
+        <div class="legend"><span><i style="background:var(--rain)"></i>مطر فعّال</span><span><i style="background:var(--irr)"></i>ري صافٍ</span><span><i style="background:var(--dep)"></i>الاستنزاف Dr</span><span style="color:var(--warn)"><i class="dash"></i>عتبة الري RAW</span><span style="color:var(--muted)"><i class="dash"></i>الماء المتاح الكلي TAW</span></div></div>
+      <svg id="wbChart" viewBox="0 0 760 330" role="img" aria-label="مخطط الموازنة المائية"></svg>
+      <div class="note">الاستنزاف يُرسم نحو الأسفل: الصفر هو السعة الحقلية، وخط TAW هو نقطة الذبول. المنطقة المظللة يمين المؤشر هي أيام التوقع السبعة.</div>
+    </div>
+    <div class="panel chart">
+      <div class="panel-head"><h2>التراكم الحراري والأطوار</h2><p>GDD، الحرارة الأساس 0 °م</p></div>
+      <svg id="gddChart" viewBox="0 0 460 330" role="img" aria-label="منحنى التراكم الحراري"></svg>
+      <div class="note" id="gddNote"></div>
+    </div>
+  </section>
+
+  <section class="charts">
+    <div class="panel chart">
+      <div class="panel-head"><h2>الطلب المائي اليومي</h2>
+        <div class="legend"><span><i style="background:var(--muted);height:8px"></i>ET₀ المرجعي</span><span><i style="background:var(--ink)"></i>ETc,adj للمحصول</span></div></div>
+      <svg id="etChart" viewBox="0 0 760 220" role="img" aria-label="مخطط التبخر-نتح"></svg>
+    </div>
+    <div class="panel chart">
+      <div class="panel-head"><h2>معامل المحصول Kc</h2><p>منحنى FAO-56 على الزمن الحراري</p></div>
+      <svg id="kcChart" viewBox="0 0 460 220" role="img" aria-label="منحنى معامل المحصول"></svg>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head"><h2>ماذا تغيّر الجدولة؟</h2><p id="cmpScope">حتى تاريخ العرض</p></div>
+    <div class="cmp">
+      <div>
+        <div class="eyebrow">الماء الموفَّر في الحقل (25 دونماً)</div>
+        <div class="saving" id="saving">—</div>
+        <p id="cmpText"></p>
+        <div class="key" style="margin-top:10px"><span><i style="background:var(--irr)"></i>جدولة المنصة</span><span><i style="background:var(--muted)"></i>جدول تقليدي افتراضي</span></div>
+      </div>
+      <div class="cmp-rows" id="cmpRows"></div>
+    </div>
+  </section>
+
+  <section class="bottom">
+    <div class="panel map">
+      <div class="panel-head"><h2>موقع الحقل</h2><p>خلية ناسا <span class="num" id="cellTxt"></span></p></div>
+      <svg id="map" viewBox="0 0 420 380" role="img" aria-label="خريطة سورية وموقع الحقل"></svg>
+    </div>
+    <div class="panel prov">
+      <div class="panel-head"><h2>من أين تأتي هذه الأرقام؟</h2></div>
+      <div class="check" id="checks"></div>
+      <ul>
+        <li><b>المحرك:</b> ملفات المحرك العلمي للمنصة نفسها، مضمّنة كما هي: ET₀ بمعادلة FAO-56 Penman–Monteith، والموازنة اليومية (Eq. 85) مع Ks (Eq. 84)، والجريان بطريقة SCS-CN، والأطوار بالزمن الحراري.</li>
+        <li><b>الطقس:</b> سلسلة يومية حقيقية من NASA POWER (مجتمع AG) لخلية سلمية، من 1 تشرين الثاني 2025 حتى 30 حزيران 2026، و ET₀ يُحسب منها داخل الصفحة.</li>
+        <li><b>الحقل:</b> افتراضي بالكامل: الاسم والمساحة والتربة (لومية سلتية، θFC 0.29 و θWP 0.15) ونظام الري (رذاذ، Ea 0.75، حد الرية 45 مم).</li>
+        <li><b>التوقع:</b> في هذه النسخة تُؤخذ الأيام السبعة التالية لتاريخ العرض من الأرشيف نفسه وتُعامل كتوقع، ويُحتسب المطر فيها إذا كان احتماله 60% فأكثر. في المنصة الحية يأتي التوقع من Open-Meteo.</li>
+        <li><b>الجدول التقليدي:</b> افتراضي للمقارنة: رية زراعة، ثم 60 مم إجمالي كل 10–12 يوماً من آذار إلى منتصف أيار.</li>
+      </ul>
+    </div>
+  </section>
+
+  <footer>الهيئة العامة للبحوث العلمية الزراعية — إدارة بحوث الموارد الطبيعية · نسخة عرض لا تُستخدم لاتخاذ قرارات ري فعلية</footer>
+</div>
+<div class="tip" id="tip" hidden></div>
+
+<script>
+/* GCSAR.Fao56 — FAO-56 reference evapotranspiration and climate helpers.
+ * Pure functions, no DOM. Mirrors the future C# class  GCSAR.Irrigation.Core.Fao56.
+ * Equation numbers: Allen et al. (1998), FAO Irrigation and Drainage Paper 56.
+ * Validated: FAO-56 Example 18 (Uccle, 6 July) → ET0 = 3.88 mm/day (published 3.9).
+ */
+(function (root) {
+  'use strict';
+  const G = root.GCSAR = root.GCSAR || {};
+
+  const num = v => (v === null || v === undefined || v === '' ? null : (Number.isFinite(+v) ? +v : null));
+
+  /** Saturation vapour pressure e°(T) [kPa] — Eq. 11 */
+  const e0 = T => 0.6108 * Math.exp(17.27 * T / (T + 237.3));
+
+  /** Wind speed at 2 m from height z [m] — Eq. 47 (log profile, short grass) */
+  function wind2m(u, z) {
+    if (!Number.isFinite(u)) return null;
+    if (!Number.isFinite(z) || z <= 0 || Math.abs(z - 2) < 0.01) return u;
+    return u * 4.87 / Math.log(67.8 * z - 5.42);
+  }
+
+  /** Day of year 1..366 (local calendar date) */
+  function doy(d) { return Math.floor((d - new Date(d.getFullYear(), 0, 0)) / 86400000); }
+
+  /** Daily FAO-56 Penman–Monteith ET0 [mm/day] — Eq. 6, G = 0 (Eq. 42).
+   * rec: Tmin_C, Tmax_C, WindSpeed_m_s, WindHeight_m, SolarRadiation_MJ_m2_day,
+   *      RHmin_pct+RHmax_pct | DewPoint_C | RHmean_pct  (priority in that order)
+   * meta: Latitude, Elevation_m, WindHeight_m;  date: JS Date */
+  function et0FromRecord(rec, meta, date) {
+    const Tmin = num(rec.Tmin_C), Tmax = num(rec.Tmax_C), u = num(rec.WindSpeed_m_s),
+      zh = num(rec.WindHeight_m) || num(meta.WindHeight_m) || 2, Rs = num(rec.SolarRadiation_MJ_m2_day),
+      z = num(meta.Elevation_m), lat = num(meta.Latitude), d = date;
+    if ([Tmin, Tmax, u, Rs, z, lat].some(v => v === null) || !d) return { et0: null, reason: 'نقص بيانات أساسية' };
+    const T = (Tmin + Tmax) / 2, es = (e0(Tmax) + e0(Tmin)) / 2;                 // Eq. 9, 12
+    let ea = null, humMethod = '';
+    const rhmin = num(rec.RHmin_pct), rhmax = num(rec.RHmax_pct), rhmean = num(rec.RHmean_pct), td = num(rec.DewPoint_C);
+    if (rhmin !== null && rhmax !== null) { ea = (e0(Tmin) * rhmax / 100 + e0(Tmax) * rhmin / 100) / 2; humMethod = 'RHmin/RHmax'; } // Eq. 17
+    else if (td !== null) { ea = e0(td); humMethod = 'Tdew'; }                                                                 // Eq. 14
+    else if (rhmean !== null) { ea = es * rhmean / 100; humMethod = 'RHmean approx'; }                                         // Eq. 19
+    else return { et0: null, reason: 'الرطوبة غير كافية' };
+    const delta = 4098 * e0(T) / Math.pow(T + 237.3, 2);                          // Eq. 13
+    const P = 101.3 * Math.pow((293 - 0.0065 * z) / 293, 5.26), gamma = 0.000665 * P; // Eq. 7, 8
+    const J = doy(d), phi = lat * Math.PI / 180;
+    const dr = 1 + 0.033 * Math.cos(2 * Math.PI * J / 365);                       // Eq. 23
+    const sd = 0.409 * Math.sin(2 * Math.PI * J / 365 - 1.39);                    // Eq. 24
+    const ws = Math.acos(Math.max(-1, Math.min(1, -Math.tan(phi) * Math.tan(sd)))); // Eq. 25
+    const Ra = (24 * 60 / Math.PI) * 0.0820 * dr * (ws * Math.sin(phi) * Math.sin(sd) + Math.cos(phi) * Math.cos(sd) * Math.sin(ws)); // Eq. 21
+    const Rso = (0.75 + 2e-5 * z) * Ra;                                           // Eq. 37
+    const Rns = 0.77 * Rs;                                                        // Eq. 38 (albedo 0.23)
+    const ratio = Rso > 0 ? Math.max(0, Math.min(1, Rs / Rso)) : 1;
+    const cloud = Math.max(0.05, Math.min(1, 1.35 * ratio - 0.35));
+    const Rnl = 4.903e-9 * (Math.pow(Tmax + 273.16, 4) + Math.pow(Tmin + 273.16, 4)) / 2 * (0.34 - 0.14 * Math.sqrt(Math.max(ea, 0))) * cloud; // Eq. 39
+    const Rn = Rns - Rnl;                                                         // Eq. 40
+    const u2 = wind2m(u, zh);
+    const et = (0.408 * delta * Rn + gamma * (900 / (T + 273)) * u2 * (es - ea)) / (delta + gamma * (1 + 0.34 * u2)); // Eq. 6
+    return { et0: Math.max(0, et), u2, humMethod, Ra, Rn, es, ea };
+  }
+
+  /** Daily minimum relative humidity [%] — measured, or estimated from Tdew and Tmax
+   * (FAO-56 Eq. 63 basis: RHmin ≈ 100·e°(Tdew)/e°(Tmax)). */
+  function rhMin(rec) {
+    const r = num(rec.RHmin_pct); if (r !== null) return r;
+    const td = num(rec.DewPoint_C), tx = num(rec.Tmax_C);
+    if (td !== null && tx !== null) return Math.min(100, 100 * e0(td) / e0(tx));
+    return null;
+  }
+
+  /** Climatic adjustment of Kc mid / Kc end — Eq. 62 (and Eq. 65 for Kc end ≥ 0.45).
+   * u2 limited to 1–6 m/s, RHmin to 20–80 %, h = mean crop height [m]. */
+  function kcClimateAdjust(kcTab, u2, rhmin, h) {
+    if (!Number.isFinite(u2) || !Number.isFinite(rhmin)) return kcTab;
+    const u = Math.max(1, Math.min(6, u2)), rh = Math.max(20, Math.min(80, rhmin));
+    return kcTab + (0.04 * (u - 2) - 0.004 * (rh - 45)) * Math.pow(h / 3, 0.3);
+  }
+
+  G.Fao56 = { e0, wind2m, doy, et0FromRecord, rhMin, kcClimateAdjust, num };
+})(typeof window !== 'undefined' ? window : globalThis);
+
+/* GCSAR.Crops — crop parameter library (FAO-56 initial values, to be calibrated locally).
+ * Mirrors the future C# class  GCSAR.Irrigation.Core.CropLibrary  (and the CropParameters record).
+ *
+ * Stage boundaries are expressed in thermal time (GDD, °C·day from sowing) instead of days,
+ * so the FAO-56 four-stage Kc curve follows the season's actual temperature (decision in the
+ * methodology guide: phenology drives Kc, Zr and p). The GDD boundaries below are INITIAL
+ * test values derived from the platform's phenology presets; calibrate per variety/region.
+ *
+ * Sources:  Kc — FAO-56 Table 12;  Zr max, p — Table 22;  h — Table 12;  Ky — FAO-33.
+ */
+(function (root) {
+  'use strict';
+  const G = root.GCSAR = root.GCSAR || {};
+
+  const CROPS = {
+    wheat: {
+      key: 'wheat', name: 'قمح (شتوي)', sowMonthDay: '11-20',
+      kcIni: 0.70,   // Table 12: winter wheat, non-frozen soils (Syrian winter rains wet the surface often)
+      kcMid: 1.15, kcEnd: 0.30, h: 1.0,
+      zrMin: 0.20, zrMax: 1.50,   // Table 22: 1.5–1.8 m; lower bound used (calibrate to soil depth)
+      p: 0.55,                    // Table 22 (for ETc ≈ 5 mm/day; adjusted daily)
+      ky: 1.05,                   // FAO-33 winter wheat, whole season
+      tbase: 0, tupper: null,
+      // Derived from NASA POWER, Salamiyah cell, sowing 20 Nov 2025, at typical Syrian wheat dates:
+      // tillering ~31 Dec (548), full cover ~5 Apr (1597), senescence ~5 May (2098), maturity ~1 Jun (2640).
+      // → stage lengths ≈ 41/95/30/27 days (FAO-56 Table 11, Mediterranean winter wheat: 30/140/40/30).
+      gdd: { iniEnd: 550, devEnd: 1600, midEnd: 2100, lateEnd: 2600 },
+      note: 'حدود الأطوار مشتقة من موسم 2025/26 في سلمية (NASA POWER، زراعة 20 تشرين الثاني): الإشطاء ≈ نهاية كانون الأول، التغطية الكاملة ≈ أوائل نيسان، بداية الشيخوخة ≈ أوائل أيار، النضج ≈ أوائل حزيران. تُعاير بأرصاد فينولوجية حقلية.'
+    },
+    barley: {
+      key: 'barley', name: 'شعير', sowMonthDay: '11-15',
+      kcIni: 0.70, kcMid: 1.15, kcEnd: 0.25, h: 1.0,
+      zrMin: 0.20, zrMax: 1.20, p: 0.55, ky: null,
+      tbase: 0, tupper: null,
+      gdd: { iniEnd: 500, devEnd: 1450, midEnd: 1900, lateEnd: 2350 },   // ≈ two weeks earlier than wheat
+      note: 'Kc ini مأخوذ مثل القمح الشتوي لنظام الأمطار الشتوية؛ حدود الأطوار أبكر من القمح بنحو أسبوعين. تُعاير محلياً.'
+    },
+    maize: {
+      key: 'maize', name: 'ذرة صفراء (حبية)', sowMonthDay: '04-15',
+      kcIni: 0.30, kcMid: 1.20, kcEnd: 0.35, h: 2.0,
+      zrMin: 0.20, zrMax: 1.30, p: 0.55, ky: 1.25,
+      tbase: 10, tupper: 30,
+      gdd: { iniEnd: 200, devEnd: 750, midEnd: 1300, lateEnd: 1800 },
+      note: 'Kc end = 0.35 للحصاد الجاف للحبوب (0.60 للحصاد الرطب).'
+    }
+  };
+
+  /** Deep copy so UI edits never mutate the library */
+  function get(key) { return JSON.parse(JSON.stringify(CROPS[key])); }
+
+  G.Crops = { CROPS, get, keys: Object.keys(CROPS) };
+})(typeof window !== 'undefined' ? window : globalThis);
+
+/* GCSAR.Soils — soil water characteristics and irrigation system efficiencies.
+ * Mirrors the future C# class  GCSAR.Irrigation.Core.SoilLibrary.
+ * θFC, θWP [m³/m³]: mid-points of the ranges in FAO-56 Table 19 (replace with measured values when available).
+ * CN: SCS curve number, antecedent condition II, cultivated land — indicative by hydrologic group.
+ */
+(function (root) {
+  'use strict';
+  const G = root.GCSAR = root.GCSAR || {};
+
+  const SOILS = {
+    sand:            { name: 'رملية',              thetaFC: 0.12,  thetaWP: 0.045, cn: 67 },
+    loamySand:       { name: 'رملية لومية',        thetaFC: 0.15,  thetaWP: 0.065, cn: 72 },
+    sandyLoam:       { name: 'لومية رملية',        thetaFC: 0.23,  thetaWP: 0.11,  cn: 75 },
+    loam:            { name: 'لومية',              thetaFC: 0.25,  thetaWP: 0.12,  cn: 78 },
+    siltLoam:        { name: 'لومية سلتية',        thetaFC: 0.29,  thetaWP: 0.15,  cn: 80 },
+    silt:            { name: 'سلتية',              thetaFC: 0.32,  thetaWP: 0.17,  cn: 80 },
+    siltyClayLoam:   { name: 'لومية طينية سلتية',  thetaFC: 0.335, thetaWP: 0.205, cn: 83 },
+    siltyClay:       { name: 'طينية سلتية',        thetaFC: 0.36,  thetaWP: 0.23,  cn: 85 },
+    clay:            { name: 'طينية',              thetaFC: 0.36,  thetaWP: 0.22,  cn: 85 }
+  };
+
+  // Typical application efficiency Ea (fraction of applied water stored in the root zone) and the largest
+  // NET depth one irrigation normally applies (maxNetMm). INITIAL planning values — replace with the station's practice:
+  //  surface:   furrow/basin sets usually apply 60–100 mm gross; 80 mm net is a practical upper bound on medium soils
+  //  sprinkler: limited by soil intake rate and set time; 30–50 mm net per set is common for field crops
+  //  drip:      high-frequency, small applications; 15–25 mm net per irrigation
+  const SYSTEMS = {
+    surface:   { name: 'ري سطحي (أثلام/أحواض)', ea: 0.60, maxNetMm: 80 },
+    sprinkler: { name: 'ري بالرذاذ',             ea: 0.75, maxNetMm: 45 },
+    drip:      { name: 'ري بالتنقيط',            ea: 0.90, maxNetMm: 20 }
+  };
+
+  /** Total available water in the root zone [mm] — FAO-56 Eq. 82 */
+  const taw = (thetaFC, thetaWP, zr) => 1000 * (thetaFC - thetaWP) * zr;
+
+  G.Soils = { SOILS, SYSTEMS, taw };
+})(typeof window !== 'undefined' ? window : globalThis);
+
+/* GCSAR.WaterBalance — daily root-zone soil water balance and irrigation scheduling (FAO-56 Ch. 8, single Kc).
+ * Mirrors the future C# class  GCSAR.Irrigation.Core.WaterBalanceEngine.
+ *
+ * Daily balance (Eq. 85, CR = 0):   Dr,i = Dr,i-1 − (P − RO)i − Ii + ETc,adj,i + DPi
+ * Stress (Eq. 84):                  Ks = 1 if Dr ≤ RAW, else (TAW − Dr)/((1 − p)·TAW)
+ * TAW (Eq. 82), RAW (Eq. 83), p adjusted for ETc (Table 22 footnote): p = p_tab + 0.04·(5 − ETc)
+ *
+ * Declared conventions (methodology guide: one convention, no double counting):
+ *  - Rain enters as P − RO, with RO from the SCS curve-number method (daily, AMC II). No separate Peff.
+ *  - Thermal-time phenology: stages, Kc curve and root depth are driven by GDD from sowing.
+ *  - Growing root zone: the soil below the roots (down to Zr,max) is a second store with its own
+ *    depletion Dsub. When roots deepen by ΔZr, the new slice brings its share of Dsub into Dr
+ *    (Dr is NOT left unchanged — guide §9.2). Deep percolation from the root zone first refills
+ *    Dsub; only the excess leaves the profile. The two stores together conserve mass, and the
+ *    summary reports the closure error.
+ *  - Ks is computed from Dr at the start of the day (end of the previous day), as in FAO-56.
+ */
+(function (root) {
+  'use strict';
+  const G = root.GCSAR = root.GCSAR || {};
+  const F = () => G.Fao56;
+
+  const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+  const iso = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  const parseDate = s => { const [y, m, d] = String(s).slice(0, 10).split('-').map(Number); return new Date(y, m - 1, d); };
+
+  /** Daily growing degree-days (average method, optional upper cutoff) */
+  function gdd(tmin, tmax, tbase, tupper) {
+    if (!Number.isFinite(tmin) || !Number.isFinite(tmax)) return 0;
+    if (Number.isFinite(tupper)) { tmin = Math.min(tmin, tupper); tmax = Math.min(tmax, tupper); }
+    return Math.max(0, (tmin + tmax) / 2 - tbase);
+  }
+
+  /** FAO-56 stage (0 initial, 1 development, 2 mid, 3 late, 4 after harvest) from cumulative GDD */
+  function stageOf(g, s) { return g < s.iniEnd ? 0 : g < s.devEnd ? 1 : g < s.midEnd ? 2 : g < s.lateEnd ? 3 : 4; }
+  const STAGE_NAMES = ['أولي', 'تطور', 'منتصف الموسم', 'نهاية الموسم', 'بعد الحصاد'];
+
+  /** Four-stage Kc curve interpolated in thermal time (FAO-56 Fig. 25, Eq. 66 with GDD in place of days) */
+  function kcAt(g, c, kcMid, kcEnd) {
+    const s = c.gdd;
+    if (g < s.iniEnd) return c.kcIni;
+    if (g < s.devEnd) return c.kcIni + (kcMid - c.kcIni) * (g - s.iniEnd) / (s.devEnd - s.iniEnd);
+    if (g < s.midEnd) return kcMid;
+    if (g < s.lateEnd) return kcMid + (kcEnd - kcMid) * (g - s.midEnd) / (s.lateEnd - s.midEnd);
+    return kcEnd;
+  }
+
+  /** Root depth: linear in thermal time from Zr,min at sowing to Zr,max at end of development (full cover) */
+  function zrAt(g, c) { return c.zrMin + (c.zrMax - c.zrMin) * clamp(g / c.gdd.devEnd, 0, 1); }
+
+  /** SCS curve-number runoff [mm] for daily rain P [mm] */
+  function runoffSCS(P, cn) {
+    if (!(P > 0) || !(cn > 0) || cn >= 100) return 0;
+    const S = 25400 / cn - 254, Ia = 0.2 * S;
+    return P > Ia ? (P - Ia) * (P - Ia) / (P + 0.8 * S) : 0;
+  }
+
+  /**
+   * Run a season.
+   * input = {
+   *   crop:  CropParameters (see crops.js),
+   *   soil:  { thetaFC, thetaWP, cn, initialDepletionFrac, subsoilDepletionFrac },
+   *   irrigation: { mode: 'scheduled'|'actual'|'rainfed', efficiency, triggerFrac|null (null = RAW i.e. p), events:[{date,grossMm}],
+   *                 maxNetMm|null (largest net depth one irrigation can apply; null = refill to FC),
+   *                 forecastRainProbMin (%; forecast rain counts only when its probability ≥ this, default 60) },
+   *   sowingDate: 'YYYY-MM-DD', endDate: 'YYYY-MM-DD',
+   *   weather: [{ date, tmin, tmax, et0, rain, u2, rhmin, kind, rainProb }]
+   *            u2, rhmin optional (Kc climate adjustment); kind: 'obs' (default) | 'model' (recent analysis) | 'forecast'
+   * }
+   * Forecast days continue the same balance; their totals are reported separately (summary = observed + model days only).
+   * returns { days:[DailyBalance], summary, recommendation, kcMidAdj, kcEndAdj }
+   */
+  function run(input) {
+    const c = input.crop, soil = input.soil, irr = input.irrigation || { mode: 'rainfed' };
+    const t0 = parseDate(input.sowingDate), t1 = parseDate(input.endDate);
+    const wx = new Map(input.weather.map(w => [String(w.date).slice(0, 10), w]));
+    const dTheta = soil.thetaFC - soil.thetaWP;
+    if (!(dTheta > 0)) throw new Error('θFC يجب أن يكون أكبر من θWP');
+    const ea = clamp(irr.efficiency || 1, 0.3, 1);
+    const events = new Map((irr.events || []).map(e => [String(e.date).slice(0, 10), +e.grossMm || 0]));
+    const maxNet = Number.isFinite(irr.maxNetMm) && irr.maxNetMm > 0 ? irr.maxNetMm : Infinity;
+    const probMin = Number.isFinite(irr.forecastRainProbMin) ? irr.forecastRainProbMin : 60;
+
+    // ---- pass 1: thermal time per day → mean u2 & RHmin over mid and late stages → adjusted Kc mid/end (Eq. 62)
+    const dates = [];
+    for (let d = new Date(t0); d <= t1; d.setDate(d.getDate() + 1)) dates.push(iso(d));
+    let cum = 0; const g = [];
+    for (const k of dates) { const w = wx.get(k); cum += w ? gdd(w.tmin, w.tmax, c.tbase, c.tupper) : 0; g.push(cum); }
+    // the season ends at harvest maturity (GDD ≥ lateEnd): later days are not part of the crop water balance
+    const hv = g.findIndex(x => x >= c.gdd.lateEnd);
+    if (hv >= 0) { dates.length = hv + 1; g.length = hv + 1; }
+    const meanOver = (stage, f) => { const v = dates.map((k, i) => stageOf(g[i], c.gdd) === stage ? f(wx.get(k)) : null).filter(Number.isFinite); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null; };
+    const adj = (kc, st) => { const u = meanOver(st, w => w && w.u2), rh = meanOver(st, w => w && w.rhmin); return (u === null || rh === null) ? kc : F().kcClimateAdjust(kc, u, rh, c.h); };
+    const kcMidAdj = adj(c.kcMid, 2);
+    const kcEndAdj = c.kcEnd >= 0.45 ? adj(c.kcEnd, 3) : c.kcEnd;   // Eq. 65 applies only when Kc end ≥ 0.45
+
+    // ---- pass 2: daily balance
+    let zrPrev = c.zrMin;
+    let Dr = clamp(soil.initialDepletionFrac ?? 0.5, 0, 1) * 1000 * dTheta * zrPrev;
+    let Dsub = clamp(soil.subsoilDepletionFrac ?? 0, 0, 1) * 1000 * dTheta * Math.max(0, c.zrMax - zrPrev);
+    const store0 = Dr + Dsub;
+    const days = [];
+    const tot = { P: 0, RO: 0, Inet: 0, Igross: 0, ETc: 0, ETcAdj: 0, DP: 0, stressDays: 0, missing: 0, irrigations: 0 };   // observed + model days
+    const fc = { P: 0, RO: 0, Inet: 0, Igross: 0, ETc: 0, ETcAdj: 0, DP: 0, stressDays: 0, missing: 0, irrigations: 0 };    // forecast days
+    let pendingAuto = 0; // net mm decided at the end of yesterday, applied today
+
+    dates.forEach((k, i) => {
+      const w = wx.get(k);
+      const kind = (w && w.kind) || 'obs', isFc = kind === 'forecast';
+      const G_ = g[i], st = stageOf(G_, c.gdd), kc = st === 4 ? null : kcAt(G_, c, kcMidAdj, kcEndAdj);
+      const zr = zrAt(G_, c);
+      // root growth: bring the new slice's share of subsoil depletion into the root zone
+      if (zr > zrPrev + 1e-9) {
+        const thick = c.zrMax - zrPrev;
+        const take = thick > 0 ? Dsub * (zr - zrPrev) / thick : 0;
+        Dr += take; Dsub -= take;
+      }
+      zrPrev = zr;
+      const TAW = 1000 * dTheta * zr;
+      const et0 = w && Number.isFinite(w.et0) ? w.et0 : null;
+      const ETc = kc !== null && et0 !== null ? kc * et0 : 0;
+      const p = clamp(c.p + 0.04 * (5 - ETc), 0.1, 0.8);
+      const RAW = p * TAW;
+      const Ks = Dr <= RAW ? 1 : clamp((TAW - Dr) / ((1 - p) * TAW), 0, 1);
+      const ETcAdj = Ks * ETc;
+      const rainRaw = w && Number.isFinite(w.rain) ? Math.max(0, w.rain) : 0;
+      const rainProb = w && Number.isFinite(w.rainProb) ? w.rainProb : null;
+      // forecast rain enters the balance only when likely enough (decision rule, not a probability-weighted amount)
+      const P = isFc && rainProb !== null && rainProb < probMin ? 0 : rainRaw;
+      const RO = runoffSCS(P, soil.cn);
+      // irrigation today: recorded events (gross → net with Ea) + automatic recommendation from yesterday
+      let Igross = 0, Inet = 0, auto = false;
+      if (irr.mode !== 'rainfed' && events.has(k)) { Igross += events.get(k); Inet += events.get(k) * ea; }
+      if (irr.mode === 'scheduled' && pendingAuto > 0) { Inet += pendingAuto; Igross += pendingAuto / ea; auto = true; }
+      pendingAuto = 0;
+      // balance
+      let DrNew = Dr - (P - RO) - Inet + ETcAdj;
+      let DP = 0, recharge = 0;
+      if (DrNew < 0) { DP = -DrNew; DrNew = 0; recharge = Math.min(DP, Dsub); Dsub -= recharge; DP -= recharge; }
+      DrNew = Math.min(DrNew, TAW);
+      Dr = DrNew;
+      // decision for tomorrow (crop still in the field)
+      const trig = (irr.triggerFrac ?? p) * TAW;
+      const needs = st < 4 && Dr >= trig;
+      if (irr.mode === 'scheduled' && needs) pendingAuto = Math.min(Dr, maxNet);   // refill to FC, limited by the system's max net depth
+      const T = isFc ? fc : tot;
+      if (Ks < 1) T.stressDays++;
+      if (Inet > 0) T.irrigations++;
+      if (!w || et0 === null) T.missing++;
+      T.P += P; T.RO += RO; T.Inet += Inet; T.Igross += Igross; T.ETc += ETc; T.ETcAdj += ETcAdj; T.DP += DP;
+      days.push({ Date: k, GDD: +G_.toFixed(1), Stage: st, StageName: STAGE_NAMES[st], Kc: kc === null ? null : +kc.toFixed(3),
+        Zr: +zr.toFixed(3), TAW: +TAW.toFixed(1), RAW: +RAW.toFixed(1), p: +p.toFixed(3), ET0: et0 === null ? null : +et0.toFixed(2),
+        ETc: +ETc.toFixed(2), Ks: +Ks.toFixed(3), ETcAdj: +ETcAdj.toFixed(2), P: +P.toFixed(1), RO: +RO.toFixed(1),
+        Inet: +Inet.toFixed(1), Igross: +Igross.toFixed(1), AutoIrrigation: auto, DP: +DP.toFixed(1), Recharge: +recharge.toFixed(1),
+        Dr: +Dr.toFixed(1), Dsub: +Dsub.toFixed(1), Trigger: +trig.toFixed(1), NeedsIrrigation: needs, MissingWeather: et0 === null,
+        Kind: kind, RainForecast: isFc ? +rainRaw.toFixed(1) : null, RainProb: rainProb });
+    });
+
+    // mass closure: water gained by the profile (= decrease of total depletion) must equal inputs − outputs
+    const store1 = Dr + Dsub;
+    const all = k => tot[k] + fc[k];
+    const closure = (store0 - store1) - ((all('P') - all('RO')) + all('Inet') - all('ETcAdj') - all('DP'));
+    const ratio = tot.ETc > 0 ? tot.ETcAdj / tot.ETc : 1;
+    const summary = {
+      ...Object.fromEntries(Object.entries(tot).map(([k, v]) => [k, typeof v === 'number' ? +v.toFixed(1) : v])),
+      ETcAdjOverETc: +ratio.toFixed(3),
+      YieldReductionPct: c.ky ? +(100 * c.ky * (1 - ratio)).toFixed(1) : null,   // FAO-33: 1 − Ya/Ym = Ky (1 − ETa/ETm)
+      MassClosureMm: +closure.toFixed(3),
+      KcMidAdj: +kcMidAdj.toFixed(3), KcEndAdj: +kcEndAdj.toFixed(3)
+    };
+    const forecast = Object.fromEntries(Object.entries(fc).map(([k, v]) => [k, +v.toFixed(1)]));
+    return { days, summary, forecast, recommendation: recommend(days, ea, maxNet, probMin), kcMidAdj, kcEndAdj };
+  }
+
+  /** Irrigation advice.
+   *  today  — on the last non-forecast day ("now"): irrigate (net limited by maxNet) or days until the trigger.
+   *  alert  — over the forecast days: first date the trigger is reached, the planned irrigations (scheduled mode),
+   *           forecast rain (counted / all) and ET0 over the horizon.  level: 'now' | 'soon' | 'ok' | 'harvested' */
+  function recommend(days, ea, maxNet = Infinity, probMin = 60) {
+    if (!days.length) return null;
+    const m3PerDunum = mm => mm * 1.0;   // 1 mm over 1 dunum (1000 m²) = 1 m³
+    let li = days.length - 1; while (li > 0 && days[li].Kind === 'forecast') li--;
+    const last = days[li], fdays = days.slice(li + 1).filter(d => d.Kind === 'forecast');
+    const harvestDay = days.find(d => d.Stage === 4);
+    let today;
+    if (last.Stage === 4) today = { action: 'harvested', date: last.Date };
+    else if (last.NeedsIrrigation) {
+      const net = Math.min(last.Dr, maxNet), gross = net / ea;
+      today = { action: 'irrigate', date: last.Date, netMm: +net.toFixed(1), grossMm: +gross.toFixed(1), m3PerDunum: +m3PerDunum(gross).toFixed(1),
+        remainingMm: +(last.Dr - net).toFixed(1), limited: last.Dr > maxNet, Dr: last.Dr, trigger: last.Trigger, TAW: last.TAW };
+    } else {
+      const recent = days.slice(Math.max(0, li - 6), li + 1).map(d => d.ETcAdj).filter(x => x > 0);
+      const rate = recent.length ? recent.reduce((a, b) => a + b, 0) / recent.length : null;
+      today = { action: 'wait', date: last.Date, daysUntil: rate ? Math.max(0, Math.floor((last.Trigger - last.Dr) / rate)) : null,
+        rateMmDay: rate === null ? null : +rate.toFixed(2), Dr: last.Dr, trigger: last.Trigger, TAW: last.TAW };
+    }
+    let alert = null;
+    if (fdays.length) {
+      const sum = f => +fdays.reduce((a, d) => a + (f(d) || 0), 0).toFixed(1);
+      const need = fdays.find(d => d.NeedsIrrigation);
+      const plan = fdays.filter(d => d.AutoIrrigation && d.Inet > 0).map(d => ({ date: d.Date, netMm: d.Inet, grossMm: d.Igross, m3PerDunum: +m3PerDunum(d.Igross).toFixed(1) }));
+      const level = today.action === 'harvested' ? 'harvested' : today.action === 'irrigate' ? 'now' : need ? 'soon' : 'ok';
+      alert = { level, from: fdays[0].Date, to: fdays[fdays.length - 1].Date, days: fdays.length,
+        firstNeedDate: need ? need.Date : null, plan,
+        rainCountedMm: sum(d => d.P), rainAllMm: sum(d => d.RainForecast), probMin,
+        rainDays: fdays.filter(d => (d.RainForecast || 0) >= 1).map(d => ({ date: d.Date, mm: d.RainForecast, prob: d.RainProb })),
+        et0Mm: sum(d => d.ET0), etcAdjMm: sum(d => d.ETcAdj), stressDays: fdays.filter(d => d.Ks < 1).length,
+        harvestInHorizon: harvestDay && harvestDay.Kind === 'forecast' ? harvestDay.Date : null };
+    }
+    return { ...today, today, alert };
+  }
+
+  G.WaterBalance = { run, gdd, kcAt, zrAt, stageOf, runoffSCS, STAGE_NAMES };
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
+<script>
+// Syria ADM1 — geoBoundaries gbOpen (CC BY 4.0), simplified (coverage, tol=0.004°)
+const SYRIA_GOV={"damascus":{"rings":[[[36.212,33.539],[36.223,33.54],[36.227,33.546],[36.232,33.542],[36.27,33.558],[36.274,33.556],[36.28,33.564],[36.315,33.565],[36.317,33.571],[36.323,33.571],[36.325,33.564],[36.334,33.565],[36.336,33.559],[36.356,33.557],[36.353,33.546],[36.344,33.526],[36.351,33.521],[36.34,33.518],[36.325,33.486],[36.317,33.485],[36.314,33.463],[36.311,33.461],[36.298,33.468],[36.297,33.462],[36.283,33.459],[36.277,33.465],[36.279,33.476],[36.266,33.469],[36.247,33.476],[36.243,33.48],[36.222,33.468],[36.219,33.472],[36.207,33.469],[36.21,33.479],[36.205,33.486],[36.21,33.486],[36.209,33.516],[36.199,33.515],[36.197,33.525],[36.205,33.53],[36.204,33.534],[36.212,33.539]]],"label":[36.274,33.515]},"aleppo":{"rings":[[[38.644,36.77],[38.635,36.769],[38.634,36.762],[38.64,36.75],[38.644,36.746],[38.636,36.733],[38.65,36.717],[38.665,36.716],[38.673,36.684],[38.661,36.676],[38.622,36.667],[38.616,36.675],[38.585,36.678],[38.58,36.665],[38.593,36.646],[38.589,36.633],[38.596,36.614],[38.624,36.606],[38.634,36.611],[38.634,36.637],[38.629,36.644],[38.663,36.654],[38.668,36.638],[38.676,36.639],[38.705,36.652],[38.709,36.65],[38.71,36.641],[38.715,36.645],[38.72,36.641],[38.715,36.637],[38.703,36.638],[38.694,36.619],[38.696,36.614],[38.675,36.575],[38.673,36.56],[38.682,36.552],[38.684,36.543],[38.667,36.529],[38.653,36.498],[38.656,36.482],[38.677,36.477],[38.672,36.46],[38.657,36.455],[38.653,36.446],[38.664,36.435],[38.664,36.421],[38.656,36.419],[38.652,36.412],[38.642,36.412],[38.642,36.405],[38.635,36.399],[38.64,36.39],[38.636,36.372],[38.643,36.368],[38.647,36.348],[38.64,36.344],[38.646,36.339],[38.638,36.328],[38.647,36.313],[38.628,36.303],[38.632,36.282],[38.609,36.275],[38.574,36.258],[38.572,36.26],[38.571,36.287],[38.547,36.29],[38.539,36.281],[38.539,36.26],[38.534,36.26],[38.529,36.247],[38.537,36.247],[38.547,36.238],[38.548,36.232],[38.558,36.232],[38.546,36.22],[38.527,36.206],[38.513,36.204],[38.51,36.232],[38.503,36.238],[38.481,36.24],[38.437,36.231],[38.424,36.227],[38.418,36.223],[38.428,36.206],[38.44,36.196],[38.442,36.184],[38.438,36.155],[38.413,36.153],[38.402,36.157],[38.388,36.159],[38.384,36.168],[38.386,36.179],[38.379,36.187],[38.383,36.195],[38.359,36.2],[38.333,36.214],[38.332,36.221],[38.338,36.236],[38.337,36.244],[38.344,36.246],[38.348,36.251],[38.352,36.263],[38.344,36.271],[38.332,36.276],[38.329,36.283],[38.313,36.282],[38.312,36.278],[38.299,36.275],[38.281,36.274],[38.257,36.275],[38.228,36.283],[38.215,36.279],[38.206,36.282],[38.198,36.273],[38.185,36.269],[38.163,36.257],[38.141,36.257],[38.133,36.251],[38.137,36.23],[38.134,36.223],[38.115,36.209],[38.112,36.189],[38.108,36.177],[38.087,36.172],[38.079,36.151],[38.08,36.145],[38.074,36.137],[38.082,36.123],[38.082,36.118],[38.101,36.102],[38.092,36.089],[38.08,36.088],[38.069,36.099],[38.06,36.097],[38.061,36.083],[38.085,36.072],[38.105,36.052],[38.096,36.04],[38.1,36.02],[38.11,36.012],[38.124,36.01],[38.133,35.999],[38.147,35.997],[38.154,35.991],[38.153,35.979],[38.16,35.979],[38.164,35.971],[38.161,35.957],[38.164,35.952],[38.177,35.953],[38.191,35.95],[38.201,35.942],[38.183,35.928],[38.157,35.902],[38.136,35.877],[38.13,35.86],[38.115,35.834],[38.126,35.831],[38.128,35.837],[38.151,35.835],[38.154,35.838],[38.172,35.836],[38.145,35.793],[38.17,35.787],[38.157,35.732],[38.164,35.725],[38.187,35.718],[38.194,35.705],[38.198,35.691],[38.199,35.678],[38.197,35.665],[38.192,35.653],[38.21,35.617],[38.207,35.607],[38.254,35.592],[38.257,35.598],[38.265,35.599],[38.269,35.594],[38.267,35.581],[38.303,35.568],[38.3,35.528],[38.29,35.516],[38.279,35.506],[38.245,35.444],[38.317,35.395],[38.226,35.381],[38.176,35.385],[38.048,35.417],[37.965,35.432],[37.875,35.44],[37.808,35.443],[37.786,35.481],[37.732,35.481],[37.733,35.463],[37.599,35.461],[37.499,35.473],[37.496,35.498],[37.485,35.519],[37.443,35.548],[37.417,35.556],[37.383,35.536],[37.385,35.532],[37.385,35.508],[37.368,35.515],[37.346,35.507],[37.335,35.516],[37.328,35.512],[37.314,35.524],[37.323,35.527],[37.325,35.542],[37.304,35.539],[37.301,35.547],[37.284,35.539],[37.283,35.533],[37.269,35.533],[37.261,35.531],[37.25,35.533],[37.241,35.555],[37.234,35.561],[37.222,35.559],[37.219,35.546],[37.215,35.544],[37.199,35.546],[37.202,35.554],[37.188,35.558],[37.175,35.55],[37.167,35.553],[37.156,35.583],[37.143,35.588],[37.118,35.589],[37.111,35.591],[37.121,35.605],[37.118,35.61],[37.145,35.636],[37.134,35.64],[37.128,35.644],[37.135,35.668],[37.123,35.673],[37.111,35.671],[37.103,35.674],[37.1,35.679],[37.1,35.687],[37.11,35.702],[37.12,35.708],[37.12,35.727],[37.117,35.74],[37.105,35.742],[37.104,35.747],[37.115,35.749],[37.12,35.758],[37.108,35.767],[37.121,35.78],[37.137,35.781],[37.137,35.796],[37.115,35.802],[37.115,35.809],[37.12,35.829],[37.109,35.831],[37.103,35.829],[37.103,35.82],[37.092,35.819],[37.088,35.823],[37.068,35.833],[37.066,35.84],[37.053,35.837],[37.034,35.844],[37.031,35.825],[37.025,35.817],[37.01,35.82],[36.99,35.806],[36.985,35.812],[36.985,35.825],[36.991,35.836],[36.981,35.838],[36.977,35.845],[36.959,35.85],[36.954,35.863],[36.96,35.87],[36.958,35.879],[36.953,35.886],[36.94,35.887],[36.935,35.898],[36.942,35.904],[36.936,35.916],[36.92,35.913],[36.902,35.914],[36.9,35.925],[36.893,35.929],[36.888,35.936],[36.878,35.934],[36.875,35.96],[36.868,35.971],[36.868,35.982],[36.873,35.988],[36.872,36.001],[36.875,36.015],[36.883,36.024],[36.882,36.043],[36.857,36.044],[36.845,36.04],[36.839,36.047],[36.834,36.065],[36.823,36.066],[36.807,36.072],[36.789,36.07],[36.781,36.066],[36.771,36.067],[36.747,36.08],[36.741,36.085],[36.744,36.1],[36.755,36.105],[36.756,36.109],[36.75,36.115],[36.738,36.118],[36.729,36.123],[36.721,36.134],[36.718,36.142],[36.71,36.146],[36.715,36.155],[36.733,36.157],[36.743,36.163],[36.76,36.165],[36.773,36.186],[36.765,36.191],[36.774,36.195],[36.781,36.207],[36.798,36.217],[36.812,36.215],[36.828,36.217],[36.833,36.231],[36.84,36.234],[36.836,36.249],[36.822,36.25],[36.824,36.258],[36.816,36.268],[36.823,36.282],[36.815,36.284],[36.793,36.281],[36.787,36.303],[36.773,36.302],[36.766,36.304],[36.761,36.31],[36.754,36.329],[36.745,36.338],[36.726,36.338],[36.723,36.334],[36.729,36.328],[36.715,36.323],[36.697,36.322],[36.68,36.322],[36.669,36.32],[36.669,36.326],[36.659,36.334],[36.639,36.336],[36.621,36.329],[36.612,36.328],[36.608,36.333],[36.612,36.341],[36.628,36.354],[36.628,36.36],[36.62,36.375],[36.624,36.388],[36.616,36.393],[36.607,36.391],[36.593,36.394],[36.587,36.402],[36.585,36.412],[36.577,36.425],[36.576,36.439],[36.569,36.445],[36.568,36.468],[36.555,36.486],[36.557,36.492],[36.553,36.501],[36.573,36.512],[36.583,36.523],[36.591,36.538],[36.604,36.579],[36.601,36.601],[36.588,36.631],[36.592,36.65],[36.606,36.672],[36.619,36.68],[36.628,36.695],[36.637,36.705],[36.639,36.712],[36.635,36.728],[36.624,36.747],[36.627,36.758],[36.633,36.766],[36.67,36.8],[36.678,36.811],[36.678,36.821],[36.668,36.836],[36.676,36.846],[36.685,36.835],[36.739,36.824],[36.804,36.799],[36.88,36.781],[36.903,36.778],[36.944,36.781],[36.989,36.762],[36.999,36.755],[37.009,36.743],[37.02,36.737],[37.052,36.727],[37.058,36.721],[37.057,36.713],[37.033,36.678],[37.028,36.666],[37.031,36.658],[37.048,36.653],[37.065,36.642],[37.08,36.629],[37.091,36.624],[37.104,36.627],[37.113,36.646],[37.122,36.659],[37.127,36.662],[37.151,36.663],[37.174,36.655],[37.196,36.654],[37.226,36.663],[37.266,36.665],[37.303,36.662],[37.335,36.655],[37.373,36.654],[37.427,36.646],[37.461,36.638],[37.473,36.638],[37.485,36.641],[37.502,36.649],[37.521,36.667],[37.534,36.676],[37.578,36.699],[37.603,36.707],[37.636,36.721],[37.655,36.731],[37.674,36.737],[37.694,36.738],[37.71,36.745],[37.734,36.749],[37.767,36.747],[37.791,36.749],[37.814,36.759],[37.862,36.774],[37.908,36.786],[37.929,36.794],[37.958,36.81],[37.977,36.818],[37.998,36.824],[38.041,36.829],[38.052,36.836],[38.058,36.849],[38.071,36.859],[38.126,36.881],[38.173,36.895],[38.188,36.905],[38.2,36.908],[38.23,36.906],[38.245,36.912],[38.265,36.913],[38.296,36.907],[38.316,36.905],[38.343,36.9],[38.408,36.895],[38.449,36.882],[38.493,36.863],[38.522,36.854],[38.563,36.839],[38.58,36.824],[38.591,36.817],[38.601,36.806],[38.623,36.79],[38.644,36.77]]],"label":[37.543,36.122]},"rif-dimashq":{"rings":[[[39.125,33.532],[38.793,33.375],[37.806,32.846],[37.464,32.664],[37.287,32.907],[37.279,32.927],[37.275,32.965],[37.277,32.995],[37.257,33.003],[37.202,33.006],[37.194,33.008],[37.128,33.019],[37.116,33.023],[37.095,33.033],[37.049,33.047],[37.037,33.049],[36.913,33.052],[36.885,33.056],[36.865,33.066],[36.712,33.193],[36.708,33.194],[36.572,33.183],[36.565,33.217],[36.556,33.246],[36.549,33.252],[36.55,33.26],[36.536,33.281],[36.528,33.284],[36.515,33.297],[36.506,33.296],[36.491,33.279],[36.471,33.273],[36.466,33.27],[36.45,33.268],[36.44,33.255],[36.426,33.249],[36.393,33.217],[36.398,33.194],[36.396,33.192],[36.368,33.184],[36.346,33.199],[36.339,33.198],[36.322,33.21],[36.316,33.225],[36.298,33.227],[36.282,33.234],[36.276,33.246],[36.261,33.26],[36.244,33.267],[36.236,33.273],[36.227,33.27],[36.217,33.217],[36.209,33.21],[36.194,33.211],[36.183,33.218],[36.164,33.212],[36.157,33.197],[36.145,33.192],[36.121,33.198],[36.11,33.195],[36.091,33.197],[36.08,33.193],[36.076,33.177],[36.08,33.167],[36.07,33.161],[36.057,33.162],[36.051,33.157],[36.036,33.154],[36.025,33.154],[36.009,33.164],[35.999,33.164],[35.989,33.159],[35.993,33.181],[35.99,33.185],[35.995,33.199],[35.974,33.202],[35.963,33.201],[35.959,33.208],[35.961,33.219],[35.966,33.232],[35.966,33.249],[35.964,33.259],[35.958,33.265],[35.941,33.263],[35.92,33.267],[35.91,33.261],[35.903,33.261],[35.895,33.255],[35.885,33.254],[35.875,33.272],[35.865,33.281],[35.872,33.285],[35.872,33.292],[35.883,33.297],[35.876,33.308],[35.846,33.337],[35.816,33.358],[35.819,33.384],[35.826,33.396],[35.843,33.408],[35.882,33.425],[35.903,33.436],[35.915,33.448],[35.937,33.461],[35.949,33.473],[35.95,33.504],[35.938,33.511],[35.938,33.515],[35.952,33.526],[35.969,33.53],[35.98,33.537],[35.991,33.532],[36.014,33.542],[36.028,33.54],[36.04,33.554],[36.062,33.574],[36.063,33.58],[36.056,33.59],[36.022,33.614],[36.017,33.616],[36.004,33.614],[35.996,33.619],[35.988,33.629],[35.975,33.638],[35.965,33.633],[35.957,33.632],[35.941,33.637],[35.932,33.645],[35.932,33.649],[35.942,33.656],[35.947,33.667],[35.964,33.674],[35.968,33.678],[35.977,33.697],[35.971,33.708],[35.978,33.715],[35.993,33.723],[36.001,33.749],[36.01,33.758],[36.015,33.77],[36.029,33.765],[36.047,33.783],[36.057,33.803],[36.071,33.822],[36.079,33.823],[36.088,33.815],[36.107,33.822],[36.113,33.833],[36.128,33.836],[36.139,33.836],[36.152,33.852],[36.164,33.851],[36.167,33.84],[36.173,33.834],[36.202,33.828],[36.209,33.83],[36.215,33.827],[36.22,33.835],[36.237,33.836],[36.244,33.853],[36.25,33.854],[36.26,33.848],[36.277,33.846],[36.292,33.835],[36.308,33.835],[36.325,33.826],[36.339,33.825],[36.367,33.818],[36.375,33.82],[36.384,33.83],[36.39,33.832],[36.391,33.844],[36.385,33.855],[36.371,33.861],[36.364,33.873],[36.338,33.873],[36.321,33.877],[36.313,33.892],[36.297,33.9],[36.283,33.903],[36.288,33.917],[36.308,33.948],[36.319,33.952],[36.329,33.97],[36.345,33.982],[36.353,33.994],[36.366,33.995],[36.371,34.004],[36.385,34.01],[36.386,34.019],[36.391,34.029],[36.406,34.028],[36.402,34.041],[36.411,34.045],[36.417,34.041],[36.426,34.055],[36.443,34.05],[36.455,34.044],[36.463,34.044],[36.481,34.039],[36.489,34.049],[36.496,34.027],[36.501,34.049],[36.518,34.045],[36.505,34.056],[36.516,34.077],[36.512,34.09],[36.515,34.098],[36.532,34.108],[36.536,34.117],[36.546,34.129],[36.564,34.133],[36.572,34.143],[36.568,34.152],[36.584,34.164],[36.596,34.186],[36.606,34.194],[36.625,34.201],[36.622,34.207],[36.608,34.219],[36.601,34.223],[36.663,34.234],[36.695,34.225],[36.726,34.229],[36.751,34.23],[36.76,34.236],[36.783,34.241],[36.794,34.242],[36.793,34.226],[36.82,34.222],[36.824,34.219],[36.825,34.206],[36.863,34.185],[36.872,34.188],[36.881,34.185],[36.901,34.186],[36.923,34.165],[36.943,34.132],[36.966,34.113],[37.006,34.09],[36.985,34.07],[36.951,34.05],[36.971,34.038],[36.984,34.033],[36.997,34.021],[37.019,34.021],[37.009,33.96],[37.009,33.94],[37.139,33.938],[37.191,33.939],[37.296,33.932],[37.396,33.957],[37.423,33.952],[37.453,33.969],[37.484,33.981],[37.552,33.987],[37.58,33.986],[37.602,33.981],[37.61,33.973],[37.614,33.958],[37.604,33.937],[37.611,33.924],[37.621,33.918],[37.656,33.91],[37.704,33.902],[38.269,33.836],[38.933,33.76],[39.125,33.532]]],"label":[37.658,33.369]},"homs":{"rings":[[[39.125,33.532],[38.933,33.76],[38.269,33.836],[37.704,33.902],[37.656,33.91],[37.621,33.918],[37.611,33.924],[37.604,33.937],[37.614,33.958],[37.61,33.973],[37.602,33.981],[37.58,33.986],[37.552,33.987],[37.484,33.981],[37.453,33.969],[37.423,33.952],[37.396,33.957],[37.296,33.932],[37.191,33.939],[37.139,33.938],[37.009,33.94],[37.009,33.96],[37.019,34.021],[36.997,34.021],[36.984,34.033],[36.971,34.038],[36.951,34.05],[36.985,34.07],[37.006,34.09],[36.966,34.113],[36.943,34.132],[36.923,34.165],[36.901,34.186],[36.881,34.185],[36.872,34.188],[36.863,34.185],[36.825,34.206],[36.824,34.219],[36.82,34.222],[36.793,34.226],[36.794,34.242],[36.783,34.241],[36.76,34.236],[36.751,34.23],[36.726,34.229],[36.695,34.225],[36.663,34.234],[36.601,34.223],[36.587,34.228],[36.585,34.251],[36.575,34.277],[36.596,34.29],[36.602,34.298],[36.601,34.304],[36.592,34.312],[36.578,34.312],[36.563,34.316],[36.56,34.321],[36.561,34.332],[36.55,34.342],[36.544,34.356],[36.53,34.372],[36.545,34.384],[36.553,34.396],[36.556,34.411],[36.552,34.422],[36.536,34.427],[36.529,34.434],[36.525,34.429],[36.522,34.435],[36.514,34.439],[36.514,34.445],[36.507,34.45],[36.495,34.45],[36.486,34.458],[36.472,34.46],[36.463,34.464],[36.458,34.48],[36.446,34.486],[36.448,34.507],[36.436,34.507],[36.422,34.511],[36.409,34.508],[36.393,34.5],[36.368,34.498],[36.359,34.505],[36.351,34.499],[36.338,34.5],[36.331,34.509],[36.329,34.519],[36.333,34.524],[36.364,34.533],[36.416,34.56],[36.415,34.567],[36.405,34.579],[36.403,34.593],[36.406,34.607],[36.416,34.609],[36.427,34.604],[36.434,34.591],[36.455,34.591],[36.46,34.603],[36.46,34.621],[36.463,34.635],[36.445,34.629],[36.427,34.616],[36.407,34.629],[36.392,34.629],[36.383,34.632],[36.364,34.645],[36.349,34.662],[36.351,34.67],[36.344,34.679],[36.333,34.684],[36.314,34.684],[36.307,34.677],[36.302,34.667],[36.308,34.655],[36.296,34.635],[36.289,34.63],[36.285,34.632],[36.278,34.628],[36.264,34.627],[36.244,34.636],[36.237,34.632],[36.238,34.627],[36.212,34.631],[36.201,34.637],[36.19,34.637],[36.177,34.633],[36.172,34.628],[36.164,34.633],[36.141,34.634],[36.127,34.642],[36.117,34.638],[36.116,34.647],[36.129,34.665],[36.125,34.68],[36.128,34.692],[36.148,34.7],[36.151,34.724],[36.145,34.735],[36.16,34.744],[36.17,34.759],[36.194,34.77],[36.208,34.783],[36.22,34.789],[36.244,34.794],[36.26,34.804],[36.269,34.807],[36.285,34.838],[36.31,34.857],[36.315,34.864],[36.328,34.874],[36.326,34.881],[36.311,34.878],[36.304,34.868],[36.289,34.863],[36.272,34.869],[36.267,34.874],[36.267,34.886],[36.283,34.898],[36.284,34.915],[36.298,34.918],[36.302,34.916],[36.3,34.908],[36.307,34.906],[36.311,34.9],[36.32,34.894],[36.325,34.896],[36.321,34.886],[36.331,34.89],[36.34,34.874],[36.337,34.868],[36.343,34.857],[36.353,34.858],[36.366,34.875],[36.381,34.867],[36.384,34.855],[36.394,34.859],[36.399,34.857],[36.412,34.868],[36.425,34.873],[36.438,34.872],[36.466,34.882],[36.467,34.898],[36.463,34.899],[36.461,34.92],[36.471,34.92],[36.487,34.924],[36.485,34.939],[36.504,34.949],[36.506,34.953],[36.524,34.954],[36.533,34.949],[36.536,34.941],[36.52,34.932],[36.52,34.924],[36.54,34.923],[36.544,34.915],[36.552,34.912],[36.552,34.9],[36.559,34.895],[36.568,34.897],[36.572,34.901],[36.575,34.912],[36.573,34.92],[36.586,34.922],[36.597,34.927],[36.604,34.925],[36.609,34.912],[36.598,34.91],[36.602,34.904],[36.611,34.905],[36.611,34.909],[36.626,34.909],[36.634,34.902],[36.658,34.906],[36.66,34.913],[36.67,34.92],[36.688,34.935],[36.696,34.938],[36.708,34.936],[36.72,34.946],[36.735,34.943],[36.736,34.931],[36.743,34.933],[36.743,34.94],[36.752,34.94],[36.753,34.934],[36.763,34.937],[36.767,34.947],[36.782,34.949],[36.786,34.945],[36.797,34.943],[36.815,34.95],[36.813,34.957],[36.832,34.958],[36.85,34.97],[36.854,34.969],[36.867,34.973],[36.87,34.969],[36.884,34.971],[36.899,34.978],[36.913,34.976],[36.94,34.95],[36.944,34.941],[36.958,34.928],[36.971,34.927],[36.976,34.912],[36.97,34.883],[36.987,34.875],[36.995,34.863],[37.015,34.865],[37.058,34.895],[37.081,34.906],[37.101,34.911],[37.111,34.909],[37.114,34.913],[37.13,34.918],[37.148,34.918],[37.152,34.91],[37.158,34.908],[37.172,34.921],[37.177,34.933],[37.191,34.938],[37.207,34.933],[37.216,34.936],[37.222,34.934],[37.23,34.926],[37.235,34.912],[37.256,34.92],[37.283,34.914],[37.29,34.936],[37.308,34.94],[37.303,34.949],[37.31,34.958],[37.327,34.96],[37.337,34.973],[37.352,34.977],[37.384,34.975],[37.389,34.978],[37.405,34.973],[37.421,34.977],[37.472,34.973],[37.492,34.967],[37.499,34.953],[37.522,34.954],[37.544,34.937],[37.584,34.954],[37.642,34.971],[37.689,35.03],[37.703,35.061],[37.713,35.091],[37.752,35.099],[37.767,35.099],[37.788,35.104],[37.807,35.104],[37.839,35.08],[37.854,35.071],[37.868,35.068],[37.886,35.059],[37.905,35.039],[37.91,35.004],[37.918,34.988],[37.922,34.988],[37.955,34.973],[37.998,34.942],[38.013,34.93],[38.046,34.89],[38.057,34.882],[38.067,34.888],[38.09,34.908],[38.1,34.922],[38.106,34.938],[38.134,34.984],[38.161,35.006],[38.178,35.014],[38.251,35.038],[38.27,35.042],[38.33,35.062],[38.349,35.08],[38.35,35.085],[38.34,35.09],[38.329,35.101],[38.322,35.124],[38.339,35.155],[38.379,35.176],[38.398,35.19],[38.426,35.228],[38.434,35.244],[38.45,35.294],[38.443,35.397],[38.575,35.399],[38.871,35.371],[39.134,35.324],[39.148,35.328],[39.175,35.326],[39.198,35.315],[39.202,35.305],[39.201,35.294],[39.209,35.287],[39.225,35.285],[39.245,35.278],[39.297,35.251],[39.416,35.162],[39.6,34.918],[40.219,34.13],[40.265,34.068],[39.866,33.88],[39.125,33.532]]],"label":[38.908,34.542]},"hama":{"rings":[[[37.199,35.546],[37.215,35.544],[37.219,35.546],[37.222,35.559],[37.234,35.561],[37.241,35.555],[37.25,35.533],[37.261,35.531],[37.269,35.533],[37.283,35.533],[37.284,35.539],[37.301,35.547],[37.304,35.539],[37.325,35.542],[37.323,35.527],[37.314,35.524],[37.328,35.512],[37.335,35.516],[37.346,35.507],[37.368,35.515],[37.385,35.508],[37.385,35.532],[37.383,35.536],[37.417,35.556],[37.443,35.548],[37.485,35.519],[37.496,35.498],[37.499,35.473],[37.599,35.461],[37.733,35.463],[37.732,35.481],[37.786,35.481],[37.808,35.443],[37.875,35.44],[37.965,35.432],[38.048,35.417],[38.176,35.385],[38.226,35.381],[38.317,35.395],[38.443,35.397],[38.45,35.294],[38.434,35.244],[38.426,35.228],[38.398,35.19],[38.379,35.176],[38.339,35.155],[38.322,35.124],[38.329,35.101],[38.34,35.09],[38.35,35.085],[38.349,35.08],[38.33,35.062],[38.27,35.042],[38.251,35.038],[38.178,35.014],[38.161,35.006],[38.134,34.984],[38.106,34.938],[38.1,34.922],[38.09,34.908],[38.067,34.888],[38.057,34.882],[38.046,34.89],[38.013,34.93],[37.998,34.942],[37.955,34.973],[37.922,34.988],[37.918,34.988],[37.91,35.004],[37.905,35.039],[37.886,35.059],[37.868,35.068],[37.854,35.071],[37.839,35.08],[37.807,35.104],[37.788,35.104],[37.767,35.099],[37.752,35.099],[37.713,35.091],[37.703,35.061],[37.689,35.03],[37.642,34.971],[37.584,34.954],[37.544,34.937],[37.522,34.954],[37.499,34.953],[37.492,34.967],[37.472,34.973],[37.421,34.977],[37.405,34.973],[37.389,34.978],[37.384,34.975],[37.352,34.977],[37.337,34.973],[37.327,34.96],[37.31,34.958],[37.303,34.949],[37.308,34.94],[37.29,34.936],[37.283,34.914],[37.256,34.92],[37.235,34.912],[37.23,34.926],[37.222,34.934],[37.216,34.936],[37.207,34.933],[37.191,34.938],[37.177,34.933],[37.172,34.921],[37.158,34.908],[37.152,34.91],[37.148,34.918],[37.13,34.918],[37.114,34.913],[37.111,34.909],[37.101,34.911],[37.081,34.906],[37.058,34.895],[37.015,34.865],[36.995,34.863],[36.987,34.875],[36.97,34.883],[36.976,34.912],[36.971,34.927],[36.958,34.928],[36.944,34.941],[36.94,34.95],[36.913,34.976],[36.899,34.978],[36.884,34.971],[36.87,34.969],[36.867,34.973],[36.854,34.969],[36.85,34.97],[36.832,34.958],[36.813,34.957],[36.815,34.95],[36.797,34.943],[36.786,34.945],[36.782,34.949],[36.767,34.947],[36.763,34.937],[36.753,34.934],[36.752,34.94],[36.743,34.94],[36.743,34.933],[36.736,34.931],[36.735,34.943],[36.72,34.946],[36.708,34.936],[36.696,34.938],[36.688,34.935],[36.67,34.92],[36.66,34.913],[36.658,34.906],[36.634,34.902],[36.626,34.909],[36.611,34.909],[36.611,34.905],[36.602,34.904],[36.598,34.91],[36.609,34.912],[36.604,34.925],[36.597,34.927],[36.586,34.922],[36.573,34.92],[36.575,34.912],[36.572,34.901],[36.568,34.897],[36.559,34.895],[36.552,34.9],[36.552,34.912],[36.544,34.915],[36.54,34.923],[36.52,34.924],[36.52,34.932],[36.536,34.941],[36.533,34.949],[36.524,34.954],[36.506,34.953],[36.504,34.949],[36.485,34.939],[36.487,34.924],[36.471,34.92],[36.461,34.92],[36.463,34.899],[36.467,34.898],[36.466,34.882],[36.438,34.872],[36.425,34.873],[36.412,34.868],[36.399,34.857],[36.394,34.859],[36.384,34.855],[36.381,34.867],[36.366,34.875],[36.353,34.858],[36.343,34.857],[36.337,34.868],[36.34,34.874],[36.331,34.89],[36.321,34.886],[36.325,34.896],[36.32,34.894],[36.311,34.9],[36.307,34.906],[36.3,34.908],[36.302,34.916],[36.298,34.918],[36.284,34.915],[36.278,34.919],[36.266,34.919],[36.27,34.934],[36.269,34.949],[36.261,34.959],[36.238,34.977],[36.211,34.98],[36.187,34.987],[36.173,34.984],[36.154,34.975],[36.138,34.972],[36.137,34.979],[36.15,34.983],[36.154,34.997],[36.159,35.005],[36.183,35.012],[36.2,35.024],[36.238,35.026],[36.242,35.029],[36.254,35.067],[36.249,35.07],[36.249,35.079],[36.265,35.085],[36.264,35.101],[36.272,35.11],[36.269,35.116],[36.273,35.127],[36.266,35.139],[36.266,35.152],[36.263,35.158],[36.255,35.183],[36.254,35.197],[36.255,35.212],[36.246,35.226],[36.244,35.244],[36.236,35.251],[36.226,35.254],[36.235,35.289],[36.234,35.298],[36.238,35.308],[36.23,35.325],[36.231,35.334],[36.238,35.335],[36.237,35.34],[36.23,35.35],[36.227,35.361],[36.234,35.375],[36.215,35.397],[36.208,35.41],[36.206,35.423],[36.21,35.435],[36.209,35.448],[36.219,35.454],[36.215,35.459],[36.217,35.467],[36.222,35.467],[36.223,35.477],[36.221,35.507],[36.222,35.51],[36.221,35.568],[36.228,35.573],[36.225,35.601],[36.216,35.609],[36.216,35.626],[36.219,35.627],[36.224,35.641],[36.223,35.649],[36.216,35.649],[36.217,35.658],[36.205,35.665],[36.211,35.682],[36.219,35.671],[36.233,35.669],[36.239,35.672],[36.24,35.682],[36.249,35.676],[36.251,35.688],[36.246,35.693],[36.247,35.701],[36.253,35.705],[36.25,35.715],[36.257,35.715],[36.259,35.72],[36.244,35.734],[36.235,35.739],[36.229,35.752],[36.257,35.75],[36.279,35.744],[36.294,35.752],[36.314,35.747],[36.317,35.76],[36.323,35.762],[36.332,35.758],[36.346,35.743],[36.347,35.736],[36.341,35.735],[36.342,35.723],[36.346,35.72],[36.361,35.723],[36.368,35.716],[36.377,35.718],[36.381,35.726],[36.394,35.721],[36.41,35.705],[36.411,35.691],[36.406,35.676],[36.387,35.675],[36.387,35.67],[36.401,35.669],[36.402,35.665],[36.396,35.648],[36.397,35.638],[36.395,35.612],[36.397,35.607],[36.405,35.606],[36.408,35.597],[36.402,35.596],[36.399,35.584],[36.394,35.58],[36.397,35.569],[36.392,35.559],[36.394,35.54],[36.408,35.536],[36.425,35.535],[36.43,35.53],[36.445,35.535],[36.449,35.525],[36.446,35.517],[36.451,35.51],[36.459,35.506],[36.459,35.488],[36.457,35.477],[36.474,35.476],[36.475,35.463],[36.496,35.455],[36.507,35.454],[36.508,35.443],[36.523,35.434],[36.524,35.428],[36.516,35.414],[36.519,35.408],[36.532,35.41],[36.555,35.409],[36.566,35.415],[36.585,35.421],[36.589,35.417],[36.588,35.403],[36.596,35.404],[36.625,35.401],[36.64,35.395],[36.639,35.377],[36.651,35.38],[36.651,35.385],[36.657,35.396],[36.67,35.4],[36.675,35.405],[36.696,35.403],[36.714,35.404],[36.746,35.403],[36.79,35.408],[36.796,35.414],[36.814,35.411],[36.839,35.413],[36.861,35.412],[36.875,35.405],[36.88,35.391],[36.879,35.382],[36.896,35.378],[36.917,35.383],[36.927,35.384],[36.948,35.38],[36.955,35.384],[36.957,35.395],[36.963,35.401],[36.989,35.413],[36.997,35.431],[37.005,35.432],[37.01,35.427],[37.016,35.413],[37.035,35.412],[37.036,35.409],[37.052,35.411],[37.08,35.411],[37.089,35.42],[37.104,35.429],[37.107,35.442],[37.103,35.447],[37.102,35.459],[37.104,35.469],[37.117,35.472],[37.122,35.467],[37.143,35.459],[37.149,35.471],[37.156,35.478],[37.161,35.489],[37.161,35.505],[37.166,35.513],[37.182,35.517],[37.195,35.533],[37.199,35.546]]],"label":[37.298,35.241]},"latakia":{"rings":[[[36.229,35.752],[36.235,35.739],[36.244,35.734],[36.259,35.72],[36.257,35.715],[36.25,35.715],[36.253,35.705],[36.247,35.701],[36.246,35.693],[36.251,35.688],[36.249,35.676],[36.24,35.682],[36.239,35.672],[36.233,35.669],[36.219,35.671],[36.211,35.682],[36.205,35.665],[36.217,35.658],[36.216,35.649],[36.223,35.649],[36.224,35.641],[36.219,35.627],[36.216,35.626],[36.216,35.609],[36.225,35.601],[36.228,35.573],[36.221,35.568],[36.222,35.51],[36.221,35.507],[36.223,35.477],[36.222,35.467],[36.217,35.467],[36.215,35.459],[36.219,35.454],[36.209,35.448],[36.21,35.435],[36.206,35.423],[36.208,35.41],[36.215,35.397],[36.234,35.375],[36.227,35.361],[36.23,35.35],[36.237,35.34],[36.238,35.335],[36.231,35.334],[36.23,35.325],[36.238,35.308],[36.234,35.298],[36.235,35.289],[36.226,35.254],[36.22,35.254],[36.203,35.249],[36.191,35.236],[36.183,35.233],[36.18,35.226],[36.165,35.221],[36.145,35.226],[36.122,35.224],[36.118,35.222],[36.093,35.225],[36.078,35.224],[36.063,35.226],[36.046,35.226],[36.039,35.231],[36.015,35.231],[35.991,35.252],[35.985,35.252],[35.975,35.244],[35.971,35.257],[35.957,35.259],[35.953,35.268],[35.947,35.271],[35.956,35.271],[35.965,35.259],[35.97,35.258],[35.963,35.271],[35.954,35.275],[35.932,35.27],[35.928,35.285],[35.932,35.312],[35.927,35.354],[35.928,35.37],[35.926,35.384],[35.92,35.413],[35.924,35.424],[35.883,35.463],[35.866,35.473],[35.827,35.496],[35.816,35.504],[35.798,35.507],[35.788,35.5],[35.77,35.512],[35.779,35.52],[35.783,35.53],[35.779,35.544],[35.764,35.548],[35.762,35.553],[35.743,35.565],[35.754,35.58],[35.75,35.586],[35.729,35.582],[35.728,35.588],[35.739,35.588],[35.75,35.593],[35.759,35.591],[35.77,35.599],[35.771,35.609],[35.776,35.614],[35.783,35.609],[35.782,35.619],[35.788,35.626],[35.79,35.642],[35.784,35.656],[35.774,35.663],[35.778,35.673],[35.79,35.682],[35.807,35.686],[35.82,35.707],[35.84,35.722],[35.843,35.74],[35.853,35.748],[35.854,35.756],[35.847,35.771],[35.847,35.784],[35.841,35.794],[35.838,35.806],[35.828,35.819],[35.826,35.83],[35.817,35.837],[35.82,35.85],[35.818,35.853],[35.807,35.852],[35.808,35.856],[35.824,35.859],[35.833,35.853],[35.844,35.851],[35.862,35.857],[35.872,35.865],[35.887,35.874],[35.905,35.919],[35.91,35.925],[35.922,35.93],[35.936,35.919],[35.951,35.922],[35.994,35.939],[36.009,35.94],[36.023,35.924],[36.022,35.909],[36.015,35.89],[36.016,35.884],[36.023,35.88],[36.05,35.879],[36.096,35.869],[36.116,35.866],[36.134,35.855],[36.142,35.846],[36.155,35.82],[36.148,35.795],[36.151,35.789],[36.161,35.784],[36.169,35.785],[36.189,35.775],[36.198,35.767],[36.2,35.761],[36.208,35.753],[36.229,35.752]]],"label":[36.01,35.62]},"idlib":{"rings":[[[36.669,36.32],[36.68,36.322],[36.697,36.322],[36.715,36.323],[36.729,36.328],[36.723,36.334],[36.726,36.338],[36.745,36.338],[36.754,36.329],[36.761,36.31],[36.766,36.304],[36.773,36.302],[36.787,36.303],[36.793,36.281],[36.815,36.284],[36.823,36.282],[36.816,36.268],[36.824,36.258],[36.822,36.25],[36.836,36.249],[36.84,36.234],[36.833,36.231],[36.828,36.217],[36.812,36.215],[36.798,36.217],[36.781,36.207],[36.774,36.195],[36.765,36.191],[36.773,36.186],[36.76,36.165],[36.743,36.163],[36.733,36.157],[36.715,36.155],[36.71,36.146],[36.718,36.142],[36.721,36.134],[36.729,36.123],[36.738,36.118],[36.75,36.115],[36.756,36.109],[36.755,36.105],[36.744,36.1],[36.741,36.085],[36.747,36.08],[36.771,36.067],[36.781,36.066],[36.789,36.07],[36.807,36.072],[36.823,36.066],[36.834,36.065],[36.839,36.047],[36.845,36.04],[36.857,36.044],[36.882,36.043],[36.883,36.024],[36.875,36.015],[36.872,36.001],[36.873,35.988],[36.868,35.982],[36.868,35.971],[36.875,35.96],[36.878,35.934],[36.888,35.936],[36.893,35.929],[36.9,35.925],[36.902,35.914],[36.92,35.913],[36.936,35.916],[36.942,35.904],[36.935,35.898],[36.94,35.887],[36.953,35.886],[36.958,35.879],[36.96,35.87],[36.954,35.863],[36.959,35.85],[36.977,35.845],[36.981,35.838],[36.991,35.836],[36.985,35.825],[36.985,35.812],[36.99,35.806],[37.01,35.82],[37.025,35.817],[37.031,35.825],[37.034,35.844],[37.053,35.837],[37.066,35.84],[37.068,35.833],[37.088,35.823],[37.092,35.819],[37.103,35.82],[37.103,35.829],[37.109,35.831],[37.12,35.829],[37.115,35.809],[37.115,35.802],[37.137,35.796],[37.137,35.781],[37.121,35.78],[37.108,35.767],[37.12,35.758],[37.115,35.749],[37.104,35.747],[37.105,35.742],[37.117,35.74],[37.12,35.727],[37.12,35.708],[37.11,35.702],[37.1,35.687],[37.1,35.679],[37.103,35.674],[37.111,35.671],[37.123,35.673],[37.135,35.668],[37.128,35.644],[37.134,35.64],[37.145,35.636],[37.118,35.61],[37.121,35.605],[37.111,35.591],[37.118,35.589],[37.143,35.588],[37.156,35.583],[37.167,35.553],[37.175,35.55],[37.188,35.558],[37.202,35.554],[37.199,35.546],[37.195,35.533],[37.182,35.517],[37.166,35.513],[37.161,35.505],[37.161,35.489],[37.156,35.478],[37.149,35.471],[37.143,35.459],[37.122,35.467],[37.117,35.472],[37.104,35.469],[37.102,35.459],[37.103,35.447],[37.107,35.442],[37.104,35.429],[37.089,35.42],[37.08,35.411],[37.052,35.411],[37.036,35.409],[37.035,35.412],[37.016,35.413],[37.01,35.427],[37.005,35.432],[36.997,35.431],[36.989,35.413],[36.963,35.401],[36.957,35.395],[36.955,35.384],[36.948,35.38],[36.927,35.384],[36.917,35.383],[36.896,35.378],[36.879,35.382],[36.88,35.391],[36.875,35.405],[36.861,35.412],[36.839,35.413],[36.814,35.411],[36.796,35.414],[36.79,35.408],[36.746,35.403],[36.714,35.404],[36.696,35.403],[36.675,35.405],[36.67,35.4],[36.657,35.396],[36.651,35.385],[36.651,35.38],[36.639,35.377],[36.64,35.395],[36.625,35.401],[36.596,35.404],[36.588,35.403],[36.589,35.417],[36.585,35.421],[36.566,35.415],[36.555,35.409],[36.532,35.41],[36.519,35.408],[36.516,35.414],[36.524,35.428],[36.523,35.434],[36.508,35.443],[36.507,35.454],[36.496,35.455],[36.475,35.463],[36.474,35.476],[36.457,35.477],[36.459,35.488],[36.459,35.506],[36.451,35.51],[36.446,35.517],[36.449,35.525],[36.445,35.535],[36.43,35.53],[36.425,35.535],[36.408,35.536],[36.394,35.54],[36.392,35.559],[36.397,35.569],[36.394,35.58],[36.399,35.584],[36.402,35.596],[36.408,35.597],[36.405,35.606],[36.397,35.607],[36.395,35.612],[36.397,35.638],[36.396,35.648],[36.402,35.665],[36.401,35.669],[36.387,35.67],[36.387,35.675],[36.406,35.676],[36.411,35.691],[36.41,35.705],[36.394,35.721],[36.381,35.726],[36.377,35.718],[36.368,35.716],[36.361,35.723],[36.346,35.72],[36.342,35.723],[36.341,35.735],[36.347,35.736],[36.346,35.743],[36.332,35.758],[36.323,35.762],[36.317,35.76],[36.314,35.747],[36.294,35.752],[36.279,35.744],[36.257,35.75],[36.229,35.752],[36.208,35.753],[36.2,35.761],[36.198,35.767],[36.189,35.775],[36.169,35.785],[36.161,35.784],[36.151,35.789],[36.148,35.795],[36.155,35.82],[36.169,35.815],[36.183,35.836],[36.189,35.884],[36.181,35.902],[36.188,35.919],[36.199,35.936],[36.213,35.952],[36.229,35.96],[36.244,35.964],[36.263,35.962],[36.279,35.955],[36.29,35.954],[36.306,35.961],[36.295,35.98],[36.298,35.992],[36.317,36.004],[36.344,35.992],[36.357,35.992],[36.368,35.995],[36.379,36.001],[36.382,36.01],[36.381,36.026],[36.392,36.04],[36.395,36.052],[36.389,36.068],[36.398,36.084],[36.386,36.099],[36.381,36.119],[36.392,36.143],[36.388,36.152],[36.377,36.169],[36.382,36.181],[36.389,36.188],[36.399,36.19],[36.403,36.2],[36.398,36.213],[36.398,36.223],[36.403,36.226],[36.413,36.223],[36.435,36.211],[36.458,36.208],[36.471,36.202],[36.482,36.205],[36.489,36.219],[36.492,36.233],[36.495,36.234],[36.509,36.23],[36.523,36.238],[36.543,36.238],[36.557,36.228],[36.584,36.232],[36.609,36.218],[36.627,36.218],[36.641,36.229],[36.675,36.229],[36.684,36.237],[36.701,36.244],[36.706,36.255],[36.696,36.266],[36.692,36.276],[36.7,36.292],[36.695,36.297],[36.671,36.302],[36.669,36.32]]],"label":[36.703,35.697]},"hasakah":{"rings":[[[41.289,35.494],[41.209,35.538],[41.11,35.547],[41.026,35.551],[40.971,35.549],[40.861,35.588],[40.752,35.617],[40.735,35.628],[40.723,35.64],[40.693,35.653],[40.661,35.674],[40.634,35.695],[40.618,35.711],[40.578,35.738],[40.553,35.758],[40.538,35.772],[40.501,35.789],[40.447,35.837],[40.416,35.863],[40.394,35.884],[40.389,35.896],[40.383,35.905],[40.376,35.924],[40.364,35.938],[40.346,35.947],[40.322,35.953],[40.314,35.959],[40.286,35.97],[40.26,35.984],[40.239,36.005],[40.233,36.026],[40.2,36.029],[40.186,36.037],[40.154,36.06],[40.099,36.086],[40.088,36.119],[40.077,36.136],[40.067,36.145],[40.006,36.182],[40.011,36.192],[40.002,36.209],[39.956,36.234],[39.944,36.245],[39.899,36.336],[39.894,36.338],[39.855,36.358],[39.828,36.361],[39.814,36.372],[39.8,36.369],[39.759,36.452],[39.73,36.477],[39.625,36.562],[39.597,36.59],[39.564,36.618],[39.513,36.684],[39.504,36.702],[39.546,36.708],[39.597,36.72],[39.626,36.723],[39.665,36.726],[39.712,36.742],[39.723,36.744],[39.807,36.75],[39.842,36.755],[39.856,36.761],[39.89,36.777],[39.929,36.787],[39.963,36.798],[40.016,36.824],[40.052,36.836],[40.073,36.849],[40.087,36.861],[40.133,36.872],[40.181,36.879],[40.208,36.888],[40.238,36.903],[40.26,36.92],[40.278,36.926],[40.326,36.952],[40.37,36.967],[40.398,36.981],[40.419,36.999],[40.438,37.009],[40.462,37.015],[40.533,37.024],[40.546,37.027],[40.582,37.041],[40.602,37.054],[40.635,37.063],[40.675,37.078],[40.688,37.088],[40.708,37.098],[40.721,37.101],[40.741,37.102],[40.753,37.106],[40.782,37.121],[40.823,37.12],[40.834,37.109],[40.85,37.107],[40.858,37.108],[40.87,37.118],[40.886,37.124],[40.921,37.127],[40.95,37.124],[40.972,37.117],[41.001,37.112],[41.032,37.107],[41.06,37.105],[41.115,37.095],[41.132,37.093],[41.17,37.092],[41.204,37.079],[41.212,37.067],[41.218,37.064],[41.237,37.065],[41.249,37.069],[41.257,37.075],[41.271,37.079],[41.501,37.08],[41.558,37.085],[41.59,37.092],[41.626,37.105],[41.657,37.112],[41.687,37.114],[41.728,37.114],[41.759,37.117],[41.975,37.16],[42.016,37.177],[42.057,37.189],[42.079,37.202],[42.106,37.213],[42.113,37.219],[42.122,37.235],[42.139,37.249],[42.154,37.26],[42.184,37.275],[42.194,37.282],[42.208,37.3],[42.216,37.315],[42.225,37.319],[42.235,37.316],[42.229,37.298],[42.219,37.284],[42.221,37.277],[42.235,37.281],[42.256,37.279],[42.267,37.272],[42.276,37.271],[42.295,37.281],[42.307,37.261],[42.321,37.257],[42.328,37.245],[42.335,37.24],[42.35,37.236],[42.357,37.228],[42.359,37.218],[42.355,37.211],[42.34,37.2],[42.335,37.186],[42.337,37.175],[42.349,37.148],[42.356,37.14],[42.358,37.122],[42.354,37.098],[42.362,37.095],[42.366,37.089],[42.381,37.082],[42.385,37.067],[42.249,36.958],[42.177,36.89],[42.137,36.861],[42.092,36.814],[42.034,36.764],[41.991,36.723],[41.938,36.67],[41.828,36.593],[41.707,36.567],[41.411,36.523],[41.295,36.356],[41.292,36.264],[41.267,36.092],[41.258,36.055],[41.381,35.835],[41.394,35.63],[41.289,35.494]]],"label":[40.702,36.446]},"deir-ez-zor":{"rings":[[[40.265,34.068],[40.219,34.13],[39.6,34.918],[39.416,35.162],[39.297,35.251],[39.245,35.278],[39.471,35.553],[39.64,35.753],[39.643,35.762],[39.658,35.776],[39.685,35.777],[39.695,35.769],[39.7,35.77],[39.698,35.776],[39.704,35.826],[39.701,35.93],[39.708,35.955],[39.698,35.969],[39.703,35.989],[39.714,35.994],[39.724,36.002],[39.727,36.009],[39.742,36.016],[39.742,36.027],[39.746,36.033],[39.764,36.036],[39.768,36.043],[39.78,36.05],[39.784,36.063],[39.795,36.07],[39.801,36.082],[39.8,36.086],[39.81,36.097],[39.817,36.109],[39.828,36.111],[39.838,36.12],[39.843,36.131],[39.837,36.138],[39.835,36.146],[39.829,36.151],[39.843,36.173],[39.843,36.18],[39.854,36.188],[39.864,36.209],[39.88,36.215],[39.884,36.225],[39.895,36.24],[39.893,36.245],[39.899,36.269],[39.894,36.338],[39.899,36.336],[39.944,36.245],[39.956,36.234],[40.002,36.209],[40.011,36.192],[40.006,36.182],[40.067,36.145],[40.077,36.136],[40.088,36.119],[40.099,36.086],[40.154,36.06],[40.186,36.037],[40.2,36.029],[40.233,36.026],[40.239,36.005],[40.26,35.984],[40.286,35.97],[40.314,35.959],[40.322,35.953],[40.346,35.947],[40.364,35.938],[40.376,35.924],[40.383,35.905],[40.389,35.896],[40.394,35.884],[40.416,35.863],[40.447,35.837],[40.501,35.789],[40.538,35.772],[40.553,35.758],[40.578,35.738],[40.618,35.711],[40.634,35.695],[40.661,35.674],[40.693,35.653],[40.723,35.64],[40.735,35.628],[40.752,35.617],[40.861,35.588],[40.971,35.549],[41.026,35.551],[41.11,35.547],[41.209,35.538],[41.289,35.494],[41.283,35.486],[41.275,35.385],[41.242,35.285],[41.233,35.248],[41.225,35.204],[41.218,35.132],[41.23,34.938],[41.23,34.86],[41.238,34.785],[41.235,34.777],[41.139,34.664],[41.033,34.452],[41.017,34.44],[41.012,34.42],[40.265,34.068]]],"label":[40.475,34.959]},"tartus":{"rings":[[[36.284,34.915],[36.283,34.898],[36.267,34.886],[36.267,34.874],[36.272,34.869],[36.289,34.863],[36.304,34.868],[36.311,34.878],[36.326,34.881],[36.328,34.874],[36.315,34.864],[36.31,34.857],[36.285,34.838],[36.269,34.807],[36.26,34.804],[36.244,34.794],[36.22,34.789],[36.208,34.783],[36.194,34.77],[36.17,34.759],[36.16,34.744],[36.145,34.735],[36.151,34.724],[36.148,34.7],[36.128,34.692],[36.125,34.68],[36.129,34.665],[36.116,34.647],[36.117,34.638],[36.111,34.634],[36.098,34.636],[36.093,34.629],[36.079,34.634],[36.074,34.628],[36.072,34.633],[36.063,34.636],[36.053,34.628],[36.043,34.63],[36.034,34.628],[36.024,34.635],[36.006,34.642],[36.007,34.646],[35.992,34.643],[35.992,34.65],[35.984,34.652],[35.981,34.644],[35.961,34.697],[35.947,34.723],[35.941,34.741],[35.939,34.758],[35.939,34.775],[35.934,34.787],[35.905,34.842],[35.88,34.91],[35.888,34.926],[35.885,34.938],[35.886,34.946],[35.883,34.968],[35.888,34.992],[35.903,35.004],[35.904,35.011],[35.898,35.05],[35.892,35.059],[35.898,35.074],[35.9,35.086],[35.896,35.099],[35.897,35.108],[35.905,35.119],[35.91,35.12],[35.917,35.131],[35.92,35.143],[35.931,35.154],[35.933,35.16],[35.933,35.175],[35.957,35.188],[35.963,35.201],[35.96,35.216],[35.949,35.245],[35.936,35.263],[35.938,35.268],[35.947,35.271],[35.953,35.268],[35.957,35.259],[35.971,35.257],[35.975,35.244],[35.985,35.252],[35.991,35.252],[36.015,35.231],[36.039,35.231],[36.046,35.226],[36.063,35.226],[36.078,35.224],[36.093,35.225],[36.118,35.222],[36.122,35.224],[36.145,35.226],[36.165,35.221],[36.18,35.226],[36.183,35.233],[36.191,35.236],[36.203,35.249],[36.22,35.254],[36.226,35.254],[36.236,35.251],[36.244,35.244],[36.246,35.226],[36.255,35.212],[36.254,35.197],[36.255,35.183],[36.263,35.158],[36.266,35.152],[36.266,35.139],[36.273,35.127],[36.269,35.116],[36.272,35.11],[36.264,35.101],[36.265,35.085],[36.249,35.079],[36.249,35.07],[36.254,35.067],[36.242,35.029],[36.238,35.026],[36.2,35.024],[36.183,35.012],[36.159,35.005],[36.154,34.997],[36.15,34.983],[36.137,34.979],[36.138,34.972],[36.154,34.975],[36.173,34.984],[36.187,34.987],[36.211,34.98],[36.238,34.977],[36.261,34.959],[36.269,34.949],[36.27,34.934],[36.266,34.919],[36.278,34.919],[36.284,34.915]],[[35.858,34.858],[35.862,34.854],[35.858,34.853],[35.858,34.858]]],"label":[36.059,34.854]},"raqqa":{"rings":[[[38.317,35.395],[38.245,35.444],[38.279,35.506],[38.29,35.516],[38.3,35.528],[38.303,35.568],[38.267,35.581],[38.269,35.594],[38.265,35.599],[38.257,35.598],[38.254,35.592],[38.207,35.607],[38.21,35.617],[38.192,35.653],[38.197,35.665],[38.199,35.678],[38.198,35.691],[38.194,35.705],[38.187,35.718],[38.164,35.725],[38.157,35.732],[38.17,35.787],[38.145,35.793],[38.172,35.836],[38.154,35.838],[38.151,35.835],[38.128,35.837],[38.126,35.831],[38.115,35.834],[38.13,35.86],[38.136,35.877],[38.157,35.902],[38.183,35.928],[38.201,35.942],[38.191,35.95],[38.177,35.953],[38.164,35.952],[38.161,35.957],[38.164,35.971],[38.16,35.979],[38.153,35.979],[38.154,35.991],[38.147,35.997],[38.133,35.999],[38.124,36.01],[38.11,36.012],[38.1,36.02],[38.096,36.04],[38.105,36.052],[38.085,36.072],[38.061,36.083],[38.06,36.097],[38.069,36.099],[38.08,36.088],[38.092,36.089],[38.101,36.102],[38.082,36.118],[38.082,36.123],[38.074,36.137],[38.08,36.145],[38.079,36.151],[38.087,36.172],[38.108,36.177],[38.112,36.189],[38.115,36.209],[38.134,36.223],[38.137,36.23],[38.133,36.251],[38.141,36.257],[38.163,36.257],[38.185,36.269],[38.198,36.273],[38.206,36.282],[38.215,36.279],[38.228,36.283],[38.257,36.275],[38.281,36.274],[38.299,36.275],[38.312,36.278],[38.313,36.282],[38.329,36.283],[38.332,36.276],[38.344,36.271],[38.352,36.263],[38.348,36.251],[38.344,36.246],[38.337,36.244],[38.338,36.236],[38.332,36.221],[38.333,36.214],[38.359,36.2],[38.383,36.195],[38.379,36.187],[38.386,36.179],[38.384,36.168],[38.388,36.159],[38.402,36.157],[38.413,36.153],[38.438,36.155],[38.442,36.184],[38.44,36.196],[38.428,36.206],[38.418,36.223],[38.424,36.227],[38.437,36.231],[38.481,36.24],[38.503,36.238],[38.51,36.232],[38.513,36.204],[38.527,36.206],[38.546,36.22],[38.558,36.232],[38.548,36.232],[38.547,36.238],[38.537,36.247],[38.529,36.247],[38.534,36.26],[38.539,36.26],[38.539,36.281],[38.547,36.29],[38.571,36.287],[38.572,36.26],[38.574,36.258],[38.609,36.275],[38.632,36.282],[38.628,36.303],[38.647,36.313],[38.638,36.328],[38.646,36.339],[38.64,36.344],[38.647,36.348],[38.643,36.368],[38.636,36.372],[38.64,36.39],[38.635,36.399],[38.642,36.405],[38.642,36.412],[38.652,36.412],[38.656,36.419],[38.664,36.421],[38.664,36.435],[38.653,36.446],[38.657,36.455],[38.672,36.46],[38.677,36.477],[38.656,36.482],[38.653,36.498],[38.667,36.529],[38.684,36.543],[38.682,36.552],[38.673,36.56],[38.675,36.575],[38.696,36.614],[38.694,36.619],[38.703,36.638],[38.715,36.637],[38.72,36.641],[38.715,36.645],[38.71,36.641],[38.709,36.65],[38.705,36.652],[38.676,36.639],[38.668,36.638],[38.663,36.654],[38.629,36.644],[38.634,36.637],[38.634,36.611],[38.624,36.606],[38.596,36.614],[38.589,36.633],[38.593,36.646],[38.58,36.665],[38.585,36.678],[38.616,36.675],[38.622,36.667],[38.661,36.676],[38.673,36.684],[38.665,36.716],[38.65,36.717],[38.636,36.733],[38.644,36.746],[38.64,36.75],[38.634,36.762],[38.635,36.769],[38.644,36.77],[38.697,36.728],[38.724,36.71],[38.731,36.707],[38.777,36.699],[38.801,36.697],[38.815,36.698],[38.847,36.697],[38.97,36.699],[38.999,36.703],[39.02,36.703],[39.085,36.697],[39.15,36.683],[39.216,36.666],[39.227,36.665],[39.276,36.674],[39.345,36.69],[39.398,36.694],[39.43,36.695],[39.453,36.7],[39.467,36.698],[39.504,36.702],[39.513,36.684],[39.564,36.618],[39.597,36.59],[39.625,36.562],[39.73,36.477],[39.759,36.452],[39.8,36.369],[39.814,36.372],[39.828,36.361],[39.855,36.358],[39.894,36.338],[39.899,36.269],[39.893,36.245],[39.895,36.24],[39.884,36.225],[39.88,36.215],[39.864,36.209],[39.854,36.188],[39.843,36.18],[39.843,36.173],[39.829,36.151],[39.835,36.146],[39.837,36.138],[39.843,36.131],[39.838,36.12],[39.828,36.111],[39.817,36.109],[39.81,36.097],[39.8,36.086],[39.801,36.082],[39.795,36.07],[39.784,36.063],[39.78,36.05],[39.768,36.043],[39.764,36.036],[39.746,36.033],[39.742,36.027],[39.742,36.016],[39.727,36.009],[39.724,36.002],[39.714,35.994],[39.703,35.989],[39.698,35.969],[39.708,35.955],[39.701,35.93],[39.704,35.826],[39.698,35.776],[39.7,35.77],[39.695,35.769],[39.685,35.777],[39.658,35.776],[39.643,35.762],[39.64,35.753],[39.471,35.553],[39.245,35.278],[39.225,35.285],[39.209,35.287],[39.201,35.294],[39.202,35.305],[39.198,35.315],[39.175,35.326],[39.148,35.328],[39.134,35.324],[38.871,35.371],[38.575,35.399],[38.443,35.397],[38.317,35.395]]],"label":[39.137,36.038]},"daraa":{"rings":[[[35.989,33.159],[35.999,33.164],[36.009,33.164],[36.025,33.154],[36.036,33.154],[36.051,33.157],[36.057,33.162],[36.07,33.161],[36.08,33.167],[36.076,33.177],[36.08,33.193],[36.091,33.197],[36.11,33.195],[36.121,33.198],[36.145,33.192],[36.157,33.197],[36.164,33.212],[36.183,33.218],[36.194,33.211],[36.209,33.21],[36.217,33.217],[36.227,33.27],[36.236,33.273],[36.244,33.267],[36.261,33.26],[36.276,33.246],[36.282,33.234],[36.298,33.227],[36.316,33.225],[36.322,33.21],[36.339,33.198],[36.346,33.199],[36.368,33.184],[36.396,33.192],[36.398,33.194],[36.393,33.217],[36.426,33.249],[36.44,33.255],[36.45,33.268],[36.466,33.27],[36.471,33.273],[36.491,33.279],[36.506,33.296],[36.515,33.297],[36.528,33.284],[36.536,33.281],[36.55,33.26],[36.549,33.252],[36.556,33.246],[36.565,33.217],[36.572,33.183],[36.524,33.179],[36.504,33.167],[36.498,33.156],[36.492,33.128],[36.492,33.105],[36.501,33.088],[36.518,33.058],[36.535,33.054],[36.539,33.042],[36.553,33.027],[36.555,33.017],[36.534,33.005],[36.506,33.001],[36.466,32.997],[36.428,32.989],[36.42,32.984],[36.394,32.963],[36.376,32.942],[36.382,32.916],[36.375,32.896],[36.371,32.867],[36.372,32.854],[36.382,32.787],[36.389,32.777],[36.393,32.748],[36.375,32.744],[36.371,32.728],[36.358,32.71],[36.372,32.704],[36.38,32.696],[36.393,32.697],[36.403,32.685],[36.442,32.673],[36.456,32.666],[36.464,32.659],[36.464,32.643],[36.453,32.63],[36.432,32.628],[36.4,32.616],[36.405,32.584],[36.413,32.568],[36.438,32.566],[36.491,32.569],[36.505,32.566],[36.512,32.556],[36.507,32.537],[36.514,32.51],[36.534,32.489],[36.543,32.475],[36.544,32.464],[36.522,32.437],[36.51,32.389],[36.506,32.374],[36.5,32.362],[36.48,32.373],[36.464,32.377],[36.41,32.382],[36.401,32.387],[36.337,32.443],[36.296,32.47],[36.258,32.493],[36.218,32.522],[36.201,32.528],[36.178,32.518],[36.165,32.522],[36.134,32.524],[36.111,32.523],[36.091,32.518],[36.089,32.537],[36.084,32.549],[36.07,32.576],[36.059,32.588],[36.036,32.604],[36.035,32.607],[36.039,32.643],[36.033,32.658],[36.011,32.663],[35.994,32.661],[35.983,32.665],[35.973,32.673],[35.983,32.682],[35.983,32.691],[35.975,32.697],[35.963,32.697],[35.948,32.707],[35.945,32.718],[35.937,32.724],[35.92,32.722],[35.909,32.726],[35.901,32.725],[35.878,32.736],[35.862,32.736],[35.841,32.729],[35.826,32.731],[35.817,32.74],[35.808,32.738],[35.804,32.743],[35.809,32.751],[35.801,32.76],[35.78,32.752],[35.769,32.751],[35.756,32.735],[35.747,32.732],[35.761,32.752],[35.773,32.762],[35.78,32.773],[35.791,32.78],[35.807,32.784],[35.809,32.788],[35.823,32.795],[35.826,32.803],[35.843,32.815],[35.848,32.824],[35.846,32.835],[35.852,32.845],[35.873,32.855],[35.897,32.882],[35.912,32.883],[35.927,32.897],[35.938,32.897],[35.945,32.906],[35.945,32.917],[35.938,32.925],[35.94,32.931],[35.95,32.929],[35.96,32.942],[35.97,32.939],[35.976,32.928],[35.988,32.93],[35.997,32.938],[35.993,32.961],[35.982,32.969],[35.983,32.987],[35.967,33.003],[35.963,33.019],[35.946,33.036],[35.946,33.044],[35.965,33.066],[35.968,33.092],[35.98,33.104],[35.989,33.126],[35.985,33.139],[35.985,33.149],[35.989,33.159]]],"label":[36.167,32.822]},"suwayda":{"rings":[[[36.572,33.183],[36.708,33.194],[36.712,33.193],[36.865,33.066],[36.885,33.056],[36.913,33.052],[37.037,33.049],[37.049,33.047],[37.095,33.033],[37.116,33.023],[37.128,33.019],[37.194,33.008],[37.202,33.006],[37.257,33.003],[37.277,32.995],[37.275,32.965],[37.279,32.927],[37.287,32.907],[37.464,32.664],[36.867,32.343],[36.835,32.316],[36.722,32.333],[36.704,32.327],[36.692,32.339],[36.502,32.36],[36.5,32.362],[36.506,32.374],[36.51,32.389],[36.522,32.437],[36.544,32.464],[36.543,32.475],[36.534,32.489],[36.514,32.51],[36.507,32.537],[36.512,32.556],[36.505,32.566],[36.491,32.569],[36.438,32.566],[36.413,32.568],[36.405,32.584],[36.4,32.616],[36.432,32.628],[36.453,32.63],[36.464,32.643],[36.464,32.659],[36.456,32.666],[36.442,32.673],[36.403,32.685],[36.393,32.697],[36.38,32.696],[36.372,32.704],[36.358,32.71],[36.371,32.728],[36.375,32.744],[36.393,32.748],[36.389,32.777],[36.382,32.787],[36.372,32.854],[36.371,32.867],[36.375,32.896],[36.382,32.916],[36.376,32.942],[36.394,32.963],[36.42,32.984],[36.428,32.989],[36.466,32.997],[36.506,33.001],[36.534,33.005],[36.555,33.017],[36.553,33.027],[36.539,33.042],[36.535,33.054],[36.518,33.058],[36.501,33.088],[36.492,33.105],[36.492,33.128],[36.498,33.156],[36.504,33.167],[36.524,33.179],[36.572,33.183]]],"label":[36.82,32.716]},"quneitra":{"rings":[[[35.816,33.358],[35.846,33.337],[35.876,33.308],[35.883,33.297],[35.872,33.292],[35.872,33.285],[35.865,33.281],[35.875,33.272],[35.885,33.254],[35.895,33.255],[35.903,33.261],[35.91,33.261],[35.92,33.267],[35.941,33.263],[35.958,33.265],[35.964,33.259],[35.966,33.249],[35.966,33.232],[35.961,33.219],[35.959,33.208],[35.963,33.201],[35.974,33.202],[35.995,33.199],[35.99,33.185],[35.993,33.181],[35.989,33.159],[35.985,33.149],[35.985,33.139],[35.989,33.126],[35.98,33.104],[35.968,33.092],[35.965,33.066],[35.946,33.044],[35.946,33.036],[35.963,33.019],[35.967,33.003],[35.983,32.987],[35.982,32.969],[35.993,32.961],[35.997,32.938],[35.988,32.93],[35.976,32.928],[35.97,32.939],[35.96,32.942],[35.95,32.929],[35.94,32.931],[35.938,32.925],[35.945,32.917],[35.945,32.906],[35.938,32.897],[35.927,32.897],[35.912,32.883],[35.897,32.882],[35.873,32.855],[35.852,32.845],[35.846,32.835],[35.848,32.824],[35.843,32.815],[35.826,32.803],[35.823,32.795],[35.809,32.788],[35.807,32.784],[35.791,32.78],[35.78,32.773],[35.773,32.762],[35.761,32.752],[35.747,32.732],[35.74,32.732],[35.708,32.722],[35.699,32.712],[35.688,32.708],[35.672,32.691],[35.674,32.685],[35.664,32.68],[35.658,32.685],[35.645,32.678],[35.635,32.686],[35.638,32.705],[35.649,32.714],[35.652,32.734],[35.657,32.748],[35.656,32.755],[35.663,32.777],[35.655,32.793],[35.656,32.809],[35.644,32.811],[35.646,32.821],[35.642,32.834],[35.65,32.841],[35.65,32.849],[35.644,32.865],[35.623,32.89],[35.614,32.895],[35.617,32.905],[35.623,32.906],[35.627,32.912],[35.624,32.917],[35.628,32.938],[35.629,32.956],[35.631,32.96],[35.633,32.99],[35.631,32.995],[35.633,33.009],[35.63,33.013],[35.632,33.025],[35.641,33.041],[35.647,33.063],[35.646,33.078],[35.649,33.085],[35.653,33.124],[35.671,33.153],[35.663,33.189],[35.667,33.225],[35.671,33.231],[35.683,33.237],[35.685,33.243],[35.68,33.248],[35.67,33.247],[35.651,33.25],[35.643,33.246],[35.624,33.242],[35.621,33.253],[35.621,33.272],[35.643,33.28],[35.659,33.274],[35.688,33.295],[35.709,33.304],[35.714,33.322],[35.718,33.326],[35.727,33.329],[35.747,33.325],[35.787,33.34],[35.803,33.352],[35.816,33.358]]],"label":[35.795,33.007]}};
+const SYRIA_OUTLINE=[[[36.867,32.343],[36.835,32.316],[36.722,32.333],[36.704,32.327],[36.692,32.339],[36.502,32.36],[36.5,32.362],[36.48,32.373],[36.464,32.377],[36.41,32.382],[36.401,32.387],[36.337,32.443],[36.296,32.47],[36.258,32.493],[36.218,32.522],[36.201,32.528],[36.178,32.518],[36.165,32.522],[36.134,32.524],[36.111,32.523],[36.091,32.518],[36.089,32.537],[36.084,32.549],[36.07,32.576],[36.059,32.588],[36.036,32.604],[36.035,32.607],[36.039,32.643],[36.033,32.658],[36.011,32.663],[35.994,32.661],[35.983,32.665],[35.973,32.673],[35.983,32.682],[35.983,32.691],[35.975,32.697],[35.963,32.697],[35.948,32.707],[35.945,32.718],[35.937,32.724],[35.92,32.722],[35.909,32.726],[35.901,32.725],[35.878,32.736],[35.862,32.736],[35.841,32.729],[35.826,32.731],[35.817,32.74],[35.808,32.738],[35.804,32.743],[35.809,32.751],[35.801,32.76],[35.78,32.752],[35.769,32.751],[35.756,32.735],[35.747,32.732],[35.74,32.732],[35.708,32.722],[35.699,32.712],[35.688,32.708],[35.672,32.691],[35.674,32.685],[35.664,32.68],[35.658,32.685],[35.645,32.678],[35.635,32.686],[35.638,32.705],[35.649,32.714],[35.652,32.734],[35.657,32.748],[35.656,32.755],[35.663,32.777],[35.655,32.793],[35.656,32.809],[35.644,32.811],[35.646,32.821],[35.642,32.834],[35.65,32.841],[35.65,32.849],[35.644,32.865],[35.623,32.89],[35.614,32.895],[35.617,32.905],[35.623,32.906],[35.627,32.912],[35.624,32.917],[35.628,32.938],[35.629,32.956],[35.631,32.96],[35.633,32.99],[35.631,32.995],[35.633,33.009],[35.63,33.013],[35.632,33.025],[35.641,33.041],[35.647,33.063],[35.646,33.078],[35.649,33.085],[35.653,33.124],[35.671,33.153],[35.663,33.189],[35.667,33.225],[35.671,33.231],[35.683,33.237],[35.685,33.243],[35.68,33.248],[35.67,33.247],[35.651,33.25],[35.643,33.246],[35.624,33.242],[35.621,33.253],[35.621,33.272],[35.643,33.28],[35.659,33.274],[35.688,33.295],[35.709,33.304],[35.714,33.322],[35.718,33.326],[35.727,33.329],[35.747,33.325],[35.787,33.34],[35.803,33.352],[35.816,33.358],[35.819,33.384],[35.826,33.396],[35.843,33.408],[35.882,33.425],[35.903,33.436],[35.915,33.448],[35.937,33.461],[35.949,33.473],[35.95,33.504],[35.938,33.511],[35.938,33.515],[35.952,33.526],[35.969,33.53],[35.98,33.537],[35.991,33.532],[36.014,33.542],[36.028,33.54],[36.04,33.554],[36.062,33.574],[36.063,33.58],[36.056,33.59],[36.022,33.614],[36.017,33.616],[36.004,33.614],[35.996,33.619],[35.988,33.629],[35.975,33.638],[35.965,33.633],[35.957,33.632],[35.941,33.637],[35.932,33.645],[35.932,33.649],[35.942,33.656],[35.947,33.667],[35.964,33.674],[35.968,33.678],[35.977,33.697],[35.971,33.708],[35.978,33.715],[35.993,33.723],[36.001,33.749],[36.01,33.758],[36.015,33.77],[36.029,33.765],[36.047,33.783],[36.057,33.803],[36.071,33.822],[36.079,33.823],[36.088,33.815],[36.107,33.822],[36.113,33.833],[36.128,33.836],[36.139,33.836],[36.152,33.852],[36.164,33.851],[36.167,33.84],[36.173,33.834],[36.202,33.828],[36.209,33.83],[36.215,33.827],[36.22,33.835],[36.237,33.836],[36.244,33.853],[36.25,33.854],[36.26,33.848],[36.277,33.846],[36.292,33.835],[36.308,33.835],[36.325,33.826],[36.339,33.825],[36.367,33.818],[36.375,33.82],[36.384,33.83],[36.39,33.832],[36.391,33.844],[36.385,33.855],[36.371,33.861],[36.364,33.873],[36.338,33.873],[36.321,33.877],[36.313,33.892],[36.297,33.9],[36.283,33.903],[36.288,33.917],[36.308,33.948],[36.319,33.952],[36.329,33.97],[36.345,33.982],[36.353,33.994],[36.366,33.995],[36.371,34.004],[36.385,34.01],[36.386,34.019],[36.391,34.029],[36.406,34.028],[36.402,34.041],[36.411,34.045],[36.417,34.041],[36.426,34.055],[36.443,34.05],[36.455,34.044],[36.463,34.044],[36.481,34.039],[36.489,34.049],[36.496,34.027],[36.501,34.049],[36.518,34.045],[36.505,34.056],[36.516,34.077],[36.512,34.09],[36.515,34.098],[36.532,34.108],[36.536,34.117],[36.546,34.129],[36.564,34.133],[36.572,34.143],[36.568,34.152],[36.584,34.164],[36.596,34.186],[36.606,34.194],[36.625,34.201],[36.622,34.207],[36.608,34.219],[36.601,34.223],[36.587,34.228],[36.585,34.251],[36.575,34.277],[36.596,34.29],[36.602,34.298],[36.601,34.304],[36.592,34.312],[36.578,34.312],[36.563,34.316],[36.56,34.321],[36.561,34.332],[36.55,34.342],[36.544,34.356],[36.53,34.372],[36.545,34.384],[36.553,34.396],[36.556,34.411],[36.552,34.422],[36.536,34.427],[36.529,34.434],[36.525,34.429],[36.522,34.435],[36.514,34.439],[36.514,34.445],[36.507,34.45],[36.495,34.45],[36.486,34.458],[36.472,34.46],[36.463,34.464],[36.458,34.48],[36.446,34.486],[36.448,34.507],[36.436,34.507],[36.422,34.511],[36.409,34.508],[36.393,34.5],[36.368,34.498],[36.359,34.505],[36.351,34.499],[36.338,34.5],[36.331,34.509],[36.329,34.519],[36.333,34.524],[36.364,34.533],[36.416,34.56],[36.415,34.567],[36.405,34.579],[36.403,34.593],[36.406,34.607],[36.416,34.609],[36.427,34.604],[36.434,34.591],[36.455,34.591],[36.46,34.603],[36.46,34.621],[36.463,34.635],[36.445,34.629],[36.427,34.616],[36.407,34.629],[36.392,34.629],[36.383,34.632],[36.364,34.645],[36.349,34.662],[36.351,34.67],[36.344,34.679],[36.333,34.684],[36.314,34.684],[36.307,34.677],[36.302,34.667],[36.308,34.655],[36.296,34.635],[36.289,34.63],[36.285,34.632],[36.278,34.628],[36.264,34.627],[36.244,34.636],[36.237,34.632],[36.238,34.627],[36.212,34.631],[36.201,34.637],[36.19,34.637],[36.177,34.633],[36.172,34.628],[36.164,34.633],[36.141,34.634],[36.127,34.642],[36.117,34.638],[36.111,34.634],[36.098,34.636],[36.093,34.629],[36.079,34.634],[36.074,34.628],[36.072,34.633],[36.063,34.636],[36.053,34.628],[36.043,34.63],[36.034,34.628],[36.024,34.635],[36.006,34.642],[36.007,34.646],[35.992,34.643],[35.992,34.65],[35.984,34.652],[35.981,34.644],[35.961,34.697],[35.947,34.723],[35.941,34.741],[35.939,34.758],[35.939,34.775],[35.934,34.787],[35.905,34.842],[35.88,34.91],[35.888,34.926],[35.885,34.938],[35.886,34.946],[35.883,34.968],[35.888,34.992],[35.903,35.004],[35.904,35.011],[35.898,35.05],[35.892,35.059],[35.898,35.074],[35.9,35.086],[35.896,35.099],[35.897,35.108],[35.905,35.119],[35.91,35.12],[35.917,35.131],[35.92,35.143],[35.931,35.154],[35.933,35.16],[35.933,35.175],[35.957,35.188],[35.963,35.201],[35.96,35.216],[35.949,35.245],[35.936,35.263],[35.938,35.268],[35.947,35.271],[35.956,35.271],[35.965,35.259],[35.97,35.258],[35.963,35.271],[35.954,35.275],[35.932,35.27],[35.928,35.285],[35.932,35.312],[35.927,35.354],[35.928,35.37],[35.926,35.384],[35.92,35.413],[35.924,35.424],[35.883,35.463],[35.866,35.473],[35.827,35.496],[35.816,35.504],[35.798,35.507],[35.788,35.5],[35.77,35.512],[35.779,35.52],[35.783,35.53],[35.779,35.544],[35.764,35.548],[35.762,35.553],[35.743,35.565],[35.754,35.58],[35.75,35.586],[35.729,35.582],[35.728,35.588],[35.739,35.588],[35.75,35.593],[35.759,35.591],[35.77,35.599],[35.771,35.609],[35.776,35.614],[35.783,35.609],[35.782,35.619],[35.788,35.626],[35.79,35.642],[35.784,35.656],[35.774,35.663],[35.778,35.673],[35.79,35.682],[35.807,35.686],[35.82,35.707],[35.84,35.722],[35.843,35.74],[35.853,35.748],[35.854,35.756],[35.847,35.771],[35.847,35.784],[35.841,35.794],[35.838,35.806],[35.828,35.819],[35.826,35.83],[35.817,35.837],[35.82,35.85],[35.818,35.853],[35.807,35.852],[35.808,35.856],[35.824,35.859],[35.833,35.853],[35.844,35.851],[35.862,35.857],[35.872,35.865],[35.887,35.874],[35.905,35.919],[35.91,35.925],[35.922,35.93],[35.936,35.919],[35.951,35.922],[35.994,35.939],[36.009,35.94],[36.023,35.924],[36.022,35.909],[36.015,35.89],[36.016,35.884],[36.023,35.88],[36.05,35.879],[36.096,35.869],[36.116,35.866],[36.134,35.855],[36.142,35.846],[36.155,35.82],[36.169,35.815],[36.183,35.836],[36.189,35.884],[36.181,35.902],[36.188,35.919],[36.199,35.936],[36.213,35.952],[36.229,35.96],[36.244,35.964],[36.263,35.962],[36.279,35.955],[36.29,35.954],[36.306,35.961],[36.295,35.98],[36.298,35.992],[36.317,36.004],[36.344,35.992],[36.357,35.992],[36.368,35.995],[36.379,36.001],[36.382,36.01],[36.381,36.026],[36.392,36.04],[36.395,36.052],[36.389,36.068],[36.398,36.084],[36.386,36.099],[36.381,36.119],[36.392,36.143],[36.388,36.152],[36.377,36.169],[36.382,36.181],[36.389,36.188],[36.399,36.19],[36.403,36.2],[36.398,36.213],[36.398,36.223],[36.403,36.226],[36.413,36.223],[36.435,36.211],[36.458,36.208],[36.471,36.202],[36.482,36.205],[36.489,36.219],[36.492,36.233],[36.495,36.234],[36.509,36.23],[36.523,36.238],[36.543,36.238],[36.557,36.228],[36.584,36.232],[36.609,36.218],[36.627,36.218],[36.641,36.229],[36.675,36.229],[36.684,36.237],[36.701,36.244],[36.706,36.255],[36.696,36.266],[36.692,36.276],[36.7,36.292],[36.695,36.297],[36.671,36.302],[36.669,36.32],[36.669,36.326],[36.659,36.334],[36.639,36.336],[36.621,36.329],[36.612,36.328],[36.608,36.333],[36.612,36.341],[36.628,36.354],[36.628,36.36],[36.62,36.375],[36.624,36.388],[36.616,36.393],[36.607,36.391],[36.593,36.394],[36.587,36.402],[36.585,36.412],[36.577,36.425],[36.576,36.439],[36.569,36.445],[36.568,36.468],[36.555,36.486],[36.557,36.492],[36.553,36.501],[36.573,36.512],[36.583,36.523],[36.591,36.538],[36.604,36.579],[36.601,36.601],[36.588,36.631],[36.592,36.65],[36.606,36.672],[36.619,36.68],[36.628,36.695],[36.637,36.705],[36.639,36.712],[36.635,36.728],[36.624,36.747],[36.627,36.758],[36.633,36.766],[36.67,36.8],[36.678,36.811],[36.678,36.821],[36.668,36.836],[36.676,36.846],[36.685,36.835],[36.739,36.824],[36.804,36.799],[36.88,36.781],[36.903,36.778],[36.944,36.781],[36.989,36.762],[36.999,36.755],[37.009,36.743],[37.02,36.737],[37.052,36.727],[37.058,36.721],[37.057,36.713],[37.033,36.678],[37.028,36.666],[37.031,36.658],[37.048,36.653],[37.065,36.642],[37.08,36.629],[37.091,36.624],[37.104,36.627],[37.113,36.646],[37.122,36.659],[37.127,36.662],[37.151,36.663],[37.174,36.655],[37.196,36.654],[37.226,36.663],[37.266,36.665],[37.303,36.662],[37.335,36.655],[37.373,36.654],[37.427,36.646],[37.461,36.638],[37.473,36.638],[37.485,36.641],[37.502,36.649],[37.521,36.667],[37.534,36.676],[37.578,36.699],[37.603,36.707],[37.636,36.721],[37.655,36.731],[37.674,36.737],[37.694,36.738],[37.71,36.745],[37.734,36.749],[37.767,36.747],[37.791,36.749],[37.814,36.759],[37.862,36.774],[37.908,36.786],[37.929,36.794],[37.958,36.81],[37.977,36.818],[37.998,36.824],[38.041,36.829],[38.052,36.836],[38.058,36.849],[38.071,36.859],[38.126,36.881],[38.173,36.895],[38.188,36.905],[38.2,36.908],[38.23,36.906],[38.245,36.912],[38.265,36.913],[38.296,36.907],[38.316,36.905],[38.343,36.9],[38.408,36.895],[38.449,36.882],[38.493,36.863],[38.522,36.854],[38.563,36.839],[38.58,36.824],[38.591,36.817],[38.601,36.806],[38.623,36.79],[38.644,36.77],[38.697,36.728],[38.724,36.71],[38.731,36.707],[38.777,36.699],[38.801,36.697],[38.815,36.698],[38.847,36.697],[38.97,36.699],[38.999,36.703],[39.02,36.703],[39.085,36.697],[39.15,36.683],[39.216,36.666],[39.227,36.665],[39.276,36.674],[39.345,36.69],[39.398,36.694],[39.43,36.695],[39.453,36.7],[39.467,36.698],[39.504,36.702],[39.546,36.708],[39.597,36.72],[39.626,36.723],[39.665,36.726],[39.712,36.742],[39.723,36.744],[39.807,36.75],[39.842,36.755],[39.856,36.761],[39.89,36.777],[39.929,36.787],[39.963,36.798],[40.016,36.824],[40.052,36.836],[40.073,36.849],[40.087,36.861],[40.133,36.872],[40.181,36.879],[40.208,36.888],[40.238,36.903],[40.26,36.92],[40.278,36.926],[40.326,36.952],[40.37,36.967],[40.398,36.981],[40.419,36.999],[40.438,37.009],[40.462,37.015],[40.533,37.024],[40.546,37.027],[40.582,37.041],[40.602,37.054],[40.635,37.063],[40.675,37.078],[40.688,37.088],[40.708,37.098],[40.721,37.101],[40.741,37.102],[40.753,37.106],[40.782,37.121],[40.823,37.12],[40.834,37.109],[40.85,37.107],[40.858,37.108],[40.87,37.118],[40.886,37.124],[40.921,37.127],[40.95,37.124],[40.972,37.117],[41.001,37.112],[41.032,37.107],[41.06,37.105],[41.115,37.095],[41.132,37.093],[41.17,37.092],[41.204,37.079],[41.212,37.067],[41.218,37.064],[41.237,37.065],[41.249,37.069],[41.257,37.075],[41.271,37.079],[41.501,37.08],[41.558,37.085],[41.59,37.092],[41.626,37.105],[41.657,37.112],[41.687,37.114],[41.728,37.114],[41.759,37.117],[41.975,37.16],[42.016,37.177],[42.057,37.189],[42.079,37.202],[42.106,37.213],[42.113,37.219],[42.122,37.235],[42.139,37.249],[42.154,37.26],[42.184,37.275],[42.194,37.282],[42.208,37.3],[42.216,37.315],[42.225,37.319],[42.235,37.316],[42.229,37.298],[42.219,37.284],[42.221,37.277],[42.235,37.281],[42.256,37.279],[42.267,37.272],[42.276,37.271],[42.295,37.281],[42.307,37.261],[42.321,37.257],[42.328,37.245],[42.335,37.24],[42.35,37.236],[42.357,37.228],[42.359,37.218],[42.355,37.211],[42.34,37.2],[42.335,37.186],[42.337,37.175],[42.349,37.148],[42.356,37.14],[42.358,37.122],[42.354,37.098],[42.362,37.095],[42.366,37.089],[42.381,37.082],[42.385,37.067],[42.249,36.958],[42.177,36.89],[42.137,36.861],[42.092,36.814],[42.034,36.764],[41.991,36.723],[41.938,36.67],[41.828,36.593],[41.707,36.567],[41.411,36.523],[41.295,36.356],[41.292,36.264],[41.267,36.092],[41.258,36.055],[41.381,35.835],[41.394,35.63],[41.289,35.494],[41.283,35.486],[41.275,35.385],[41.242,35.285],[41.233,35.248],[41.225,35.204],[41.218,35.132],[41.23,34.938],[41.23,34.86],[41.238,34.785],[41.235,34.777],[41.139,34.664],[41.033,34.452],[41.017,34.44],[41.012,34.42],[40.265,34.068],[39.866,33.88],[39.125,33.532],[38.793,33.375],[37.806,32.846],[37.464,32.664],[36.867,32.343]],[[35.862,34.854],[35.858,34.853],[35.858,34.858],[35.862,34.854]]];
+
+</script>
+<script>
+const DEMO_WX={"cell":[35.0,36.875,483.5],"cols":["date","Tmax_C","Tmin_C","DewPoint_C","RHmean_pct","WindSpeed_m_s","SolarRadiation_MJ_m2_day","Rain_mm"],"rows":[["20251101",30.5,13.24,-1.14,23.98,1.65,15.915,0.0],["20251102",31.76,14.06,-0.92,23.71,1.76,14.75,0.0],["20251103",33.01,16.12,0.97,24.52,1.51,13.96,0.0],["20251104",29.95,17.02,5.04,35.72,1.29,12.535,0.0],["20251105",30.77,16.99,5.58,34.05,2.03,11.255,0.0],["20251106",32.18,17.74,-2.86,19.14,3.64,12.695,0.0],["20251107",30.75,16.25,1.52,35.05,3.04,13.4,0.0],["20251108",29.74,14.28,7.18,49.86,0.77,13.245,0.0],["20251109",31.74,14.11,0.7,31.41,1.23,13.28,0.0],["20251110",30.85,15.78,-4.17,17.74,2.6,13.13,0.0],["20251111",26.92,15.74,1.21,30.5,1.84,6.59,0.59],["20251112",25.08,12.83,11.9,70.07,1.22,11.435,0.13],["20251113",22.56,14.99,8.92,58.01,0.95,7.38,0.42],["20251114",19.42,11.5,10.65,79.17,2.21,5.665,3.64],["20251115",17.98,8.95,7.31,70.57,2.46,9.435,4.19],["20251116",19.02,7.24,4.57,63.21,1.72,13.05,0.01],["20251117",20.56,7.32,3.95,56.79,3.3,12.655,0.0],["20251118",24.07,8.03,4.66,52.78,3.38,12.55,0.05],["20251119",25.07,10.27,5.31,51.63,2.11,12.565,0.0],["20251120",28.61,10.87,5.49,47.59,3.25,11.415,0.0],["20251121",30.08,13.08,4.12,39.33,2.06,12.435,0.0],["20251122",28.77,12.78,2.27,36.03,2.25,12.44,0.0],["20251123",27.9,12.33,0.75,33.86,1.81,12.26,0.0],["20251124",25.6,11.61,-1.78,28.42,2.73,9.6,0.0],["20251125",17.08,9.77,3.25,52.9,2.61,3.755,2.21],["20251126",20.9,9.01,7.03,66.24,1.12,9.88,0.03],["20251127",22.14,8.02,4.07,54.81,2.53,10.99,0.0],["20251128",25.18,9.56,3.18,43.65,3.66,10.85,0.0],["20251129",24.69,11.82,3.5,44.53,2.82,9.315,0.09],["20251130",22.54,11.04,7.78,63.84,1.7,4.975,0.33],["20251201",19.52,9.1,9.13,79.1,2.16,9.905,0.22],["20251202",19.43,8.15,7.63,72.17,1.11,9.185,0.07],["20251203",21.68,6.76,3.97,56.31,1.6,10.02,0.03],["20251204",21.82,11.1,4.73,51.67,3.77,9.025,0.0],["20251205",22.94,10.19,3.51,47.64,4.75,9.605,0.0],["20251206",19.84,10.12,6.23,61.73,4.96,4.82,5.21],["20251207",18.56,7.99,8.53,74.72,2.37,5.955,2.77],["20251208",17.91,6.52,6.03,71.66,1.73,6.36,1.84],["20251209",17.82,9.53,7.02,70.4,1.37,5.715,0.68],["20251210",16.55,8.57,7.21,74.99,0.92,6.3,0.29],["20251211",14.07,7.69,7.61,82.68,1.07,3.37,9.13],["20251212",15.03,6.17,6.2,81.61,1.07,8.73,0.02],["20251213",16.21,5.46,6.15,77.83,1.7,9.625,0.0],["20251214",17.21,4.64,2.74,62.79,1.02,10.95,0.0],["20251215",15.13,6.51,3.28,65.67,1.0,5.255,0.1],["20251216",13.12,1.49,1.1,68.96,1.71,9.17,0.04],["20251217",12.6,1.62,0.86,69.11,1.92,10.24,0.0],["20251218",15.72,1.47,-0.95,59.8,1.39,11.315,0.0],["20251219",17.73,3.24,5.92,81.86,1.88,10.505,0.0],["20251220",16.53,6.31,5.92,76.81,1.07,9.505,0.0],["20251221",16.74,5.54,1.78,59.8,3.94,6.575,0.0],["20251222",18.77,3.91,-0.08,56.62,3.24,7.845,0.0],["20251223",18.39,3.29,1.77,63.91,1.77,5.59,0.0],["20251224",17.78,5.85,4.43,67.61,1.31,9.68,0.0],["20251225",18.98,6.38,3.79,65.24,2.09,9.875,0.0],["20251226",15.72,6.15,8.23,86.51,1.78,7.005,0.35],["20251227",15.17,5.6,7.88,83.63,3.25,5.705,2.02],["20251228",11.79,1.03,-1.62,63.64,1.78,10.81,0.42],["20251229",11.58,2.16,1.15,69.83,3.47,8.735,7.96],["20251230",12.77,-0.46,-0.7,62.31,1.67,9.89,0.03],["20251231",16.16,6.99,6.63,76.14,4.33,3.63,2.24],["20260101",14.63,4.99,8.36,84.01,3.74,5.425,11.5],["20260102",9.46,-1.8,-5.66,52.43,1.78,7.03,0.13],["20260103",11.35,-1.8,-3.6,62.47,1.3,11.085,0.0],["20260104",18.38,0.03,-3.15,52.18,2.62,10.825,0.0],["20260105",17.66,2.48,-4.29,46.77,3.85,11.51,0.0],["20260106",20.45,3.87,1.02,55.59,2.52,9.665,0.0],["20260107",21.26,6.11,2.59,55.75,1.78,10.38,0.0],["20260108",23.23,8.44,2.81,47.06,2.38,9.335,0.0],["20260109",15.03,8.99,6.62,70.76,5.01,6.48,13.87],["20260110",15.78,4.08,3.49,69.25,2.57,11.33,0.31],["20260111",18.82,5.91,4.69,69.4,2.45,6.34,5.94],["20260112",15.11,5.89,6.6,79.8,3.42,3.59,14.08],["20260113",10.51,2.72,5.3,85.95,3.59,4.14,6.9],["20260114",10.0,-0.01,-2.07,65.7,2.68,7.45,0.03],["20260115",11.78,-0.09,-1.04,67.39,1.46,9.915,0.0],["20260116",14.08,2.86,3.04,76.22,1.16,9.88,0.03],["20260117",13.39,3.28,3.59,76.72,1.33,3.43,1.66],["20260118",8.99,0.42,0.7,81.13,2.94,5.73,0.6],["20260119",8.17,-2.25,-5.47,63.64,1.99,12.795,0.02],["20260120",9.12,-2.11,-6.62,53.88,1.44,12.91,0.0],["20260121",11.51,-3.57,-5.36,57.25,2.65,9.49,0.0],["20260122",10.74,3.33,-0.07,64.29,4.74,4.11,7.88],["20260123",12.33,5.11,4.7,78.54,2.51,4.815,4.27],["20260124",13.01,2.01,1.69,71.69,3.2,4.36,0.13],["20260125",16.46,5.24,5.94,78.71,1.09,9.29,0.0],["20260126",20.28,4.25,3.21,64.93,3.35,8.865,0.0],["20260127",18.96,4.98,2.91,61.01,1.48,6.76,0.26],["20260128",12.81,6.88,6.57,84.04,1.7,6.33,2.12],["20260129",16.09,7.06,6.97,79.34,1.91,8.47,1.56],["20260130",19.39,7.93,6.15,71.28,2.71,7.605,1.9],["20260131",16.58,9.01,9.97,85.92,1.71,5.02,6.66],["20260201",20.19,8.94,8.09,68.13,1.5,8.65,1.15],["20260202",24.6,11.13,7.11,61.11,4.02,9.735,0.49],["20260203",14.59,7.8,7.58,78.34,4.21,9.575,7.51],["20260204",16.92,4.6,4.39,72.5,2.12,14.16,0.0],["20260205",20.02,4.32,3.08,62.31,3.18,14.085,0.0],["20260206",18.74,7.16,3.79,60.44,2.16,4.94,0.63],["20260207",17.73,8.83,8.65,77.64,3.07,5.23,4.66],["20260208",19.45,9.58,8.47,76.0,2.59,10.82,0.01],["20260209",19.11,8.88,8.61,79.26,2.53,12.865,0.05],["20260210",17.94,8.95,7.49,73.21,2.29,9.5,0.61],["20260211",16.45,8.79,8.43,81.49,3.15,10.885,10.97],["20260212",17.98,8.2,8.81,82.13,2.19,7.695,4.59],["20260213",21.43,9.13,6.96,66.36,3.82,7.68,9.38],["20260214",16.35,8.14,8.84,84.24,3.51,9.325,2.3],["20260215",21.51,8.25,7.09,70.66,1.82,15.77,0.0],["20260216",25.71,7.9,1.8,44.6,4.21,14.82,0.0],["20260217",18.6,8.25,8.29,73.78,2.41,8.53,0.08],["20260218",18.01,5.82,6.46,72.97,4.03,9.675,2.73],["20260219",16.36,7.37,6.59,77.08,2.82,13.185,1.21],["20260220",20.2,3.45,4.45,66.96,3.18,16.895,0.0],["20260221",24.28,6.32,4.93,62.18,3.19,16.86,0.0],["20260222",17.38,7.42,8.54,82.31,2.58,13.7,0.01],["20260223",16.74,6.87,6.13,76.48,1.59,10.85,0.5],["20260224",15.24,5.72,6.7,82.77,2.75,14.625,0.64],["20260225",16.9,5.84,7.31,80.83,2.91,11.98,0.57],["20260226",14.03,4.22,4.46,73.27,4.47,13.145,8.51],["20260227",11.72,1.54,-1.54,64.19,2.8,16.12,2.26],["20260228",13.76,1.0,-0.6,64.27,1.85,15.575,0.0],["20260301",12.89,2.51,-0.86,60.42,1.28,16.07,0.0],["20260302",14.61,1.88,-1.86,54.51,1.62,18.955,0.0],["20260303",17.06,1.61,-0.44,58.74,1.06,19.4,0.0],["20260304",14.37,1.5,3.68,76.05,3.1,12.595,2.27],["20260305",15.69,1.54,-4.32,48.67,1.25,20.415,0.0],["20260306",16.94,0.8,-0.31,58.66,2.1,16.82,0.0],["20260307",14.25,1.86,3.95,77.29,1.88,11.185,0.95],["20260308",14.18,-0.13,-2.92,58.8,2.06,20.945,0.0],["20260309",15.03,1.07,-1.8,56.9,1.66,20.585,0.0],["20260310",17.13,0.42,0.6,64.78,2.28,20.555,0.0],["20260311",18.87,1.37,-0.96,51.42,2.89,20.075,0.0],["20260312",19.7,4.5,2.45,58.7,3.05,17.21,0.02],["20260313",18.87,4.92,4.65,70.25,2.55,16.225,0.08],["20260314",21.14,6.15,9.25,79.53,3.67,4.535,7.35],["20260315",19.0,9.0,8.06,76.76,3.18,10.28,4.43],["20260316",16.05,5.48,7.31,78.21,4.45,12.245,2.27],["20260317",20.66,5.48,2.23,58.82,1.68,20.64,0.05],["20260318",23.35,5.77,2.24,48.32,4.27,20.13,2.23],["20260319",15.77,8.88,8.41,81.34,3.25,4.755,11.76],["20260320",17.22,8.88,8.61,80.51,3.41,13.17,5.32],["20260321",17.29,8.75,6.87,74.22,2.55,8.935,2.47],["20260322",12.31,5.13,6.57,86.46,2.09,15.14,1.21],["20260323",17.47,4.5,4.63,70.88,1.56,11.78,1.42],["20260324",17.49,4.89,6.13,73.41,1.07,14.005,4.76],["20260325",15.83,7.28,7.14,77.83,0.88,11.74,5.03],["20260326",17.05,5.4,6.4,75.48,2.09,10.825,0.86],["20260327",17.9,9.67,9.17,80.72,5.02,19.6,1.34],["20260328",19.69,8.34,8.49,76.09,2.68,18.575,0.0],["20260329",20.59,8.54,7.02,67.44,4.35,10.435,1.76],["20260330",16.34,6.95,6.76,76.47,4.42,18.945,1.9],["20260331",19.18,7.08,7.32,74.62,1.91,19.215,0.51],["20260401",24.14,6.07,7.27,63.43,1.69,19.815,1.05],["20260402",26.11,13.3,13.7,79.91,2.63,7.185,3.62],["20260403",19.65,7.95,6.97,69.12,2.92,16.735,0.08],["20260404",19.65,6.2,5.91,70.36,2.9,20.375,0.02],["20260405",18.12,7.75,7.33,75.58,2.69,19.465,0.77],["20260406",18.3,7.41,8.38,79.94,2.13,19.51,1.6],["20260407",16.45,7.86,8.35,81.83,2.47,17.665,1.04],["20260408",20.71,8.04,8.53,75.31,3.42,21.8,0.04],["20260409",20.14,9.46,8.63,75.3,3.59,17.345,0.95],["20260410",19.87,6.88,8.42,75.12,3.21,16.665,1.67],["20260411",20.06,7.59,7.73,76.27,2.77,19.2,0.33],["20260412",17.29,8.39,8.2,78.95,3.06,14.61,13.41],["20260413",18.78,6.98,4.94,66.96,2.65,25.175,3.87],["20260414",24.85,4.02,3.52,52.84,1.88,24.765,0.0],["20260415",29.38,10.75,6.61,47.58,2.35,17.885,0.0],["20260416",27.84,12.72,9.04,53.29,3.45,21.07,0.01],["20260417",29.41,14.29,11.77,56.22,4.09,15.955,4.25],["20260418",26.27,13.5,11.73,68.71,2.74,15.655,4.81],["20260419",21.51,11.44,11.8,79.17,3.35,15.755,3.13],["20260420",18.89,9.82,9.59,77.58,3.22,20.43,0.47],["20260421",20.02,7.9,8.28,73.75,3.05,25.035,0.14],["20260422",24.26,8.09,6.4,65.0,1.58,27.34,0.0],["20260423",25.45,8.93,6.46,62.31,1.51,27.775,0.0],["20260424",25.85,8.65,6.89,60.92,1.25,26.03,0.0],["20260425",29.41,10.82,10.52,61.01,1.73,24.57,0.02],["20260426",31.15,13.04,11.48,65.0,2.52,21.065,6.13],["20260427",23.33,12.19,12.31,73.9,1.85,24.31,0.27],["20260428",23.92,11.78,11.65,73.12,2.5,24.83,0.0],["20260429",24.37,10.81,10.96,72.93,2.42,26.095,0.0],["20260430",28.78,10.82,8.66,59.43,0.81,28.18,0.0],["20260501",29.04,12.05,11.3,67.49,1.86,26.085,0.01],["20260502",27.34,13.16,11.45,64.61,1.21,24.535,0.02],["20260503",30.65,11.6,10.1,63.54,4.23,16.625,2.97],["20260504",18.53,9.41,7.14,68.84,4.21,12.72,6.84],["20260505",14.14,7.02,8.32,83.39,2.82,11.025,12.92],["20260506",21.69,6.54,7.41,70.23,1.88,23.695,0.2],["20260507",24.36,8.23,7.37,62.65,1.25,27.055,0.0],["20260508",27.66,10.67,7.16,51.41,1.65,28.04,0.0],["20260509",30.53,12.54,8.58,50.33,1.89,26.88,0.0],["20260510",31.29,13.6,9.9,52.51,1.41,28.34,0.0],["20260511",30.39,14.27,10.9,54.6,1.57,28.065,0.0],["20260512",30.4,12.63,9.62,52.49,2.06,23.67,0.0],["20260513",27.36,11.62,11.11,64.22,3.34,25.31,0.0],["20260514",27.54,11.91,7.79,52.33,3.4,21.83,0.44],["20260515",24.33,12.18,9.99,62.29,4.43,25.67,0.29],["20260516",24.55,12.16,10.82,68.52,4.55,26.74,0.0],["20260517",28.68,11.03,8.91,55.58,2.48,26.785,0.0],["20260518",27.23,13.73,11.11,60.89,3.76,23.855,0.0],["20260519",26.84,12.6,10.95,64.82,3.05,27.09,0.0],["20260520",24.6,12.34,10.67,66.26,3.8,18.35,0.59],["20260521",22.29,12.58,11.43,73.35,3.85,17.85,3.54],["20260522",27.34,11.27,10.95,66.04,2.14,25.295,0.0],["20260523",26.63,12.91,11.91,70.13,2.16,25.65,0.0],["20260524",24.28,11.72,10.55,68.44,2.87,25.725,0.01],["20260525",27.75,11.8,11.82,66.88,2.23,26.42,0.0],["20260526",29.87,12.3,11.35,61.26,1.22,28.215,0.0],["20260527",33.97,14.5,12.54,55.97,1.93,27.56,0.0],["20260528",29.39,15.39,13.7,67.43,4.04,26.01,0.0],["20260529",26.11,13.54,11.99,66.23,4.24,25.585,0.0],["20260530",29.24,13.05,12.06,63.28,2.21,26.845,0.0],["20260531",30.79,14.62,11.32,57.24,1.23,28.915,0.0],["20260601",32.95,15.88,10.88,52.19,1.63,29.25,0.0],["20260602",33.41,14.0,10.32,53.19,2.02,29.605,0.0],["20260603",30.86,14.46,9.93,54.72,2.79,30.15,0.0],["20260604",31.47,12.96,8.84,49.68,2.47,30.61,0.0],["20260605",32.62,12.92,6.14,41.87,2.21,30.755,0.0],["20260606",31.24,13.19,8.96,49.88,2.64,29.595,0.0],["20260607",32.56,14.06,11.2,51.43,2.89,29.65,0.0],["20260608",34.4,15.02,12.72,55.31,2.31,29.835,0.0],["20260609",35.14,15.84,12.99,53.12,2.26,29.695,0.0],["20260610",35.37,17.47,13.2,54.17,2.14,28.225,0.0],["20260611",32.4,16.13,13.09,57.94,3.12,29.37,0.0],["20260612",32.23,16.15,14.23,62.49,3.29,27.895,0.0],["20260613",32.72,16.07,13.81,61.52,3.24,28.35,0.01],["20260614",29.63,15.75,13.37,61.61,3.81,26.285,0.01],["20260615",32.58,17.21,13.69,58.26,2.69,28.79,0.0],["20260616",34.95,15.57,12.05,51.94,1.72,29.74,0.0],["20260617",37.65,17.89,11.6,45.76,1.67,30.155,0.0],["20260618",36.8,18.25,13.49,53.64,2.87,30.215,0.0],["20260619",33.81,17.69,13.56,59.37,3.23,30.21,0.0],["20260620",34.81,17.06,12.06,52.66,2.17,30.815,0.0],["20260621",37.44,16.97,11.49,49.29,2.01,30.075,0.0],["20260622",37.5,18.16,13.47,52.22,2.4,29.51,0.0],["20260623",33.19,19.33,14.29,55.1,4.21,28.705,0.0],["20260624",33.49,19.37,13.92,50.74,4.33,29.125,0.0],["20260625",35.03,18.49,13.54,51.44,3.89,28.66,0.0],["20260626",34.35,17.73,13.25,53.32,3.85,28.635,0.0],["20260627",35.5,18.11,14.28,53.26,3.26,28.425,0.0],["20260628",36.67,18.29,11.19,45.68,2.09,30.385,0.0],["20260629",38.69,18.69,9.31,36.35,2.29,30.91,0.0],["20260630",39.87,18.47,9.68,36.76,2.84,30.99,0.0]]};
+</script>
+<script>
+(function(){
+'use strict';
+const E = window.GCSAR, $ = id => document.getElementById(id);
+const NS = 'http://www.w3.org/2000/svg';
+const MONTHS = ['كانون الثاني','شباط','آذار','نيسان','أيار','حزيران','تموز','آب','أيلول','تشرين الأول','تشرين الثاني','كانون الأول'];
+const MSHORT = ['ك٢','شباط','آذار','نيسان','أيار','حزيران','تموز','آب','أيلول','ت١','ت٢','ك١'];
+
+// ---------- the virtual field (gcsar.field/1 shape)
+const FIELD = { name:'حقل العرض «السنبلة ٧»', place:'سلمية — حماة', lat:35.01, lon:37.05, areaDunum:25, sow:'2025-11-20', start:'2026-04-20' };
+const crop = { ...E.Crops.get('wheat') };
+const S = E.Soils.SOILS.siltLoam, SYS = E.Soils.SYSTEMS.sprinkler;
+const soil = { texture:'siltLoam', thetaFC:S.thetaFC, thetaWP:S.thetaWP, cn:S.cn, initialDepletionFrac:0.5, subsoilDepletionFrac:0.5 };
+const SCHED = { system:'sprinkler', mode:'scheduled', efficiency:SYS.ea, triggerFrac:null, events:[], maxNetMm:SYS.maxNetMm, forecastRainProbMin:60, useForecast:true };
+const TRAD = { system:'sprinkler', mode:'actual', efficiency:SYS.ea, triggerFrac:null, maxNetMm:SYS.maxNetMm, forecastRainProbMin:60, useForecast:true,
+  events:['2025-11-22','2026-03-01','2026-03-13','2026-03-25','2026-04-06','2026-04-16','2026-04-26','2026-05-06','2026-05-16'].map(date => ({ date, grossMm:60 })) };
+
+// ---------- weather: real NASA POWER rows → ET0 with the platform's FAO-56 engine
+const META = { Latitude:FIELD.lat, Elevation_m:DEMO_WX.cell[2], WindHeight_m:2 };
+const WX = DEMO_WX.rows.map(r => {
+  const o = {}; DEMO_WX.cols.forEach((c, i) => o[c] = r[i]);
+  const date = `${o.date.slice(0,4)}-${o.date.slice(4,6)}-${o.date.slice(6,8)}`;
+  const e = E.Fao56.et0FromRecord({ ...o, WindHeight_m:2 }, META, new Date(date + 'T00:00:00'));
+  return { date, tmin:o.Tmin_C, tmax:o.Tmax_C, et0:e.et0, rain:o.Rain_mm ?? 0, u2:o.WindSpeed_m_s, rhmin:E.Fao56.rhMin(o) };
+});
+const LASTWX = WX[WX.length - 1].date;
+const add = (d, n) => { const x = new Date(d + 'T00:00:00Z'); x.setUTCDate(x.getUTCDate() + n); return x.toISOString().slice(0, 10); };
+const dayN = d => Math.round((Date.parse(d + 'T00:00:00Z') - Date.parse(FIELD.sow + 'T00:00:00Z')) / 864e5);
+
+/** One engine run as seen on date D: observed days up to D, the next 7 days as a forecast (rain counted when prob ≥ 60 %). */
+function sim(D, irrigation) {
+  let f = add(D, 7); if (f > LASTWX) f = LASTWX;
+  const w = WX.filter(r => r.date <= f).map(r => r.date > D ? { ...r, kind:'forecast', rainProb: r.rain >= 1 ? 75 : 10 } : r);
+  return E.WaterBalance.run({ crop, soil, irrigation, sowingDate:FIELD.sow, endDate:f, weather:w });
+}
+
+// full-season runs: phenology projection, timeline, traditional comparison
+const FULL = sim(add(LASTWX, -7), SCHED), TRADF = sim(add(LASTWX, -7), TRAD);
+const SEASON = FULL.days.map(d => d.Date), SEASON_END = SEASON[SEASON.length - 1], NDAYS = SEASON.length;
+const stageStart = k => (FULL.days.find(d => d.Stage >= k) || {}).Date;
+const HARVEST = stageStart(4) || SEASON_END;
+const MAXDAY = SEASON.indexOf(HARVEST) >= 0 ? SEASON.indexOf(HARVEST) + 3 : NDAYS - 1;
+
+// ---------- formatting
+const f0 = v => v == null || !isFinite(v) ? '—' : Math.round(v).toLocaleString('en-US');
+const f1 = v => v == null || !isFinite(v) ? '—' : (+v).toFixed(1);
+const dTxt = d => { const [y, m, dd] = d.split('-'); return `${+dd} ${MONTHS[+m - 1]} ${y}`; };
+const dShort = d => { const [, m, dd] = d.split('-'); return `${+dd} ${MONTHS[+m - 1]}`; };
+const wd = d => new Date(d + 'T00:00:00').toLocaleDateString('ar-SY', { weekday:'long' });
+const N = n => `<span class="num">${n}</span>`;
+function el(tag, attrs, parent) { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; }
+function txt(parent, x, y, s, attrs = {}) { const t = el('text', { x, y, ...attrs }, parent); t.textContent = s; return t; }
+const STAGES = ['أولي','تطور','منتصف الموسم','نهاية الموسم','بعد الحصاد'];
+const STC = ['var(--st0)','var(--st1)','var(--st2)','var(--st3)','var(--st4)'];
+
+// ---------- passport
+$('passport').innerHTML = [
+  ['المحصول', crop.name || 'قمح شتوي'], ['الزراعة', dTxt(FIELD.sow)], ['المساحة', `${FIELD.areaDunum} دونماً`],
+  ['التربة', `${S.name} — CN ${S.cn}`], ['نظام الري', `${SYS.name} · Ea ${SYS.ea}`], ['الموقع', `${FIELD.place} · ${N(FIELD.lat + '°N ' + FIELD.lon + '°E')}`]
+].map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('');
+$('cellTxt').textContent = `${DEMO_WX.cell[0]}°N, ${DEMO_WX.cell[1]}°E · ${Math.round(DEMO_WX.cell[2])} م`;
+
+// ---------- state
+let D = FIELD.start, OUT = null, timer = null;
+const range = $('dayRange'); range.max = MAXDAY; range.value = SEASON.indexOf(D);
+
+// ---------- timeline (season strip)
+const TL = { w:1000, l:8, r:8 };
+const tx = i => TL.l + (TL.w - TL.l - TL.r) * i / (NDAYS - 1);
+function drawTimeline() {
+  const s = $('tl'); s.innerHTML = '';
+  const iD = SEASON.indexOf(D);
+  // stage bands
+  let k0 = 0;
+  for (let i = 1; i <= NDAYS; i++) {
+    if (i === NDAYS || FULL.days[i].Stage !== FULL.days[k0].Stage) {
+      const st = FULL.days[k0].Stage, x0 = tx(k0), x1 = tx(i - 1);
+      el('rect', { x:x0, y:30, width:Math.max(1, x1 - x0), height:18, fill:STC[st] }, s);
+      if (x1 - x0 > 60) txt(s, (x0 + x1) / 2, 43, STAGES[st], { 'text-anchor':'middle', 'font-size':11, fill:'var(--ink2)', 'font-family':'var(--f-body)' });
+      k0 = i;
+    }
+  }
+  // months
+  SEASON.forEach((d, i) => { if (d.endsWith('-01')) { el('line', { x1:tx(i), x2:tx(i), y1:48, y2:56, stroke:'var(--line)' }, s); txt(s, tx(i) + 3, 68, MSHORT[+d.slice(5, 7) - 1], { 'font-size':11, fill:'var(--muted)', 'font-family':'var(--f-body)' }); } });
+  // rain (up from the band) — real data, whole season
+  FULL.days.forEach((d, i) => { if (d.P > 0.5) el('rect', { x:tx(i) - 1, y:30 - Math.min(26, d.P * 1.1), width:2.2, height:Math.min(26, d.P * 1.1), fill:'var(--rain)', opacity: i <= iD ? 1 : .35 }, s); });
+  // platform irrigations up to D
+  OUT.days.forEach((d) => { if (d.Inet > 0 && d.Kind !== 'forecast') { const i = SEASON.indexOf(d.Date); el('path', { d:`M${tx(i)} 50 l5 8 h-10z`, fill:'var(--irr)' }, s); } });
+  // future shade + cursor
+  el('rect', { x:tx(iD), y:2, width:TL.w - TL.r - tx(iD), height:54, fill:'var(--surface)', opacity:.45 }, s);
+  el('line', { x1:tx(iD), x2:tx(iD), y1:2, y2:58, stroke:'var(--ink)', 'stroke-width':2 }, s);
+  el('circle', { cx:tx(iD), cy:39, r:7, fill:'var(--ink)', stroke:'var(--surface)', 'stroke-width':2 }, s);
+}
+function setFromX(clientX) {
+  const s = $('tl'), b = s.getBoundingClientRect(), x = (clientX - b.left) / b.width * TL.w;
+  const i = Math.round((x - TL.l) / (TL.w - TL.l - TL.r) * (NDAYS - 1));
+  setDay(Math.max(0, Math.min(MAXDAY, i)));
+}
+$('tl').addEventListener('pointerdown', e => { stop(); setFromX(e.clientX); $('tl').setPointerCapture(e.pointerId); });
+$('tl').addEventListener('pointermove', e => { if (e.buttons) setFromX(e.clientX); });
+range.addEventListener('input', () => { stop(); setDay(+range.value); });
+
+// key moments
+const firstSpring = (FULL.days.find(d => d.Date >= '2026-02-01' && d.Inet > 0) || {}).Date;
+const MOMENTS = [['الزراعة', add(FIELD.sow, 1)], ['الإشطاء', stageStart(1)], ['أول رية ربيعية', firstSpring && add(firstSpring, -1)], ['منتصف الموسم', stageStart(2)], ['النضج', stageStart(3)], ['الحصاد', HARVEST]].filter(m => m[1]);
+$('chips').innerHTML = MOMENTS.map(([n, d]) => `<button type="button" data-d="${d}">${n}</button>`).join('');
+$('chips').querySelectorAll('button').forEach(b => b.onclick = () => { stop(); setDay(SEASON.indexOf(b.dataset.d)); });
+
+// play
+function stop() { if (timer) { clearInterval(timer); timer = null; $('playBtn').textContent = '▶ تشغيل الموسم'; } }
+$('playBtn').onclick = () => {
+  if (timer) { stop(); return; }
+  let i = SEASON.indexOf(D); if (i >= MAXDAY) i = 0;
+  $('playBtn').textContent = '⏸ إيقاف';
+  timer = setInterval(() => { i += 1; if (i >= MAXDAY) { setDay(MAXDAY); stop(); return; } setDay(i); }, 90);
+};
+$('stepBack').onclick = () => { stop(); setDay(Math.max(0, SEASON.indexOf(D) - 7)); };
+$('stepFwd').onclick = () => { stop(); setDay(Math.min(MAXDAY, SEASON.indexOf(D) + 7)); };
+
+function setDay(i) { D = SEASON[i]; range.value = i; render(); }
+
+// ---------- alert card
+const ICONS = {
+  now:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c-4 6-7 9.5-7 13a7 7 0 0 0 14 0c0-3.5-3-7-7-13z"/></svg>',
+  soon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/></svg>',
+  ok:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+  harvested:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22V8M12 8c-3 0-4-3-4-6 3 0 4 3 4 6zM12 8c3 0 4-3 4-6-3 0-4 3-4 6zM12 14c-3 0-4-3-4-6M12 14c3 0 4-3 4-6"/></svg>'
+};
+function renderAlert() {
+  const r = OUT.recommendation, a = r.alert, last = OUT.days.filter(d => d.Kind !== 'forecast').pop();
+  const level = a ? a.level : (r.action === 'harvested' ? 'harvested' : r.action === 'irrigate' ? 'now' : 'ok');
+  const area = FIELD.areaDunum;
+  let say, why;
+  if (level === 'now') { say = `ري اليوم: ${f0(r.grossMm)} مم إجمالي`; why = `الاستنزاف ${f1(last.Dr)} مم بلغ عتبة الري ${f1(last.Trigger)} مم. الرية الصافية ${f1(r.netMm)} مم${r.limited ? ' (محدودة بحد الرذاذ 45 مم)' : ''}، أي ${f0(r.m3PerDunum)} م³/دونم و${f0(r.m3PerDunum * area)} م³ للحقل.`; }
+  else if (level === 'soon') { const p = a.plan[0]; say = `رية متوقعة ${wd(a.firstNeedDate)} ${dShort(a.firstNeedDate)}`; why = `يصل الاستنزاف إلى العتبة خلال ${dayN(a.firstNeedDate) - dayN(D)} أيام.${p ? ` الرية المخططة ${f0(p.grossMm)} مم إجمالي (${f0(p.m3PerDunum * area)} م³ للحقل) في ${dShort(p.date)}.` : ''}`; }
+  else if (level === 'ok') { say = 'لا حاجة للري هذا الأسبوع'; why = `المخزون في منطقة الجذور يكفي${r.daysUntil != null ? ` نحو ${r.daysUntil} يوماً بمعدل الاستهلاك الحالي ${f1(r.rateMmDay)} مم/يوم` : ''}${a && a.rainCountedMm > 0 ? `، ومطر التوقع المحتسب ${f1(a.rainCountedMm)} مم` : ''}.`; }
+  else { say = 'انتهى الموسم'; why = `بلغ المحصول النضج الفيزيولوجي وحُسب الحصاد في ${dTxt(HARVEST)}.`; }
+  const lbl = { now:'ري الآن', soon:'ري متوقع', ok:'وضع آمن', harvested:'محصود' }[level];
+  const fc = OUT.days.filter(d => d.Kind === 'forecast');
+  const week = fc.map(d => {
+    const frac = d.TAW ? Math.min(1, d.Dr / d.TAW) : 0, irr = d.Inet > 0, rf = d.RainForecast || 0;
+    return `<div class="day${irr ? ' irr' : d.NeedsIrrigation ? ' need' : ''}">
+      <span class="wd">${wd(d.Date).replace('ال', '')}</span><span class="dm">${dShort(d.Date)}</span>
+      <span class="et">${N(f1(d.ET0))}<small style="color:var(--muted);font-weight:400"> مم</small></span>
+      <span class="rn${rf >= 1 ? '' : ' off'}">${rf >= 1 ? `${N(f0(rf))} مم · ${N(d.RainProb + '%')}` : 'جاف'}</span>
+      <span class="bar" title="الاستنزاف من TAW"><i style="width:${(frac * 100).toFixed(0)}%"></i></span>
+      <span class="tag">${irr ? `رية ${f0(d.Igross)} مم` : ''}</span></div>`;
+  }).join('');
+  $('alert').className = `alert lv-${level}`;
+  $('alert').innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><span class="eyebrow">تنبيه الري — ${wd(D)} ${dTxt(D)}</span><span class="pill lv">${lbl}</span></div>
+    <div class="state"><div class="icon">${ICONS[level]}</div><div><div class="say">${say}</div><div class="why">${why}</div></div></div>
+    <dl class="facts">
+      <div><dt>الطور</dt><dd style="font-size:15px">${STAGES[last.Stage]}</dd></div>
+      <div><dt>الاستنزاف Dr</dt><dd>${N(f1(last.Dr))} <small>مم</small></dd></div>
+      <div><dt>عتبة الري RAW</dt><dd>${N(f1(last.Trigger))} <small>مم</small></dd></div>
+      <div><dt>معامل الإجهاد Ks</dt><dd>${N((+last.Ks).toFixed(2))}</dd></div>
+    </dl>
+    ${fc.length ? `<div><div class="eyebrow" style="margin-bottom:6px">الأيام السبعة القادمة — ET₀ والمطر واحتماله والاستنزاف</div><div class="week">${week}</div></div>` : ''}
+    <div class="note">${a ? `مطر التوقع الكلي ${f1(a.rainAllMm)} مم، المحتسب منه ${f1(a.rainCountedMm)} مم (احتمال ≥ 60%). ET₀ للأسبوع ${f1(a.et0Mm)} مم.` : ''}</div>`;
+}
+
+// ---------- soil column (signature visual)
+const RNG = (() => { let s = 7; return () => (s = (s * 16807) % 2147483647) / 2147483647; })();
+const ROOTS = Array.from({ length: 9 }, (_, k) => { const x0 = 120 + (k - 4) * 3, pts = []; let x = x0; for (let j = 1; j <= 10; j++) { x += (RNG() - .5) * 14 + (k - 4) * 1.6; pts.push([x, j / 10]); } return { x0, pts }; });
+function renderSoil() {
+  const s = $('soil'); s.innerHTML = '';
+  const last = OUT.days.filter(d => d.Kind !== 'forecast').pop();
+  const G0 = 150, PXM = 165, ZMAX = 1.6;   // ground line, px per metre
+  const y = z => G0 + z * PXM;
+  // sky and soil layers
+  el('rect', { x:0, y:0, width:340, height:G0, fill:'var(--sky)' }, s);
+  [[0, .3, 'var(--soil1)'], [.3, .9, 'var(--soil2)'], [.9, ZMAX, 'var(--soil3)']].forEach(([a, b, c]) => el('rect', { x:0, y:y(a), width:240, height:(b - a) * PXM, fill:c }, s));
+  // root zone water tint
+  const avail = last.TAW ? Math.max(0, 1 - last.Dr / last.TAW) : 0;
+  el('rect', { x:0, y:G0, width:240, height:last.Zr * PXM, fill:'var(--rain)', opacity:(0.08 + 0.32 * avail).toFixed(2) }, s);
+  el('line', { x1:0, x2:240, y1:y(last.Zr), y2:y(last.Zr), stroke:'var(--ink)', 'stroke-dasharray':'5 4', 'stroke-width':1.2 }, s);
+  txt(s, 6, y(last.Zr) - 6, `عمق الجذور Zr = ${last.Zr.toFixed(2)} م`, { 'font-size':12, fill:'var(--ink)', 'font-weight':600, 'font-family':'var(--f-body)' });
+  // depth ticks
+  for (let z = 0.5; z < ZMAX; z += 0.5) { el('line', { x1:232, x2:240, y1:y(z), y2:y(z), stroke:'var(--ink2)' }, s); txt(s, 228, y(z) + 4, `${z} م`, { 'font-size':10, fill:'var(--ink2)', 'text-anchor':'end', 'font-family':'var(--f-body)' }); }
+  // roots
+  ROOTS.forEach(r => { const d = `M${r.x0} ${G0}` + r.pts.map(([x, f]) => ` L${x.toFixed(1)} ${(G0 + f * last.Zr * PXM).toFixed(1)}`).join(''); el('path', { d, fill:'none', stroke:'var(--ink2)', 'stroke-width':1.1, opacity:.7 }, s); });
+  // plant: height follows thermal time to full cover, colour turns to straw in late season
+  const g = crop.gdd, gd = last.GDD;
+  const hf = last.Stage >= 4 ? 0 : Math.min(1, Math.max(0.06, gd / g.devEnd));
+  const H = 125 * hf, late = gd > g.midEnd, ear = gd > g.devEnd * 0.85 && last.Stage < 4;
+  const stem = late ? 'var(--wheat)' : 'var(--irr)';
+  if (last.Stage < 4) for (let k = -4; k <= 4; k++) {
+    const bx = 120 + k * 4, tipx = 120 + k * 11 * hf, ty = G0 - H * (1 - Math.abs(k) * 0.04);
+    el('path', { d:`M${bx} ${G0} Q${bx + k * 2} ${G0 - H * .5} ${tipx} ${ty}`, fill:'none', stroke:stem, 'stroke-width':2.2, 'stroke-linecap':'round' }, s);
+    if (hf > .25) el('path', { d:`M${(bx + tipx) / 2} ${G0 - H * .45} q${k >= 0 ? 16 : -16} -4 ${k >= 0 ? 22 : -22} 6`, fill:'none', stroke:stem, 'stroke-width':1.6, 'stroke-linecap':'round' }, s);
+    if (ear) el('ellipse', { cx:tipx, cy:ty - 8, rx:3.4, ry:10, fill:late ? 'var(--wheat)' : 'var(--accent)', transform:`rotate(${k * 4} ${tipx} ${ty - 8})` }, s);
+  } else { for (let k = -4; k <= 4; k++) el('line', { x1:120 + k * 6, x2:120 + k * 6, y1:G0, y2:G0 - 10, stroke:'var(--wheat)', 'stroke-width':2 }, s); }
+  el('line', { x1:0, x2:240, y1:G0, y2:G0, stroke:'var(--ink2)', 'stroke-width':1.5 }, s);
+  txt(s, 6, 20, `GDD ${f0(gd)} °م·يوم`, { 'font-size':12, fill:'var(--ink2)', 'font-family':'var(--f-body)' });
+  txt(s, 6, 38, STAGES[last.Stage], { 'font-size':14, fill:'var(--ink)', 'font-weight':700, 'font-family':'var(--f-body)' });
+  // water gauge: full = field capacity, empty = wilting point, both for the current root zone
+  const gx = 262, gw = 44, gt = 40, gh = 360;
+  el('rect', { x:gx, y:gt, width:gw, height:gh, rx:8, fill:'var(--sunk)', stroke:'var(--line)' }, s);
+  const wh = gh * avail; el('rect', { x:gx + 3, y:gt + gh - wh + 3, width:gw - 6, height:Math.max(0, wh - 6), rx:6, fill:'var(--rain)' }, s);
+  const yr = gt + gh * Math.min(1, last.Trigger / last.TAW);
+  el('line', { x1:gx - 6, x2:gx + gw + 6, y1:yr, y2:yr, stroke:'var(--warn)', 'stroke-width':2, 'stroke-dasharray':'4 3' }, s);
+  txt(s, gx - 8, yr + 4, 'عتبة الري', { 'font-size':11, fill:'var(--warn)', 'text-anchor':'end', 'font-weight':600, 'font-family':'var(--f-body)' });
+  txt(s, gx + gw / 2, gt - 22, 'الماء المتاح', { 'font-size':12, fill:'var(--ink)', 'text-anchor':'middle', 'font-weight':600, 'font-family':'var(--f-body)' });
+  txt(s, gx + gw / 2, gt - 7, `${Math.round(avail * 100)}%`, { 'font-size':12, fill:'var(--ink2)', 'text-anchor':'middle', 'font-family':'var(--f-body)' });
+  txt(s, gx + gw / 2, gt + gh + 16, `TAW ${f0(last.TAW)} مم`, { 'font-size':11, fill:'var(--ink2)', 'text-anchor':'middle', 'font-family':'var(--f-body)' });
+  $('colNote').textContent = `يحتفظ قطاع الجذور بـ ${f0(last.TAW - last.Dr)} مم من أصل ${f0(last.TAW)} مم`;
+}
+
+// ---------- KPIs (season to date)
+function renderKpis() {
+  const s = OUT.summary, last = OUT.days.filter(d => d.Kind !== 'forecast').pop();
+  const k = [
+    ['التراكم الحراري', f0(last.GDD), '°م·يوم', `من أصل ${f0(crop.gdd.lateEnd)} حتى النضج`],
+    ['المطر منذ الزراعة', f0(s.P), 'مم', `الجريان السطحي ${f1(s.RO)} مم`],
+    ['استهلاك المحصول', f0(s.ETcAdj), 'مم', `ETc,adj / ETc = ${(+s.ETcAdjOverETc).toFixed(2)}`],
+    ['الري المضاف', f0(s.Igross), 'مم', `${s.irrigations} ريات · ${f0(s.Igross * FIELD.areaDunum)} م³ للحقل`],
+    ['أيام الإجهاد المائي', f0(s.stressDays), 'يوم', 'أيام Ks < 1'],
+    ['إغلاق الكتلة', f1(s.MassClosureMm), 'مم', 'الموازنة مغلقة تماماً']
+  ];
+  $('kpis').innerHTML = k.map(([a, b, u, c]) => `<div class="kpi"><dt>${a}</dt><dd>${N(b)}<small>${u}</small></dd><div class="sub">${c}</div></div>`).join('');
+}
+
+// ---------- generic chart frame on the season axis
+function frame(svg, W, H, m) {
+  svg.innerHTML = '';
+  const X = i => m.l + (W - m.l - m.r) * i / (NDAYS - 1);
+  const axis = el('g', { class:'axis' }, svg);
+  SEASON.forEach((d, i) => { if (d.endsWith('-01')) { el('line', { x1:X(i), x2:X(i), y1:m.t, y2:H - m.b, stroke:'var(--line)', 'stroke-dasharray':'2 4' }, svg); txt(axis, X(i) + 3, H - m.b + 15, MSHORT[+d.slice(5, 7) - 1]); } });
+  const iD = SEASON.indexOf(D), iF = Math.min(NDAYS - 1, iD + 7);
+  el('rect', { x:X(iD), y:m.t, width:Math.max(0, X(iF) - X(iD)), height:H - m.t - m.b, fill:'var(--accent-soft)', opacity:.7 }, svg);
+  return { X, iD, iF };
+}
+function cursor(svg, X, iD, y0, y1) { el('line', { x1:X(iD), x2:X(iD), y1:y0, y2:y1, stroke:'var(--ink)', 'stroke-width':1.5 }, svg); }
+const pathOf = (pts) => pts.map((p, j) => (j ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join('');
+
+// hover: crosshair + tooltip on any season chart
+function hover(svg, W, X, m, H, rows) {
+  const tip = $('tip'), hl = el('line', { y1:m.t, y2:H - m.b, stroke:'var(--muted)', 'stroke-width':1, visibility:'hidden' }, svg);
+  const hit = el('rect', { x:m.l, y:m.t, width:W - m.l - m.r, height:H - m.t - m.b, fill:'transparent' }, svg);
+  hit.addEventListener('pointermove', e => {
+    const b = svg.getBoundingClientRect(), x = (e.clientX - b.left) / b.width * W;
+    const i = Math.round((x - m.l) / (W - m.l - m.r) * (NDAYS - 1)), r = rows(i);
+    if (!r) { tip.hidden = true; hl.setAttribute('visibility', 'hidden'); return; }
+    hl.setAttribute('x1', X(i)); hl.setAttribute('x2', X(i)); hl.setAttribute('visibility', 'visible');
+    tip.innerHTML = `<b>${dTxt(SEASON[i])}${r.fc ? ' · توقع' : ''}</b>` + r.lines.map(([k, v]) => `<div class="r"><span>${k}</span><span class="num">${v}</span></div>`).join('');
+    tip.hidden = false;
+    const tw = tip.offsetWidth, th = tip.offsetHeight;
+    tip.style.left = Math.min(window.innerWidth - tw - 8, Math.max(8, e.clientX + 14)) + 'px';
+    tip.style.top = Math.max(8, e.clientY - th - 12) + 'px';
+  });
+  hit.addEventListener('pointerleave', () => { tip.hidden = true; hl.setAttribute('visibility', 'hidden'); });
+}
+const dayAt = i => OUT.days.find(d => d.Date === SEASON[i]);
+
+// ---------- water balance chart: inputs strip (top) + depletion panel (below, downward)
+function renderWB() {
+  const svg = $('wbChart'), W = 760, H = 330, m = { l:44, r:12, t:8, b:24 };
+  const { X, iD, iF } = frame(svg, W, H, m);
+  const top0 = m.t, top1 = 92, dep0 = 112, dep1 = H - m.b;
+  const maxIn = 50, yi = v => top1 - Math.min(maxIn, v) / maxIn * (top1 - top0 - 4);
+  const maxD = Math.ceil(Math.max(...FULL.days.map(d => d.TAW)) / 50) * 50, yd = v => dep0 + v / maxD * (dep1 - dep0);
+  const ax = el('g', { class:'axis' }, svg);
+  [0, 25, 50].forEach(v => { txt(ax, m.l - 6, yi(v) + 4, v, { 'text-anchor':'end' }); el('line', { x1:m.l, x2:W - m.r, y1:yi(v), y2:yi(v), stroke:'var(--line)' }, svg); });
+  for (let v = 0; v <= maxD; v += 50) { txt(ax, m.l - 6, yd(v) + 4, v, { 'text-anchor':'end' }); el('line', { x1:m.l, x2:W - m.r, y1:yd(v), y2:yd(v), stroke:'var(--line)' }, svg); }
+  txt(svg, W - m.r - 4, top0 + 10, 'المدخلات (مم)', { 'text-anchor':'end', 'font-size':11, fill:'var(--muted)', 'font-family':'var(--f-body)' });
+  txt(svg, m.l + 6, dep1 - 8, 'الاستنزاف من السعة الحقلية (مم)', { 'font-size':11, fill:'var(--muted)', 'font-family':'var(--f-body)' });
+  const bw = Math.max(1.5, (W - m.l - m.r) / NDAYS - 0.6);
+  OUT.days.forEach(d => {
+    const i = SEASON.indexOf(d.Date); if (i < 0) return;
+    const pe = d.P - d.RO;
+    if (pe > 0.2) el('rect', { x:X(i) - bw / 2, y:yi(pe), width:bw, height:top1 - yi(pe), rx:1, fill:'var(--rain)', opacity:d.Kind === 'forecast' ? .5 : 1 }, svg);
+    if (d.Inet > 0) el('rect', { x:X(i) - bw / 2 - .5, y:yi(d.Inet), width:bw + 1, height:top1 - yi(d.Inet), rx:1, fill:'var(--irr)' }, svg);
+  });
+  const days = OUT.days.filter(d => SEASON.includes(d.Date));
+  const P = f => days.map(d => [X(SEASON.indexOf(d.Date)), yd(f(d))]);
+  el('path', { d:pathOf(P(d => d.TAW)), fill:'none', stroke:'var(--muted)', 'stroke-width':1.5, 'stroke-dasharray':'5 4' }, svg);
+  el('path', { d:pathOf(P(d => d.Trigger)), fill:'none', stroke:'var(--warn)', 'stroke-width':2, 'stroke-dasharray':'6 4' }, svg);
+  const obs = days.filter(d => d.Kind !== 'forecast'), fc = days.filter(d => d.Kind === 'forecast');
+  const dr = obs.map(d => [X(SEASON.indexOf(d.Date)), yd(d.Dr)]);
+  if (dr.length) el('path', { d:pathOf([[dr[0][0], dep0], ...dr, [dr[dr.length - 1][0], dep0]]) + 'Z', fill:'var(--dep)', opacity:.12 }, svg);
+  el('path', { d:pathOf(dr), fill:'none', stroke:'var(--dep)', 'stroke-width':2, 'stroke-linejoin':'round' }, svg);
+  if (fc.length && obs.length) el('path', { d:pathOf([dr[dr.length - 1], ...fc.map(d => [X(SEASON.indexOf(d.Date)), yd(d.Dr)])]), fill:'none', stroke:'var(--dep)', 'stroke-width':2, 'stroke-dasharray':'3 3' }, svg);
+  const lastO = obs[obs.length - 1];
+  if (lastO) { el('circle', { cx:X(iD), cy:yd(lastO.Dr), r:4.5, fill:'var(--dep)', stroke:'var(--surface)', 'stroke-width':2 }, svg); }
+  cursor(svg, X, iD, m.t, H - m.b);
+  hover(svg, W, X, m, H, i => { const d = dayAt(i); if (!d) return null; return { fc:d.Kind === 'forecast', lines:[['المطر الفعّال', f1(d.P - d.RO) + ' مم'], ['الري الصافي', f1(d.Inet) + ' مم'], ['الاستنزاف Dr', f1(d.Dr) + ' مم'], ['عتبة الري', f1(d.Trigger) + ' مم'], ['TAW', f0(d.TAW) + ' مم'], ['Ks', (+d.Ks).toFixed(2)]] }; });
+}
+
+// ---------- GDD chart (y = °C·day), observed to D, projection faint
+function renderGDD() {
+  const svg = $('gddChart'), W = 460, H = 330, m = { l:46, r:10, t:10, b:24 };
+  const { X, iD } = frame(svg, W, H, m);
+  const g = crop.gdd, maxG = 2800, y = v => H - m.b - v / maxG * (H - m.t - m.b);
+  const ax = el('g', { class:'axis' }, svg);
+  for (let v = 0; v <= maxG; v += 700) { txt(ax, m.l - 6, y(v) + 4, v, { 'text-anchor':'end' }); }
+  [['iniEnd', 'نهاية الطور الأولي'], ['devEnd', 'التغطية الكاملة'], ['midEnd', 'بداية النضج'], ['lateEnd', 'الحصاد']].forEach(([k, n]) => {
+    el('line', { x1:m.l, x2:W - m.r, y1:y(g[k]), y2:y(g[k]), stroke:'var(--muted)', 'stroke-dasharray':'3 4' }, svg);
+    txt(svg, m.l + 4, y(g[k]) - 4, `${n} · ${g[k]}`, { 'font-size':10.5, fill:'var(--ink2)', 'font-family':'var(--f-body)' });
+  });
+  const pts = FULL.days.map((d, i) => [X(i), y(d.GDD)]);
+  el('path', { d:pathOf(pts), fill:'none', stroke:'var(--wheat)', 'stroke-width':1.5, 'stroke-dasharray':'2 4', opacity:.7 }, svg);
+  const obs = OUT.days.filter(d => d.Kind !== 'forecast').map(d => [X(SEASON.indexOf(d.Date)), y(d.GDD)]);
+  el('path', { d:pathOf(obs) , fill:'none', stroke:'var(--wheat)', 'stroke-width':2.5, 'stroke-linecap':'round' }, svg);
+  const lo = obs[obs.length - 1]; if (lo) el('circle', { cx:lo[0], cy:lo[1], r:5, fill:'var(--wheat)', stroke:'var(--surface)', 'stroke-width':2 }, svg);
+  cursor(svg, X, iD, m.t, H - m.b);
+  const lastO = OUT.days.filter(d => d.Kind !== 'forecast').pop();
+  const left = g.lateEnd - lastO.GDD;
+  $('gddNote').innerHTML = lastO.Stage >= 4 ? `اكتمل التراكم الحراري، وحُصد الحقل في ${dTxt(HARVEST)}.` :
+    `المتبقي حتى الحصاد ${N(f0(left))} °م·يوم. الإسقاط بمناخ الموسم (الخط المنقط) يضع الحصاد قرب ${dTxt(HARVEST)}.`;
+  hover(svg, W, X, m, H, i => { const d = FULL.days[i]; return d ? { fc:i > iD, lines:[['GDD', f0(d.GDD)], ['الطور', STAGES[d.Stage]], ['Tmin / Tmax', `${f1(WX.find(w => w.date === d.Date)?.tmin)} / ${f1(WX.find(w => w.date === d.Date)?.tmax)} °م`]] } : null; });
+}
+
+// ---------- ET chart
+function renderET() {
+  const svg = $('etChart'), W = 760, H = 220, m = { l:44, r:12, t:10, b:24 };
+  const { X, iD } = frame(svg, W, H, m);
+  const maxE = 10, y = v => H - m.b - Math.min(maxE, v) / maxE * (H - m.t - m.b);
+  const ax = el('g', { class:'axis' }, svg);
+  [0, 2, 4, 6, 8, 10].forEach(v => { txt(ax, m.l - 6, y(v) + 4, v, { 'text-anchor':'end' }); el('line', { x1:m.l, x2:W - m.r, y1:y(v), y2:y(v), stroke:'var(--line)' }, svg); });
+  txt(ax, m.l - 6, m.t - 0, 'مم/يوم', { 'text-anchor':'end' });
+  const bw = Math.max(1.2, (W - m.l - m.r) / NDAYS - 0.8);
+  OUT.days.forEach(d => { const i = SEASON.indexOf(d.Date); if (i >= 0 && d.ET0 > 0) el('rect', { x:X(i) - bw / 2, y:y(d.ET0), width:bw, height:H - m.b - y(d.ET0), fill:'var(--muted)', opacity:d.Kind === 'forecast' ? .25 : .45 }, svg); });
+  const pts = OUT.days.filter(d => SEASON.includes(d.Date)).map(d => [X(SEASON.indexOf(d.Date)), y(d.ETcAdj)]);
+  el('path', { d:pathOf(pts), fill:'none', stroke:'var(--ink)', 'stroke-width':2, 'stroke-linejoin':'round' }, svg);
+  cursor(svg, X, iD, m.t, H - m.b);
+  hover(svg, W, X, m, H, i => { const d = dayAt(i); if (!d) return null; return { fc:d.Kind === 'forecast', lines:[['ET₀', f1(d.ET0) + ' مم'], ['Kc', (+d.Kc).toFixed(2)], ['ETc,adj', f1(d.ETcAdj) + ' مم']] }; });
+}
+
+// ---------- Kc chart (whole season curve, observed part bold)
+function renderKc() {
+  const svg = $('kcChart'), W = 460, H = 220, m = { l:40, r:10, t:10, b:24 };
+  const { X, iD } = frame(svg, W, H, m);
+  const y = v => H - m.b - v / 1.4 * (H - m.t - m.b);
+  const ax = el('g', { class:'axis' }, svg);
+  [0, 0.35, 0.7, 1.05, 1.4].forEach(v => { txt(ax, m.l - 6, y(v) + 4, v.toFixed(2), { 'text-anchor':'end' }); el('line', { x1:m.l, x2:W - m.r, y1:y(v), y2:y(v), stroke:'var(--line)' }, svg); });
+  el('path', { d:pathOf(FULL.days.map((d, i) => [X(i), y(d.Kc)])), fill:'none', stroke:'var(--accent)', 'stroke-width':1.5, 'stroke-dasharray':'2 4' }, svg);
+  el('path', { d:pathOf(OUT.days.filter(d => d.Kind !== 'forecast').map(d => [X(SEASON.indexOf(d.Date)), y(d.Kc)])), fill:'none', stroke:'var(--accent)', 'stroke-width':2.5 }, svg);
+  txt(svg, W - m.r - 4, y(OUT.kcMidAdj || crop.kcMid) - 6, `Kc mid معدّل = ${(+(OUT.kcMidAdj || crop.kcMid)).toFixed(2)}`, { 'font-size':10.5, fill:'var(--ink2)', 'text-anchor':'end', 'font-family':'var(--f-body)' });
+  cursor(svg, X, iD, m.t, H - m.b);
+  hover(svg, W, X, m, H, i => { const d = FULL.days[i]; return d ? { fc:i > iD, lines:[['Kc', (+d.Kc).toFixed(2)], ['Zr', d.Zr.toFixed(2) + ' م'], ['الطور', STAGES[d.Stage]]] } : null; });
+}
+
+// ---------- comparison (season to date, both runs by the same engine)
+function sumTo(days, f) { return days.filter(d => d.Date <= D && d.Kind !== 'forecast').reduce((a, d) => a + (f(d) || 0), 0); }
+function renderCmp() {
+  const P = OUT.days, T = TRADF.days, A = FIELD.areaDunum;
+  const p = { g:sumTo(P, d => d.Igross), dp:sumTo(P, d => d.DP), st:sumTo(P, d => d.Ks < 1 ? 1 : 0), et:sumTo(P, d => d.ETcAdj), n:sumTo(P, d => d.Inet > 0 ? 1 : 0) };
+  const t = { g:sumTo(T, d => d.Igross), dp:sumTo(T, d => d.DP), st:sumTo(T, d => d.Ks < 1 ? 1 : 0), et:sumTo(T, d => d.ETcAdj), n:sumTo(T, d => d.Igross > 0 ? 1 : 0) };
+  const save = (t.g - p.g) * A;
+  $('saving').innerHTML = `${N(f0(Math.max(0, save)))} م³`;
+  $('cmpScope').textContent = `من الزراعة حتى ${dTxt(D)}`;
+  $('cmpText').innerHTML = save > 0
+    ? `استهلك المحصول في الحالتين كمية متقاربة (${N(f0(p.et))} مقابل ${N(f0(t.et))} مم)، فالماء الإضافي في الجدول التقليدي لم يذهب إلى النبات: ${N(f0(t.dp))} مم منه رشحت تحت منطقة الجذور.`
+    : 'لم يبدأ الجدول التقليدي رياته الربيعية بعد؛ تظهر الفروق مع بداية آذار.';
+  const rows = [['الري الإجمالي', 'مم', p.g, t.g], ['عدد الريات', '', p.n, t.n], ['الرشح العميق (فاقد)', 'مم', p.dp, t.dp], ['أيام الإجهاد المائي', 'يوم', p.st, t.st]];
+  $('cmpRows').innerHTML = rows.map(([n, u, a, b]) => { const mx = Math.max(a, b, 1);
+    return `<div class="cmp-row"><div class="lbl"><span>${n}</span><span>${u}</span></div><div class="track">
+      <div class="hb p" style="width:${Math.max(4, a / mx * 100)}%">${f0(a)}</div><div class="hb t" style="width:${Math.max(4, b / mx * 100)}%">${f0(b)}</div></div></div>`; }).join('');
+}
+
+// ---------- map
+function renderMap() {
+  const svg = $('map'), W = 420, H = 380, pad = 14;
+  const all = SYRIA_OUTLINE.flat ? SYRIA_OUTLINE.flat(1) : [];
+  const lons = all.map(p => p[0]), lats = all.map(p => p[1]);
+  const lo0 = Math.min(...lons), lo1 = Math.max(...lons), la0 = Math.min(...lats), la1 = Math.max(...lats), k = Math.cos(35 * Math.PI / 180);
+  const sc = Math.min((W - 2 * pad) / ((lo1 - lo0) * k), (H - 2 * pad) / (la1 - la0));
+  const P = ([lo, la]) => [pad + (lo - lo0) * k * sc, H - pad - (la - la0) * sc];
+  const ring = r => r.map((p, j) => (j ? 'L' : 'M') + P(p).map(v => v.toFixed(1)).join(' ')).join('') + 'Z';
+  svg.innerHTML = '';
+  for (const [key, g] of Object.entries(SYRIA_GOV)) el('path', { d:g.rings.map(ring).join(''), fill:key === 'hama' ? 'var(--accent-soft)' : 'var(--sunk)', stroke:'var(--line)', 'stroke-width':1 }, svg);
+  el('path', { d:SYRIA_OUTLINE.map(ring).join(''), fill:'none', stroke:'var(--ink2)', 'stroke-width':1.4 }, svg);
+  const c = P([DEMO_WX.cell[1], DEMO_WX.cell[0]]), f = P([FIELD.lon, FIELD.lat]);
+  const half = [0.3125 * k * sc, 0.25 * sc];
+  el('rect', { x:c[0] - half[0], y:c[1] - half[1], width:2 * half[0], height:2 * half[1], fill:'var(--rain)', opacity:.18, stroke:'var(--rain)', 'stroke-dasharray':'3 2' }, svg);
+  el('circle', { cx:f[0], cy:f[1], r:11, fill:'var(--irr)', opacity:.25 }, svg);
+  el('circle', { cx:f[0], cy:f[1], r:5.5, fill:'var(--irr)', stroke:'var(--surface)', 'stroke-width':2 }, svg);
+  txt(svg, f[0] + 12, f[1] - 10, 'حقل العرض — سلمية', { 'font-size':13, fill:'var(--ink)', 'font-weight':700, 'font-family':'var(--f-body)' });
+  txt(svg, f[0] + 12, f[1] + 6, 'المربع: خلية ناسا', { 'font-size':11, fill:'var(--ink2)', 'font-family':'var(--f-body)' });
+}
+
+// ---------- live engine checks (shown, not asserted silently)
+(function checks() {
+  const ex = E.Fao56.et0FromRecord({ Tmin_C:12.3, Tmax_C:21.5, RHmin_pct:63, RHmax_pct:84, WindSpeed_m_s:2.078, WindHeight_m:2, SolarRadiation_MJ_m2_day:22.07 }, { Latitude:50.8, Elevation_m:100, WindHeight_m:2 }, new Date('2026-07-06T00:00:00'));
+  const items = [`مثال FAO-56 رقم 18: ET₀ = ${ex.et0.toFixed(2)} مم (المرجع 3.9)`, `إغلاق الكتلة للموسم: ${f1(FULL.summary.MassClosureMm)} مم`, `${WX.length} يوماً من NASA POWER`, `ET₀ الموسمي ${f0(WX.filter(w => w.date >= FIELD.sow && w.date <= HARVEST).reduce((a, w) => a + w.et0, 0))} مم`];
+  $('checks').innerHTML = items.map(s => `<span>${s}</span>`).join('');
+})();
+
+function render() {
+  OUT = sim(D, SCHED);
+  $('todayTxt').textContent = `${wd(D)} ${dTxt(D)}`;
+  drawTimeline(); renderAlert(); renderSoil(); renderKpis(); renderWB(); renderGDD(); renderET(); renderKc(); renderCmp();
+}
+renderMap(); render();
+})();
+</script>
+
+</body>
+</html>

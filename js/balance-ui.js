@@ -118,7 +118,8 @@
       last = { field: f, fcNote, out: E().WaterBalance.run({ crop: f.crop, soil: f.soil, irrigation: f.irrigation, sowingDate: f.sowingDate < first ? first : f.sowingDate, endDate: end, weather: w }) };
     } catch (e) { toast(e.message); return; }
     persist();
-    renderRec(); renderKpis(); renderCharts(); renderTable(); renderDashAlert(true); $('wbExportBtn').disabled = false;
+    renderRec(); renderKpis(); renderCharts(); renderTable(); renderDashAlert(true);
+    if (typeof syncCropFromField === 'function') { const lo = last.out.days.filter(d => d.Kind !== 'forecast').pop(); syncCropFromField(f.crop.key, f.sowingDate, lo && lo.Date); } $('wbExportBtn').disabled = false;
   }
 
   const fmt = (v, d = 1) => v === null || v === undefined ? '—' : (+v).toFixed(d);
@@ -165,12 +166,17 @@
   function kpi(label, value, sub) { return `<div class="kpi"><div class="label">${label}</div><div class="value">${value}</div><div class="sub">${sub || ''}</div></div>`; }
   function renderKpis() {
     const obsDays = last.out.days.filter(x => x.Kind !== 'forecast'), d = obsDays[obsDays.length - 1] || last.out.days[last.out.days.length - 1];
-    $('wbKpis').innerHTML = kpi('الطور (FAO-56)', d.StageName, `GDD ${fmt(d.GDD, 0)} °C·day`) + kpi('Kc / عمق الجذور', `${fmt(d.Kc, 2)} / ${fmt(d.Zr, 2)} م`, `Kc mid معدّل مناخياً = ${fmt(last.out.kcMidAdj, 2)}`)
-      + kpi('TAW / RAW', `${fmt(d.TAW, 0)} / ${fmt(d.RAW, 0)} مم`, `p معدّل = ${fmt(d.p, 2)}`) + kpi('Dr / Ks', `${fmt(d.Dr, 0)} مم / ${fmt(d.Ks, 2)}`, d.Ks < 1 ? 'إجهاد مائي' : 'دون إجهاد');
+    // paired values carry their own labels (no "A / B" pairs: their order flips in RTL text)
+    const pv = (l, v, u = '') => `<bdi class="pv"><small>${l}</small> ${v}${u ? ` <small>${u}</small>` : ''}</bdi>`;
+    $('wbKpis').innerHTML = kpi('الطور (FAO-56)', d.StageName, `GDD ${fmt(d.GDD, 0)} °C·day`)
+      + kpi('معامل المحصول وعمق الجذور', pv('Kc', fmt(d.Kc, 2)) + pv('Zr', fmt(d.Zr, 2), 'م'), `Kc mid معدّل مناخياً = ${fmt(last.out.kcMidAdj, 2)}`)
+      + kpi('الماء المتاح في منطقة الجذور', pv('TAW', fmt(d.TAW, 0), 'مم') + pv('RAW', fmt(d.RAW, 0), 'مم'), `p معدّل = ${fmt(d.p, 2)}`)
+      + kpi('الاستنزاف والإجهاد', pv('Dr', fmt(d.Dr, 0), 'مم') + pv('Ks', fmt(d.Ks, 2)), d.Ks < 1 ? 'إجهاد مائي' : 'دون إجهاد');
     const s = last.out.summary;
-    $('wbSummary').innerHTML = kpi('الهطول P / الجريان RO', `${fmt(s.P, 0)} / ${fmt(s.RO, 0)} مم`) + kpi('الري الصافي / الإجمالي', `${fmt(s.Inet, 0)} / ${fmt(s.Igross, 0)} مم`, `${s.irrigations} رية — ${fmt(s.Igross, 0)} م³/دونم`)
-      + kpi('ETc / ETc,adj', `${fmt(s.ETc, 0)} / ${fmt(s.ETcAdj, 0)} مم`, `النسبة ${fmt(s.ETcAdjOverETc, 2)} — ${s.stressDays} يوم إجهاد`)
-      + kpi('التسرب العميق DP', `${fmt(s.DP, 0)} مم`, s.YieldReductionPct === null ? `إغلاق التوازن ${fmt(s.MassClosureMm, 3)} مم` : `نقص غلة تقديري ${fmt(s.YieldReductionPct, 0)}% (Ky) — إغلاق ${fmt(s.MassClosureMm, 3)} مم`);
+    $('wbSummary').innerHTML = kpi('الهطول والجريان', pv('P', fmt(s.P, 0), 'مم') + pv('RO', fmt(s.RO, 0), 'مم'))
+      + kpi('الري', pv('صافٍ', fmt(s.Inet, 0), 'مم') + pv('إجمالي', fmt(s.Igross, 0), 'مم'), `${s.irrigations} رية — ${fmt(s.Igross, 0)} م³/دونم`)
+      + kpi('الاستهلاك المائي للمحصول', pv('ETc', fmt(s.ETc, 0), 'مم') + pv('ETc,adj', fmt(s.ETcAdj, 0), 'مم'), `ETc,adj/ETc = ${fmt(s.ETcAdjOverETc, 2)} — ${s.stressDays} يوم إجهاد`)
+      + kpi('التسرب العميق DP', `${fmt(s.DP, 0)} مم`, `إغلاق التوازن ${fmt(s.MassClosureMm, 3)} مم`);
   }
   function renderTable() {
     const rows = last.out.days.slice().reverse().map(d => `<tr${d.Inet > 0 ? ' style="background:#fff4ec"' : ''}><td>${d.Date}${d.Kind === 'forecast' ? '<span class="wb-badge">توقع</span>' : d.Kind === 'model' ? '<span class="wb-badge">نموذج</span>' : ''}</td><td>${d.StageName}</td><td>${fmt(d.GDD, 0)}</td><td>${fmt(d.Kc, 2)}</td><td>${fmt(d.Zr, 2)}</td><td>${fmt(d.ET0, 2)}</td><td>${fmt(d.ETc, 2)}</td><td>${fmt(d.Ks, 2)}</td><td>${fmt(d.ETcAdj, 2)}</td><td>${fmt(d.P)}</td><td>${fmt(d.RO)}</td><td>${fmt(d.Inet)}</td><td>${fmt(d.DP)}</td><td>${fmt(d.TAW, 0)}</td><td>${fmt(d.RAW, 0)}</td><td>${fmt(d.Dr)}</td></tr>`);

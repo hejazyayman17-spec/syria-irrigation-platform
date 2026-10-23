@@ -181,7 +181,7 @@ footer{text-align:center;color:var(--muted);font-size:12.5px}
 </style>
 
 <div class="wrap">
-  <div class="ribbon" role="note"><span><b>نسخة عرض</b> — الحقل افتراضي، والطقس حقيقي من أرشيف NASA POWER لموسم 2025/26، والحسابات كلها من محرك المنصة.</span><span class="num">Prototype v0.8 · demo</span></div>
+  <div class="ribbon" role="note"><span><b>نسخة عرض</b> — الحقل افتراضي، والطقس حقيقي من أرشيف NASA POWER لموسم 2025/26، والحسابات كلها من محرك المنصة.</span><span class="num">Prototype v0.9 · demo</span></div>
 
   <header class="head">
     <div class="brand">
@@ -574,7 +574,7 @@ footer{text-align:center;color:var(--muted);font-size:12.5px}
       const p = clamp(c.p + 0.04 * (5 - ETc), 0.1, 0.8);
       const RAW = p * TAW;
       const Ks = Dr <= RAW ? 1 : clamp((TAW - Dr) / ((1 - p) * TAW), 0, 1);
-      const ETcAdj = Ks * ETc;
+      let ETcAdj = Ks * ETc;
       const rainRaw = w && Number.isFinite(w.rain) ? Math.max(0, w.rain) : 0;
       const rainProb = w && Number.isFinite(w.rainProb) ? w.rainProb : null;
       // forecast rain enters the balance only when likely enough (decision rule, not a probability-weighted amount)
@@ -589,7 +589,9 @@ footer{text-align:center;color:var(--muted);font-size:12.5px}
       let DrNew = Dr - (P - RO) - Inet + ETcAdj;
       let DP = 0, recharge = 0;
       if (DrNew < 0) { DP = -DrNew; DrNew = 0; recharge = Math.min(DP, Dsub); Dsub -= recharge; DP -= recharge; }
-      DrNew = Math.min(DrNew, TAW);
+      // Dr cannot exceed TAW (wilting point): Ks is evaluated at the start of the day, so on a very dry day the
+      // computed ETc,adj may overshoot the water left; the excess is removed from ETc,adj (not discarded) to keep mass closure.
+      if (DrNew > TAW) { ETcAdj = Math.max(0, ETcAdj - (DrNew - TAW)); DrNew = TAW; }
       Dr = DrNew;
       // decision for tomorrow (crop still in the field)
       const trig = (irr.triggerFrac ?? p) * TAW;
@@ -616,7 +618,7 @@ footer{text-align:center;color:var(--muted);font-size:12.5px}
     const summary = {
       ...Object.fromEntries(Object.entries(tot).map(([k, v]) => [k, typeof v === 'number' ? +v.toFixed(1) : v])),
       ETcAdjOverETc: +ratio.toFixed(3),
-      YieldReductionPct: c.ky ? +(100 * c.ky * (1 - ratio)).toFixed(1) : null,   // FAO-33: 1 − Ya/Ym = Ky (1 − ETa/ETm)
+      // no Ky (FAO-33) yield-reduction figure: the platform reports relative ET (ETc,adj/ETc) only; yield is assessed by water productivity / yield gap
       MassClosureMm: +closure.toFixed(3),
       KcMidAdj: +kcMidAdj.toFixed(3), KcEndAdj: +kcEndAdj.toFixed(3)
     };

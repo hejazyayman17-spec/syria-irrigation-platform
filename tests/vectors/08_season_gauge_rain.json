@@ -1,0 +1,7 @@
+{ "type": "season", "name": "Measured field rain (gauge) replaces gridded rain over its period — totals and closure",
+  "input": { "cropKey": "wheat", "sowingDate": "2025-11-15", "endDate": "2026-03-31",
+    "soil": { "thetaFC": 0.29, "thetaWP": 0.15, "cn": 80, "initialDepletionFrac": 0.5, "subsoilDepletionFrac": 0.5 },
+    "irrigation": { "mode": "rainfed" },
+    "rain": { "source": "gauge", "events": [ { "date": "2025-12-01", "mm": 20 }, { "date": "2026-01-10", "mm": 35 }, { "date": "2026-02-20", "mm": 15 } ] },
+    "weatherGen": { "start": "2025-11-15", "days": 137, "tmin": 4, "tmax": 14, "amp": -4, "et0": 2.0, "et0amp": -0.8, "rain": 0, "rainEvery": 5, "rainMm": 8, "u2": 2, "rhmin": 50 } },
+  "expect": { "MassClosureMm": [0, 0.01], "P": [166, 0.05] } }

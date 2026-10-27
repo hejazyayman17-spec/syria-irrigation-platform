@@ -36,7 +36,8 @@
         initialDepletionFrac: (n('wbDr0') ?? 50) / 100, subsoilDepletionFrac: (n('wbDsub0') ?? 50) / 100 },
       irrigation: { system: $('wbSystem').value, mode: $('wbMode').value, efficiency: n('wbEa'),
         triggerFrac: n('wbTrigger') === null ? null : n('wbTrigger') / 100, events: parseEvents($('wbEvents').value),
-        maxNetMm: n('wbMaxNet'), forecastRainProbMin: n('wbRainProb') ?? 60, useForecast: $('wbUseFc').value === '1' }
+        maxNetMm: n('wbMaxNet'), forecastRainProbMin: n('wbRainProb') ?? 60, useForecast: $('wbUseFc').value === '1' },
+      rain: { source: $('wbRainSrc').value, events: parseRain($('wbRain').value) }
     };
   }
   function writeField(f) {
@@ -52,7 +53,46 @@
     $('wbTrigger').value = f.irrigation.triggerFrac === null ? '' : Math.round(100 * f.irrigation.triggerFrac);
     $('wbEvents').value = (f.irrigation.events || []).map(e => `${e.date}, ${e.grossMm}`).join('\n');
     $('wbMaxNet').value = f.irrigation.maxNetMm ?? (E().Soils.SYSTEMS[f.irrigation.system || 'sprinkler'].maxNetMm ?? '');
+    $('wbRainSrc').value = f.rain?.source === 'listed' ? 'listed' : 'gauge'; $('wbRain').value = (f.rain?.events || []).map(e => `${e.date}, ${e.mm}`).join('\n'); rainInfo();
     $('wbRainProb').value = f.irrigation.forecastRainProbMin ?? 60; $('wbUseFc').value = f.irrigation.useForecast === false ? '0' : '1';
+  }
+  const qr = n => (n >= 3 && n <= 10) ? 'قراءات' : 'قراءة';
+  /** measured rain lines "YYYY-MM-DD, mm" (also DD/MM/YYYY); later duplicates win */
+  function parseRain(txt) {
+    const m = new Map();
+    txt.split(/\n/).forEach(l => { const r = parseRainLine(l); if (r) m.set(r.date, r.mm); });
+    return [...m].sort((a, b) => a[0].localeCompare(b[0])).map(([date, mm]) => ({ date, mm }));
+  }
+  function parseRainLine(l) {
+    l = String(l).trim(); let x = l.match(/(\d{4})-(\d{1,2})-(\d{1,2})\s*[,;\t ]\s*([\d.]+)/);
+    if (x) return { date: `${x[1]}-${x[2].padStart(2, '0')}-${x[3].padStart(2, '0')}`, mm: +x[4] };
+    x = l.match(/(\d{1,2})[\/.](\d{1,2})[\/.](\d{4})\s*[,;\t ]\s*([\d.]+)/);
+    return x ? { date: `${x[3]}-${x[2].padStart(2, '0')}-${x[1].padStart(2, '0')}`, mm: +x[4] } : null;
+  }
+  function rainInfo() {
+    const ev = parseRain($('wbRain').value), el = $('wbRainInfo');
+    if (!ev.length) { el.textContent = 'لا قراءات — يُستخدم مطر ناسا.'; return; }
+    const tot = ev.reduce((a, e) => a + e.mm, 0);
+    el.innerHTML = `<b>${ev.length}</b> ${qr(ev.length)}، مجموعها <b>${tot.toFixed(1)}</b> مم، من ${ev[0].date} إلى ${ev[ev.length - 1].date}. ${$('wbRainSrc').value === 'gauge' ? 'ضمن هذه الفترة يحل المقياس محل ناسا كلياً (اليوم غير المدخل = بلا مطر)، وخارجها يبقى مطر ناسا.' : 'تُستبدل هذه الأيام فقط.'}`;
+    $('wbRainBox').open = true;
+  }
+  /** Excel / CSV import: the first column that looks like a date and the first numeric column after it */
+  async function importRain(file) {
+    try {
+      let rows;
+      if (/\.csv$/i.test(file.name)) rows = (await file.text()).split(/\r?\n/).map(l => l.split(/[,;\t]/));
+      else { const wb = XLSX.read(await file.arrayBuffer(), { cellDates: true }); rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, raw: true }); }
+      const out = [];
+      for (const r of rows) {
+        if (!r || r.length < 2) continue;
+        let d = r[0], v = +String(r[1]).replace(',', '.');
+        if (d instanceof Date) d = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        else if (typeof d === 'number' && d > 20000 && d < 80000) { const x = new Date(Date.UTC(1899, 11, 30) + d * 864e5); d = x.toISOString().slice(0, 10); }   // Excel serial date
+        const p = parseRainLine(`${d}, ${v}`); if (p && Number.isFinite(v)) out.push(`${p.date}, ${p.mm}`);
+      }
+      if (!out.length) { toast('لم أجد عمودي التاريخ والمطر في الملف'); return; }
+      $('wbRain').value = [$('wbRain').value.trim(), ...out].filter(Boolean).join('\n'); rainInfo(); toast(`استُوردت ${out.length} ${qr(out.length)} مطر`);
+    } catch (e) { toast('تعذرت قراءة الملف'); }
   }
   function parseEvents(txt) {
     return txt.split(/\n/).map(l => l.trim()).filter(Boolean).map(l => { const m = l.match(/(\d{4}-\d{2}-\d{2})\s*[,;\t ]\s*([\d.]+)/); return m ? { date: m[1], grossMm: +m[2] } : null; }).filter(Boolean);
@@ -115,7 +155,7 @@
       if (ext.rows.length) { w = obs.concat(ext.rows); end = ext.rows[ext.rows.length - 1].date; }
     } else if (f.sowingDate < first || f.endDate > lastObs) { toast(`المناخ المعتمد يغطي ${first} → ${lastObs} فقط`); }
     try {
-      last = { field: f, fcNote, out: E().WaterBalance.run({ crop: f.crop, soil: f.soil, irrigation: f.irrigation, sowingDate: f.sowingDate < first ? first : f.sowingDate, endDate: end, maturityDate: f.maturityDate, weather: w }) };
+      last = { field: f, fcNote, out: E().WaterBalance.run({ crop: f.crop, soil: f.soil, irrigation: f.irrigation, sowingDate: f.sowingDate < first ? first : f.sowingDate, endDate: end, maturityDate: f.maturityDate, rain: f.rain, weather: w }) };
     } catch (e) { toast(e.message); return; }
     persist();
     renderRec(); renderKpis(); renderCharts(); renderTable(); renderDashAlert(true);
@@ -173,13 +213,13 @@
       + kpi('الماء المتاح في منطقة الجذور', pv('TAW', fmt(d.TAW, 0), 'مم') + pv('RAW', fmt(d.RAW, 0), 'مم'), `p معدّل = ${fmt(d.p, 2)}`)
       + kpi('الاستنزاف والإجهاد', pv('Dr', fmt(d.Dr, 0), 'مم') + pv('Ks', fmt(d.Ks, 2)), d.Ks < 1 ? 'إجهاد مائي' : 'دون إجهاد');
     const s = last.out.summary;
-    $('wbSummary').innerHTML = kpi('الهطول والجريان', pv('P', fmt(s.P, 0), 'مم') + pv('RO', fmt(s.RO, 0), 'مم'))
+    $('wbSummary').innerHTML = kpi('الهطول والجريان', pv('P', fmt(s.P, 0), 'مم') + pv('RO', fmt(s.RO, 0), 'مم'), last.field.rain?.events?.length ? `مقياس الحقل (${last.field.rain.events.length} ${qr(last.field.rain.events.length)})${last.field.rain.source === 'listed' ? ' + ناسا لبقية الأيام' : ' + ناسا خارج فترة القراءات'}` : 'مطر NASA POWER الشبكي')
       + kpi('الري', pv('صافٍ', fmt(s.Inet, 0), 'مم') + pv('إجمالي', fmt(s.Igross, 0), 'مم'), `${s.irrigations} رية — ${fmt(s.Igross, 0)} م³/دونم`)
       + kpi('الاستهلاك المائي للمحصول', pv('ETc', fmt(s.ETc, 0), 'مم') + pv('ETc,adj', fmt(s.ETcAdj, 0), 'مم'), `ETc,adj/ETc = ${fmt(s.ETcAdjOverETc, 2)} — ${s.stressDays} يوم إجهاد`)
       + kpi('التسرب العميق DP', `${fmt(s.DP, 0)} مم`, `إغلاق التوازن ${fmt(s.MassClosureMm, 3)} مم`);
   }
   function renderTable() {
-    const rows = last.out.days.slice().reverse().map(d => `<tr${d.Inet > 0 ? ' style="background:#fff4ec"' : ''}><td>${d.Date}${d.Kind === 'forecast' ? '<span class="wb-badge">توقع</span>' : d.Kind === 'model' ? '<span class="wb-badge">نموذج</span>' : ''}</td><td>${d.StageName}</td><td>${fmt(d.GDD, 0)}</td><td>${fmt(d.Kc, 2)}</td><td>${fmt(d.Zr, 2)}</td><td>${fmt(d.ET0, 2)}</td><td>${fmt(d.ETc, 2)}</td><td>${fmt(d.Ks, 2)}</td><td>${fmt(d.ETcAdj, 2)}</td><td>${fmt(d.P)}</td><td>${fmt(d.RO)}</td><td>${fmt(d.Inet)}</td><td>${fmt(d.DP)}</td><td>${fmt(d.TAW, 0)}</td><td>${fmt(d.RAW, 0)}</td><td>${fmt(d.Dr)}</td></tr>`);
+    const rows = last.out.days.slice().reverse().map(d => `<tr${d.Inet > 0 ? ' style="background:#fff4ec"' : ''}><td>${d.Date}${d.Kind === 'forecast' ? '<span class="wb-badge">توقع</span>' : d.Kind === 'model' ? '<span class="wb-badge">نموذج</span>' : ''}</td><td>${d.StageName}</td><td>${fmt(d.GDD, 0)}</td><td>${fmt(d.Kc, 2)}</td><td>${fmt(d.Zr, 2)}</td><td>${fmt(d.ET0, 2)}</td><td>${fmt(d.ETc, 2)}</td><td>${fmt(d.Ks, 2)}</td><td>${fmt(d.ETcAdj, 2)}</td><td>${fmt(d.P)}${d.RainSource === 'gauge' && d.P > 0 ? '<span class="wb-badge">مقيس</span>' : ''}</td><td>${fmt(d.RO)}</td><td>${fmt(d.Inet)}</td><td>${fmt(d.DP)}</td><td>${fmt(d.TAW, 0)}</td><td>${fmt(d.RAW, 0)}</td><td>${fmt(d.Dr)}</td></tr>`);
     $('wbTable').querySelector('tbody').innerHTML = rows.join('');
   }
 
@@ -271,6 +311,7 @@
     $('wbCrop').onchange = e => { fillCrop(e.target.value); defaultDates(true); };
     $('wbSoil').onchange = e => fillSoil(e.target.value);
     $('wbSystem').onchange = e => fillSystem(e.target.value);
+    $('wbRain').addEventListener('change', rainInfo); $('wbRainSrc').onchange = rainInfo; $('wbRainFile').onchange = e => e.target.files[0] && importRain(e.target.files[0]);
     $('wbRunBtn').onclick = runBalance; $('wbExportBtn').onclick = exportXlsx; $('wbSaveBtn').onclick = saveJson;
     $('wbLoadFile').onchange = e => e.target.files[0] && loadJson(e.target.files[0]);
     notice(); renderDashAlert(false);

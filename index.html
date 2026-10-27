@@ -242,6 +242,15 @@ button,input,select{font:inherit}.app{display:grid;grid-template-columns:270px 1
             <div class="mini" style="margin:8px 0">سطر لكل رية بالصيغة: <code>2026-03-15, 60</code> (التاريخ، العمق الإجمالي بالمليمتر). 1 مم على دونم = 1 م³.</div>
             <textarea id="wbEvents" rows="4" style="width:100%;border:1px solid #cfdde0;border-radius:9px;padding:9px;font-family:monospace;direction:ltr"></textarea>
           </details>
+          <details id="wbRainBox" style="margin-top:10px"><summary style="cursor:pointer;font-weight:700;font-size:13px">الأمطار المقيسة في الحقل (بدل أمطار ناسا)</summary>
+            <div class="mini" style="margin:8px 0">أمطار NASA POWER شبكية (نحو 50 كم) وقد تخطئ كثيراً على مستوى الحقل. إذا كان لديك مقياس مطر أدخل قراءاته هنا، سطراً لكل يوم ماطر: <code>2026-01-10, 35</code> (التاريخ، المطر بالمليمتر)، أو استوردها من ملف Excel أو CSV بعمودين: التاريخ والمطر.</div>
+            <div class="form-row">
+              <div class="field"><label title="الخيار الأول: كل يوم غير مدخل ضمن فترة القراءات يُعدّ بلا مطر">طريقة الاستخدام</label><select id="wbRainSrc"><option value="gauge">المقياس بدل ناسا ضمن فترة القراءات</option><option value="listed">استبدال الأيام المدخلة فقط</option></select></div>
+              <div class="field"><label>استيراد من ملف</label><input id="wbRainFile" type="file" accept=".xlsx,.xls,.csv"></div>
+            </div>
+            <textarea id="wbRain" rows="4" style="width:100%;margin-top:8px;border:1px solid #cfdde0;border-radius:9px;padding:9px;font-family:monospace;direction:ltr" placeholder="2026-01-10, 35"></textarea>
+            <div class="mini" id="wbRainInfo" style="margin-top:6px">لا قراءات — يُستخدم مطر ناسا.</div>
+          </details>
         </div>
         <div class="card span12" id="wbRecCard"><h3>توصية الري والتنبيه للأيام القادمة</h3><div id="wbRec" class="mini">احسب الموازنة لعرض التوصية.</div></div>
         <div class="card span12"><div class="kpis" id="wbKpis"></div></div>
@@ -306,9 +315,10 @@ button,input,select{font:inherit}.app{display:grid;grid-template-columns:270px 1
             <thead><tr><th>البند</th><th>الحالة</th><th>ما يلزم</th><th>معيار القبول</th></tr></thead>
             <tbody>
               <tr><td style="white-space:normal">حساب ET₀ (FAO-56 Penman–Monteith)</td><td><span class="status ok">متحقق</span></td><td style="white-space:normal">مثال FAO-56 رقم 18: 3.88 مم/يوم (المنشور 3.9)</td><td>مطابقة المثال المنشور</td></tr>
-              <tr><td style="white-space:normal">إغلاق كتلة الموازنة المائية</td><td><span class="status ok">متحقق</span></td><td style="white-space:normal">7 حالات اختبار تُشغَّل تلقائياً عند كل تعديل، منها الذبول والنضج المرصود</td><td>الإغلاق = 0 مم</td></tr>
+              <tr><td style="white-space:normal">إغلاق كتلة الموازنة المائية</td><td><span class="status ok">متحقق</span></td><td style="white-space:normal">8 حالات اختبار تُشغَّل تلقائياً عند كل تعديل، منها الذبول والنضج المرصود والمطر المقيس</td><td>الإغلاق = 0 مم</td></tr>
               <tr><td style="white-space:normal">حدود الأطوار الحرارية (GDD) على عدة مواسم</td><td><span class="status warn">مؤجل</span></td><td style="white-space:normal">تواريخ أطوار مرصودة (الإشطاء، طرد السنابل، النضج) لعدة مواسم في سلمية ومواقع أخرى. الحدود الحالية من موسم 2025/26 وحده، وفي تجربة على موسم 2022/23 لم يبلغ التراكم حد النضج حتى 1 حزيران. إلى حين المعايرة أدخل تاريخ النضج المرصود في بطاقة الحقل.</td><td>تاريخ الطور ضمن ±7 أيام</td></tr>
               <tr><td style="white-space:normal">أرشيف NASA POWER لخمسة مواسم</td><td><span class="status info">قيد التنزيل</span></td><td style="white-space:normal">تنزيل 2021–2024 إلى أرشيف المنصة لمعايرة الأطوار والتحقق على عدة مواسم</td><td>—</td></tr>
+              <tr><td style="white-space:normal">أمطار الحقل</td><td><span class="status ok">متاح</span></td><td style="white-space:normal">قراءات مقياس المطر تُدخل في بطاقة الحقل وتحل محل أمطار ناسا الشبكية. يُنصح بمقياس مطر في كل موقع رصد</td><td>—</td></tr>
               <tr><td style="white-space:normal">عوامل تصحيح NASA POWER محلياً</td><td><span class="status warn">مؤجل</span></td><td style="white-space:normal">معاملات بحث النشابية، ثم محطات بقية مناطق الاستقرار</td><td>ET₀: RMSE &lt; 0.7 مم/يوم، d &gt; 0.90</td></tr>
               <tr><td style="white-space:normal">Kc وZr وp محلياً، والاستنزاف Dr</td><td><span class="status warn">مؤجل</span></td><td style="white-space:normal">رطوبة التربة المقاسة والريات من استمارة الرصد في المحطات</td><td>Dr: RMSE &lt; 15% من TAW؛ موعد الري ±3 أيام</td></tr>
             </tbody>

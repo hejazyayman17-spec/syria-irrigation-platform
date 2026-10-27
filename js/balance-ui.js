@@ -168,6 +168,14 @@
   function headline() {
     const r = last.out.recommendation, t = r.today, a = r.alert, f = last.field, area = f.areaDunum || 0, ea = f.irrigation.efficiency;
     const vol = g => `${fmt(g)} مم = ${fmt(g)} م³/دونم${area ? ` (${fmt(g * area, 0)} م³ للحقل)` : ''}`;
+    // a run whose last known day lies well in the past is an analysis of a past season, not an operational alert
+    const ageDays = Math.round((Date.now() - new Date(t.date + 'T00:00:00')) / 864e5);
+    if (ageDays > 14 && !(a && a.days)) {
+      const sm = last.out.summary, ld = last.out.days.filter(d => d.Kind !== 'forecast').pop() || {};
+      const harvested = t.action === 'harvested';
+      return { level: 'history', html: `<div class="big wb-ok">تحليل موسم سابق</div><div>نهاية الفترة المحسوبة <b>${t.date}</b>، فلا يُصدر تنبيه ري لهذا التاريخ.<br>
+        خلال الموسم: ${sm.irrigations} ${sm.irrigations >= 3 && sm.irrigations <= 10 ? 'ريات' : 'رية'}، الري الإجمالي <b>${vol(sm.Igross)}</b>، الهطول ${fmt(sm.P, 0)} مم، أيام الإجهاد المائي ${sm.stressDays}.${harvested ? `<br>${f.maturityDate ? 'النضج المرصود' : 'بلغ المحصول حد النضج'} في ${t.date}.` : `<br>لم يبلغ المحصول حد النضج حتى هذا التاريخ (GDD ${fmt(ld.GDD, 0)} من ${fmt(f.crop.gdd.lateEnd, 0)})؛ إن كان تاريخ النضج الفعلي معروفاً فأدخله في بطاقة الحقل.`}</div>` };
+    }
     if (t.action === 'harvested') return { level: 'harvested', html: `<div class="big">انتهى الموسم</div><div>${last.field.maturityDate ? 'النضج المرصود' : 'بلغ التراكم الحراري حد النضج'} في <b>${t.date}</b>؛ لا توصيات ري بعد هذا التاريخ.</div>` };
     if (t.action === 'irrigate') return { level: 'now', html: `<div class="big wb-alert-now">ري الآن</div><div>آخر يوم معلوم <b>${t.date}</b>: العجز <b>${fmt(t.Dr)} مم</b> تجاوز العتبة ${fmt(t.trigger)} مم (TAW ${fmt(t.TAW, 0)} مم).<br>
       الرية: صافي <b>${fmt(t.netMm)} مم</b> — إجمالي عند Ea ${ea}: <b>${vol(t.grossMm)}</b>.${t.limited ? `<br>محدودة بأقصى عمق للنظام؛ يبقى عجز ${fmt(t.remainingMm)} مم تغطيه الرية التالية.` : ''}</div>` };
@@ -190,7 +198,7 @@
         العجز ${fmt(d.Dr, 0)} مم<br><span class="wd">العتبة ${fmt(d.Trigger, 0)} مم</span>${d.Inet > 0 ? `<br><b style="color:#c2410c">ري ${fmt(d.Igross, 0)} مم</b>` : ''}</div>`).join('')}</div>
         <div class="mini" style="margin-top:8px">مجموع الأيام ${a.days}: ET₀ ${fmt(a.et0Mm)} مم — مطر متوقع ${fmt(a.rainAllMm)} مم، المحتسب منه ${fmt(a.rainCountedMm)} مم (احتمال ≥ ${a.probMin}%).${a.harvestInHorizon ? ` بلوغ حد النضج متوقع ${a.harvestInHorizon}.` : ''}</div>`;
     }
-    html += `<div class="mini" style="margin-top:6px">${last.fcNote || 'التوصية على آخر يوم في السلسلة المعتمدة.'}</div>`;
+    if (h.level !== 'history') html += `<div class="mini" style="margin-top:6px">${last.fcNote || 'التوصية على آخر يوم في السلسلة المعتمدة.'}</div>`;
     el.innerHTML = html;
   }
   /** Dashboard banner with the latest field alert (kept per browser so it shows on the next visit) */

@@ -63,7 +63,7 @@
    *   irrigation: { mode: 'scheduled'|'actual'|'rainfed', efficiency, triggerFrac|null (null = RAW i.e. p), events:[{date,grossMm}],
    *                 maxNetMm|null (largest net depth one irrigation can apply; null = refill to FC),
    *                 forecastRainProbMin (%; forecast rain counts only when its probability ≥ this, default 60) },
-   *   sowingDate: 'YYYY-MM-DD', endDate: 'YYYY-MM-DD',
+   *   sowingDate: 'YYYY-MM-DD', endDate: 'YYYY-MM-DD', maturityDate?: 'YYYY-MM-DD' (observed; overrides GDD harvest),
    *   weather: [{ date, tmin, tmax, et0, rain, u2, rhmin, kind, rainProb }]
    *            u2, rhmin optional (Kc climate adjustment); kind: 'obs' (default) | 'model' (recent analysis) | 'forecast'
    * }
@@ -87,9 +87,14 @@
     let cum = 0; const g = [];
     for (const k of dates) { const w = wx.get(k); cum += w ? gdd(w.tmin, w.tmax, c.tbase, c.tupper) : 0; g.push(cum); }
     // the season ends at harvest maturity (GDD ≥ lateEnd): later days are not part of the crop water balance
-    const hv = g.findIndex(x => x >= c.gdd.lateEnd);
+    // an OBSERVED maturity/harvest date (field record) overrides the thermal-time limit: the season ends that day,
+    // and before it the crop stays in the late stage even if GDD already passed lateEnd (calibration not yet local)
+    const mat = input.maturityDate ? String(input.maturityDate).slice(0, 10) : null;
+    const mi = mat ? dates.indexOf(mat) : -1;
+    const hv = mi >= 0 ? mi : g.findIndex(x => x >= c.gdd.lateEnd);
     if (hv >= 0) { dates.length = hv + 1; g.length = hv + 1; }
-    const meanOver = (stage, f) => { const v = dates.map((k, i) => stageOf(g[i], c.gdd) === stage ? f(wx.get(k)) : null).filter(Number.isFinite); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null; };
+    const stageAt = i => mi >= 0 ? (i === mi ? 4 : Math.min(3, stageOf(g[i], c.gdd))) : stageOf(g[i], c.gdd);
+    const meanOver = (stage, f) => { const v = dates.map((k, i) => stageAt(i) === stage ? f(wx.get(k)) : null).filter(Number.isFinite); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null; };
     const adj = (kc, st) => { const u = meanOver(st, w => w && w.u2), rh = meanOver(st, w => w && w.rhmin); return (u === null || rh === null) ? kc : F().kcClimateAdjust(kc, u, rh, c.h); };
     const kcMidAdj = adj(c.kcMid, 2);
     const kcEndAdj = c.kcEnd >= 0.45 ? adj(c.kcEnd, 3) : c.kcEnd;   // Eq. 65 applies only when Kc end ≥ 0.45
@@ -107,7 +112,7 @@
     dates.forEach((k, i) => {
       const w = wx.get(k);
       const kind = (w && w.kind) || 'obs', isFc = kind === 'forecast';
-      const G_ = g[i], st = stageOf(G_, c.gdd), kc = st === 4 ? null : kcAt(G_, c, kcMidAdj, kcEndAdj);
+      const G_ = g[i], st = stageAt(i), kc = st === 4 ? null : (st === 3 && G_ >= c.gdd.lateEnd ? kcEndAdj : kcAt(G_, c, kcMidAdj, kcEndAdj));
       const zr = zrAt(G_, c);
       // root growth: bring the new slice's share of subsoil depletion into the root zone
       if (zr > zrPrev + 1e-9) {

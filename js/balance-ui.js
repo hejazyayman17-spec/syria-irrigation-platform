@@ -29,7 +29,7 @@
       name: $('wbName').value || 'حقل',
       areaDunum: n('wbArea'),
       location: { lat: +(state.station?.Latitude ?? NaN), lon: +(state.station?.Longitude ?? NaN), climateSource: state.sourceLabel || '' },
-      sowingDate: $('wbSow').value, endDate: $('wbEnd').value,
+      sowingDate: $('wbSow').value, endDate: $('wbEnd').value, maturityDate: $('wbMaturity').value || null,
       crop: { ...base, kcIni: n('wbKcIni'), kcMid: n('wbKcMid'), kcEnd: n('wbKcEnd'), h: n('wbH'), zrMin: n('wbZrMin'), zrMax: n('wbZrMax'), p: n('wbP'),
         tbase: n('wbTbase'), tupper: n('wbTupper'), gdd: { iniEnd: n('wbG1'), devEnd: n('wbG2'), midEnd: n('wbG3'), lateEnd: n('wbG4') } },
       soil: { texture: $('wbSoil').value, thetaFC: n('wbFC'), thetaWP: n('wbWP'), cn: n('wbCN'),
@@ -45,7 +45,7 @@
     const c = f.crop;
     Object.entries({ wbKcIni: c.kcIni, wbKcMid: c.kcMid, wbKcEnd: c.kcEnd, wbH: c.h, wbZrMin: c.zrMin, wbZrMax: c.zrMax, wbP: c.p, wbTbase: c.tbase, wbTupper: c.tupper ?? '',
       wbG1: c.gdd.iniEnd, wbG2: c.gdd.devEnd, wbG3: c.gdd.midEnd, wbG4: c.gdd.lateEnd }).forEach(([k, v]) => $(k).value = v);
-    $('wbSow').value = f.sowingDate || ''; $('wbEnd').value = f.endDate || '';
+    $('wbSow').value = f.sowingDate || ''; $('wbEnd').value = f.endDate || ''; $('wbMaturity').value = f.maturityDate || '';
     $('wbSoil').value = f.soil.texture || 'loam'; $('wbFC').value = f.soil.thetaFC; $('wbWP').value = f.soil.thetaWP; $('wbCN').value = f.soil.cn;
     $('wbDr0').value = Math.round(100 * f.soil.initialDepletionFrac); $('wbDsub0').value = Math.round(100 * f.soil.subsoilDepletionFrac);
     $('wbSystem').value = f.irrigation.system || 'sprinkler'; $('wbMode').value = f.irrigation.mode; $('wbEa').value = f.irrigation.efficiency;
@@ -115,11 +115,11 @@
       if (ext.rows.length) { w = obs.concat(ext.rows); end = ext.rows[ext.rows.length - 1].date; }
     } else if (f.sowingDate < first || f.endDate > lastObs) { toast(`المناخ المعتمد يغطي ${first} → ${lastObs} فقط`); }
     try {
-      last = { field: f, fcNote, out: E().WaterBalance.run({ crop: f.crop, soil: f.soil, irrigation: f.irrigation, sowingDate: f.sowingDate < first ? first : f.sowingDate, endDate: end, weather: w }) };
+      last = { field: f, fcNote, out: E().WaterBalance.run({ crop: f.crop, soil: f.soil, irrigation: f.irrigation, sowingDate: f.sowingDate < first ? first : f.sowingDate, endDate: end, maturityDate: f.maturityDate, weather: w }) };
     } catch (e) { toast(e.message); return; }
     persist();
     renderRec(); renderKpis(); renderCharts(); renderTable(); renderDashAlert(true);
-    if (typeof syncCropFromField === 'function') { const lo = last.out.days.filter(d => d.Kind !== 'forecast').pop(); syncCropFromField(f.crop.key, f.sowingDate, lo && lo.Date); } $('wbExportBtn').disabled = false;
+    if (typeof syncCropFromField === 'function') { const lo = last.out.days.filter(d => d.Kind !== 'forecast').pop(); syncCropFromField(f.crop.key, f.sowingDate, lo && lo.Date, f.crop); } $('wbExportBtn').disabled = false;
   }
 
   const fmt = (v, d = 1) => v === null || v === undefined ? '—' : (+v).toFixed(d);
@@ -128,7 +128,7 @@
   function headline() {
     const r = last.out.recommendation, t = r.today, a = r.alert, f = last.field, area = f.areaDunum || 0, ea = f.irrigation.efficiency;
     const vol = g => `${fmt(g)} مم = ${fmt(g)} م³/دونم${area ? ` (${fmt(g * area, 0)} م³ للحقل)` : ''}`;
-    if (t.action === 'harvested') return { level: 'harvested', html: `<div class="big">انتهى الموسم</div><div>بلغ التراكم الحراري حد النضج في <b>${t.date}</b>؛ لا توصيات ري بعد هذا التاريخ.</div>` };
+    if (t.action === 'harvested') return { level: 'harvested', html: `<div class="big">انتهى الموسم</div><div>${last.field.maturityDate ? 'النضج المرصود' : 'بلغ التراكم الحراري حد النضج'} في <b>${t.date}</b>؛ لا توصيات ري بعد هذا التاريخ.</div>` };
     if (t.action === 'irrigate') return { level: 'now', html: `<div class="big wb-alert-now">ري الآن</div><div>آخر يوم معلوم <b>${t.date}</b>: العجز <b>${fmt(t.Dr)} مم</b> تجاوز العتبة ${fmt(t.trigger)} مم (TAW ${fmt(t.TAW, 0)} مم).<br>
       الرية: صافي <b>${fmt(t.netMm)} مم</b> — إجمالي عند Ea ${ea}: <b>${vol(t.grossMm)}</b>.${t.limited ? `<br>محدودة بأقصى عمق للنظام؛ يبقى عجز ${fmt(t.remainingMm)} مم تغطيه الرية التالية.` : ''}</div>` };
     if (a && a.level === 'soon') {

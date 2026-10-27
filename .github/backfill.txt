@@ -1,0 +1,6 @@
+# NASA POWER archive backfill — one period per line: START END (YYYYMMDD). Newest first.
+# Requested 2026-10-27: five seasons for multi-season phenology calibration (المعايرة والتحقق).
+20240101 20241231
+20230101 20231231
+20220101 20221231
+20210101 20211231

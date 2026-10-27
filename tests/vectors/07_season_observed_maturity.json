@@ -1,0 +1,6 @@
+{ "type": "season", "name": "Observed maturity date ends the season before the GDD limit — closure",
+  "input": { "cropKey": "wheat", "sowingDate": "2025-11-15", "endDate": "2026-06-15", "maturityDate": "2026-05-10",
+    "soil": { "thetaFC": 0.29, "thetaWP": 0.15, "cn": 80, "initialDepletionFrac": 0.5, "subsoilDepletionFrac": 0.5 },
+    "irrigation": { "mode": "scheduled", "efficiency": 0.75, "triggerFrac": null, "events": [], "maxNetMm": 45, "forecastRainProbMin": 60 },
+    "weatherGen": { "start": "2025-11-15", "days": 213, "tmin": 3, "tmax": 13, "amp": -5, "et0": 3.0, "et0amp": -1.8, "rain": 0, "rainEvery": 6, "rainMm": 9, "u2": 2.5, "rhmin": 40 } },
+  "expect": { "MassClosureMm": [0, 0.01], "LastDayIsMaturity": [1, 0], "LastStage": [4, 0] } }

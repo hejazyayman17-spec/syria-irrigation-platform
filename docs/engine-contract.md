@@ -34,11 +34,13 @@
   "soil": { "texture": "siltLoam", "thetaFC": 0.29, "thetaWP": 0.15, "cn": 80, "initialDepletionFrac": 0.5, "subsoilDepletionFrac": 0.5 },
   "irrigation": { "system": "sprinkler", "mode": "scheduled", "efficiency": 0.75, "triggerFrac": null,
                   "events": [ { "date": "2026-03-15", "grossMm": 60 } ],
-                  "maxNetMm": 45, "forecastRainProbMin": 60, "useForecast": true }
+                  "maxNetMm": 45, "forecastRainProbMin": 60, "useForecast": true },
+  "rain": { "source": "gauge", "events": [ { "date": "2026-01-10", "mm": 35 } ] }
 }
 ```
 `mode`: يأخذ إحدى ثلاث قيم: `scheduled` (ري تلقائي عند العتبة إضافة إلى الريات المسجلة)، `actual` (الريات المسجلة فقط)، `rainfed` (بعلي).
 `triggerFrac = null` تعني أن العتبة هي RAW، أي p معدّل يومياً.
+`rain` (اختياري): قراءات مقياس المطر في الحقل. `source = gauge`: المقياس هو مصدر المطر من أول قراءة إلى آخرها، واليوم غير المدخل = 0 مم. `source = listed`: تُستبدل الأيام المدخلة فقط. أيام التوقع لا تُستبدل أبداً، وكل يوم يحمل `RainSource` (`gauge` أو `grid` أو `forecast`).
 `maturityDate` (اختياري): تاريخ النضج أو الحصاد المرصود. إذا أُدخل ينتهي الموسم عنده بدل حد التراكم الحراري، ويبقى المحصول قبله في طور نهاية الموسم حتى لو تجاوز التراكم الحد.
 `maxNetMm` هو أقصى عمق صافٍ للرية الواحدة، وقيمته `null` تعني التعبئة الكاملة إلى السعة الحقلية.
 `forecastRainProbMin` (%): مطر التوقع يُحتسب كاملاً إذا بلغ احتماله هذه القيمة، ولا يُحتسب إطلاقاً إذا كان دونها. هذه قاعدة قرار، لا ضرب في الاحتمال.
@@ -56,7 +58,7 @@
 | `rainProb` | % | احتمال المطر، لأيام التوقع فقط |
 
 ## سجل الموازنة اليومية (مخرج المحرك) — `DailyBalance`
-`Date, GDD, Stage, StageName, Kc, Zr, TAW, RAW, p, ET0, ETc, Ks, ETcAdj, P, RO, Inet, Igross, AutoIrrigation, DP, Recharge, Dr, Dsub, Trigger, NeedsIrrigation, MissingWeather, Kind, RainForecast, RainProb`
+`Date, GDD, Stage, StageName, Kc, Zr, TAW, RAW, p, ET0, ETc, Ks, ETcAdj, P, RO, Inet, Igross, AutoIrrigation, DP, Recharge, Dr, Dsub, Trigger, NeedsIrrigation, MissingWeather, Kind, RainForecast, RainProb, RainSource`
 
 مخرجات `run()` الأخرى:
 - `summary`: يغطي أيام الرصد والنموذج فقط.

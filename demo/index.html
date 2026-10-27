@@ -515,6 +515,7 @@ footer{text-align:center;color:var(--muted);font-size:12.5px}
    *   irrigation: { mode: 'scheduled'|'actual'|'rainfed', efficiency, triggerFrac|null (null = RAW i.e. p), events:[{date,grossMm}],
    *                 maxNetMm|null (largest net depth one irrigation can apply; null = refill to FC),
    *                 forecastRainProbMin (%; forecast rain counts only when its probability ≥ this, default 60) },
+   *   rain?: { source: 'gauge'|'listed', events:[{date, mm}] } (measured field rain, see below),
    *   sowingDate: 'YYYY-MM-DD', endDate: 'YYYY-MM-DD', maturityDate?: 'YYYY-MM-DD' (observed; overrides GDD harvest),
    *   weather: [{ date, tmin, tmax, et0, rain, u2, rhmin, kind, rainProb }]
    *            u2, rhmin optional (Kc climate adjustment); kind: 'obs' (default) | 'model' (recent analysis) | 'forecast'
@@ -532,6 +533,13 @@ footer{text-align:center;color:var(--muted);font-size:12.5px}
     const events = new Map((irr.events || []).map(e => [String(e.date).slice(0, 10), +e.grossMm || 0]));
     const maxNet = Number.isFinite(irr.maxNetMm) && irr.maxNetMm > 0 ? irr.maxNetMm : Infinity;
     const probMin = Number.isFinite(irr.forecastRainProbMin) ? irr.forecastRainProbMin : 60;
+    // measured field rain (rain gauge). Gridded rain (NASA POWER) is often unreliable at field scale, so:
+    //  'gauge'  — the gauge is THE rain source from its first to its last entry; days without an entry = 0 mm
+    //  'listed' — only the listed days replace the gridded value
+    // forecast days are never overridden (no measurement exists yet)
+    const rr = input.rain || {}, rainObs = new Map((rr.events || []).filter(e => e && e.date && Number.isFinite(+e.mm)).map(e => [String(e.date).slice(0, 10), Math.max(0, +e.mm)]));
+    const rainMode = rainObs.size ? (rr.source === 'listed' ? 'listed' : 'gauge') : 'grid';
+    const gKeys = [...rainObs.keys()].sort(), gFrom = gKeys[0], gTo = gKeys[gKeys.length - 1];
 
     // ---- pass 1: thermal time per day → mean u2 & RHmin over mid and late stages → adjusted Kc mid/end (Eq. 62)
     const dates = [];
@@ -580,7 +588,9 @@ footer{text-align:center;color:var(--muted);font-size:12.5px}
       const RAW = p * TAW;
       const Ks = Dr <= RAW ? 1 : clamp((TAW - Dr) / ((1 - p) * TAW), 0, 1);
       let ETcAdj = Ks * ETc;
-      const rainRaw = w && Number.isFinite(w.rain) ? Math.max(0, w.rain) : 0;
+      let rainRaw = w && Number.isFinite(w.rain) ? Math.max(0, w.rain) : 0, rainSrc = isFc ? 'forecast' : 'grid';
+      if (!isFc && rainObs.has(k)) { rainRaw = rainObs.get(k); rainSrc = 'gauge'; }
+      else if (!isFc && rainMode === 'gauge' && k >= gFrom && k <= gTo) { rainRaw = 0; rainSrc = 'gauge'; }
       const rainProb = w && Number.isFinite(w.rainProb) ? w.rainProb : null;
       // forecast rain enters the balance only when likely enough (decision rule, not a probability-weighted amount)
       const P = isFc && rainProb !== null && rainProb < probMin ? 0 : rainRaw;
@@ -612,7 +622,7 @@ footer{text-align:center;color:var(--muted);font-size:12.5px}
         ETc: +ETc.toFixed(2), Ks: +Ks.toFixed(3), ETcAdj: +ETcAdj.toFixed(2), P: +P.toFixed(1), RO: +RO.toFixed(1),
         Inet: +Inet.toFixed(1), Igross: +Igross.toFixed(1), AutoIrrigation: auto, DP: +DP.toFixed(1), Recharge: +recharge.toFixed(1),
         Dr: +Dr.toFixed(1), Dsub: +Dsub.toFixed(1), Trigger: +trig.toFixed(1), NeedsIrrigation: needs, MissingWeather: et0 === null,
-        Kind: kind, RainForecast: isFc ? +rainRaw.toFixed(1) : null, RainProb: rainProb });
+        Kind: kind, RainForecast: isFc ? +rainRaw.toFixed(1) : null, RainProb: rainProb, RainSource: rainSrc });
     });
 
     // mass closure: water gained by the profile (= decrease of total depletion) must equal inputs − outputs

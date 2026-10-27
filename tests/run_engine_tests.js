@@ -26,9 +26,9 @@ for (const file of fs.readdirSync(path.join(__dirname, 'vectors')).sort()) {
 }
 /* deterministic synthetic weather: constant or sinusoidal season */
 function expandWeather(g) {
-  const out = []; const d0 = new Date(g.start + 'T00:00:00');
+  const out = []; const d0 = new Date(g.start + 'T00:00:00Z');   // UTC: the same dates on every machine/time zone
   for (let i = 0; i < g.days; i++) {
-    const d = new Date(d0); d.setDate(d.getDate() + i);
+    const d = new Date(d0); d.setUTCDate(d.getUTCDate() + i);
     const ph = Math.sin(2 * Math.PI * i / g.days);
     out.push({ date: d.toISOString().slice(0, 10), tmin: g.tmin + g.amp * ph, tmax: g.tmax + g.amp * ph, et0: g.et0 + g.et0amp * ph,
       rain: (i % g.rainEvery === 0) ? g.rainMm : 0, u2: g.u2, rhmin: g.rhmin,

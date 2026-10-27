@@ -18,7 +18,9 @@ for (const file of fs.readdirSync(path.join(__dirname, 'vectors')).sort()) {
   } else if (v.type === 'season') {
     const input = { ...v.input, crop: { ...Crops.get(v.input.cropKey), ...(v.input.cropOverride || {}) }, weather: expandWeather(v.input.weatherGen) };
     const out = WaterBalance.run(input);
-    const derived = { MaxSingleNetMm: Math.max(...out.days.map(d => d.Inet)), ForecastRainCountedMm: out.forecast.P };
+    const lastDay = out.days[out.days.length - 1];
+    const derived = { MaxSingleNetMm: Math.max(...out.days.map(d => d.Inet)), ForecastRainCountedMm: out.forecast.P,
+      LastDayIsMaturity: lastDay.Date === v.input.maturityDate ? 1 : 0, LastStage: lastDay.Stage };
     for (const [k, [exp, tol]] of Object.entries(v.expect)) near(`${v.name} ${k}`, k in derived ? derived[k] : out.summary[k], exp, tol);
   }
 }

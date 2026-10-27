@@ -1,0 +1,42 @@
+# One-off history backfill of the NASA POWER archive (data/nasa/YYYY.json), one period per line of .github/backfill.txt.
+# Triggered by pushing a change to that file (or manually). Each period is committed as soon as it is done,
+# so a timeout or an outage keeps the years already finished.
+name: NASA POWER backfill
+
+on:
+  push:
+    paths: ['.github/backfill.txt']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: data-sync
+  cancel-in-progress: false
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate FAO-56 engine (Example 18)
+        run: python tools/fao56.py
+      - name: Download each period and commit it
+        run: |
+          git config user.name  "nasa-sync-bot"
+          git config user.email "actions@users.noreply.github.com"
+          grep -E '^[0-9]{8} [0-9]{8}' .github/backfill.txt | while read start end; do
+            echo "::group::$start → $end"
+            for try in 1 2 3; do python tools/nasa_power_sync.py --start "$start" --end "$end" && break; echo "retry $try"; sleep 120; done
+            git add data/nasa
+            if ! git diff --cached --quiet; then
+              git commit -m "data: NASA POWER backfill $start-$end"
+              git pull --rebase && git push
+            fi
+            echo "::endgroup::"
+          done

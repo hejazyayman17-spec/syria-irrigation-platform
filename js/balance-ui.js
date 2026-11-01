@@ -28,7 +28,8 @@
       schema: 'gcsar.field/1',
       name: $('wbName').value || 'حقل',
       areaDunum: n('wbArea'),
-      location: { lat: +(state.station?.Latitude ?? NaN), lon: +(state.station?.Longitude ?? NaN), climateSource: state.sourceLabel || '' },
+      location: { lat: +(state.station?.Latitude ?? NaN), lon: +(state.station?.Longitude ?? NaN), elevationM: +(state.station?.Elevation_m ?? NaN), climateSource: state.sourceLabel || '',
+        climateCorrection: state.corrRes ? { level: state.corrRes.level, cellId: state.corrRes.cellId, siteType: state.corrRes.site.siteType, measuredWindFactor: state.corrRes.site.measuredWindFactor } : null },
       sowingDate: $('wbSow').value, endDate: $('wbEnd').value, maturityDate: $('wbMaturity').value || null,
       crop: { ...base, kcIni: n('wbKcIni'), kcMid: n('wbKcMid'), kcEnd: n('wbKcEnd'), h: n('wbH'), zrMin: n('wbZrMin'), zrMax: n('wbZrMax'), p: n('wbP'),
         tbase: n('wbTbase'), tupper: n('wbTupper'), gdd: { iniEnd: n('wbG1'), devEnd: n('wbG2'), midEnd: n('wbG3'), lateEnd: n('wbG4') } },
@@ -137,7 +138,8 @@
     const el = $('wbNotice'), w = weather();
     if (!state.rows.length) { el.innerHTML = '<span class="status warn">لا توجد بيانات مناخية</span> حمّل سلسلة من «أرشيف المنصة» أو ملف محطة في شاشة المناخ، ثم راجعها واعتمدها.'; return false; }
     if (!state.approved) { el.innerHTML = '<span class="status warn">البيانات غير معتمدة</span> لا تُحسب الموازنة إلا على سلسلة مناخية معتمدة (المعاينة البصرية + زر الاعتماد في شاشة المناخ).'; return false; }
-    el.innerHTML = `<span class="status ok">مناخ معتمد</span> ${state.sourceLabel || state.station?.StationName || ''} — ${w.length} يوماً (${w[0]?.date} → ${w[w.length - 1]?.date}).`;
+    const cl = window.CORRUI ? CORRUI.summaryLine() : '';
+    el.innerHTML = `<span class="status ok">مناخ معتمد</span> ${state.sourceLabel || state.station?.StationName || ''} — ${w.length} يوماً (${w[0]?.date} → ${w[w.length - 1]?.date}).${cl ? ` <span class="status info">${cl}</span>` : ''}`;
     return true;
   }
 

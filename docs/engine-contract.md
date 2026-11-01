@@ -1,6 +1,6 @@
 # عقد المحرك العلمي — جسر HTML ↔ .NET
 
-**الإصدار:** 0.9 — 23 تشرين الأول 2026
+**الإصدار:** 1.0 — 1 تشرين الثاني 2026
 
 ## المبدأ
 المحرك العلمي مفصول تماماً عن الواجهة. كل ملف في `js/engine/` دوالّه نقية: لا تقرأ من الصفحة ولا تكتب إليها.
@@ -15,6 +15,7 @@
 | `js/engine/crops.js` | `GCSAR.Irrigation.Core.CropLibrary` + `CropParameters` | معاملات المحاصيل (Kc، Zr، p، h، Ky، حدود الأطوار بـ GDD) |
 | `js/engine/soils.js` | `GCSAR.Irrigation.Core.SoilLibrary` | θFC وθWP وCN للقوامات، وكفاءات أنظمة الري |
 | `js/engine/waterbalance.js` | `GCSAR.Irrigation.Core.WaterBalanceEngine` | الموازنة اليومية، وKs، والتوصية |
+| `js/engine/correction.js` | `GCSAR.ClimateCorrection` (المكتبة نفسها، تُضاف بـ ProjectReference) | تصحيح مدخلات ناسا بمعادلات يوم السنة، ثم ET₀ مع هامش الخطأ ومستوى التصحيح والتحذيرات. نقل حرفي للمكتبة؛ المعاملات من `data/correction/correction_coefficients.json` |
 | `tools/forecast_sync.py` | `GCSAR.Irrigation.Data.ForecastService` | توقعات Open-Meteo على شبكة ناسا: سدّ التأخر + 7 أيام، وملخص المحافظات للخريطة |
 | `tools/nasa_power_sync.py` | `GCSAR.Irrigation.Data.NasaPowerService` (خدمة خلفية) | التنزيل والأرشفة؛ يبقى على GitHub Actions حتى في نسخة .NET |
 | `js/balance-ui.js` وباقي `index.html` | Blazor pages / WPF views | واجهة فقط |
@@ -27,7 +28,8 @@
   "schema": "gcsar.field/1",
   "name": "سلمية — قمح 2025/26",
   "areaDunum": 10,
-  "location": { "lat": 35.01, "lon": 37.05, "climateSource": "أرشيف المنصة — NASA POWER" },
+  "location": { "lat": 35.01, "lon": 37.05, "elevationM": 475, "climateSource": "أرشيف المنصة — NASA POWER",
+                "climateCorrection": { "level": 3, "cellId": "35_36.875", "siteType": "ordinary", "measuredWindFactor": null } },
   "sowingDate": "2025-11-20", "endDate": "2026-06-10", "maturityDate": null,
   "crop": { "key": "wheat", "kcIni": 0.7, "kcMid": 1.15, "kcEnd": 0.3, "h": 1.0, "zrMin": 0.2, "zrMax": 1.5, "p": 0.55,
             "ky": 1.05, "tbase": 0, "tupper": null, "gdd": { "iniEnd": 550, "devEnd": 1600, "midEnd": 2100, "lateEnd": 2600 } },
@@ -92,6 +94,15 @@ GCSAR.Irrigation.sln
  └─ tests/GCSAR.Irrigation.Core.Tests ← xUnit يقرأ tests/vectors/*.json نفسها
 ```
 **شرط القبول:** يجب أن تجتاز النسخة C# كل حالات `tests/vectors/` بالسماحيات نفسها، قبل أن تحل محل محرك JS في أي حساب.
+
+## تصحيح بيانات ناسا (GCSAR.ClimateCorrection)
+- **الترتيب ثابت:** تُصحَّح المدخلات (Tmax وTmin وTdew وRs وu2) بمعادلة يوم السنة، ثم يُعاد حساب ET₀. لا يُطبَّق معامل على ET₀ النهائي.
+- **المستويات:** 3 معادلة الخلية (فيها محطة مرجعية)، و2 معادلة إقليمية (البادية، الجزيرة)، و1 ناسا خام للحرارة والرطوبة مع معامل رياح.
+- **الرياح بالأولوية:** معامل مقاس، ثم معادلة رياح الخلية لنوع الموقع نفسه، ثم المعامل الافتراضي (محمي 0.72، عادي 0.67، مكشوف 1.10).
+- **الهامش (مم/يوم)** = √(RMSE الخلية الشهري² + (عدم يقين معامل الرياح × الحد الهوائي)²).
+- **حساب FAO-56 في التصحيح** هو نسخة البحث نفسها (Rs/Rso محصورة بين 0.25 و1)، ولا يُستبدل بمحرك المنصة. حالة الاختبار 09 تطابق 50 حالة مرجعية بفرق أقصى 3.6×10⁻¹⁵.
+- **ملفات الحالة:** القيم الخام تُحفظ في كل سجل (`_raw`) وتُستعاد قبل أي إعادة حساب، فلا يُصحَّح السجل مرتين. ملفات المحطات الأرضية لا تُصحَّح.
+- **مؤشرات التوافق:** `data/correction/validation_stats.json` من نتائج البحث (n، MBE، MAE، RMSE، nRMSE، d، NSE، KGE، r، الانحياز %) لكل خلية، الخام مقابل المصحح. تُبنى مع المعاملات بـ `python tools/build_correction_data.py ../nashabiyah-nasa-power`.
 
 ## التشغيل والاختبار
 - `node tests/run_engine_tests.js` لتشغيل اختبارات المحرك (Node دون أي مكتبات).

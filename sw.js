@@ -2,10 +2,10 @@
  * App shell: cache-first with background refresh (stale-while-revalidate).
  * NASA archive (data/nasa/*): network-first, falls back to the last cached copy offline.
  * Bump VERSION on every release so phones pick up the new shell. */
-const VERSION = 'gcsar-v0.9.6';
+const VERSION = 'gcsar-v1.0.0';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
-  './js/engine/fao56.js', './js/engine/crops.js', './js/engine/soils.js', './js/engine/waterbalance.js', './js/balance-ui.js', './js/guide-ui.js',
+  './js/engine/fao56.js', './js/engine/crops.js', './js/engine/soils.js', './js/engine/waterbalance.js', './js/engine/correction.js', './data/correction/correction_data.js', './js/correction-ui.js', './js/balance-ui.js', './js/guide-ui.js',
   './data/syria_gov.js', './data/climate_template_v0.1.xlsx',
   './icons/icon-192.png', './icons/icon-512.png',
   'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js'

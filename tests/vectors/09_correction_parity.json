@@ -1,0 +1,2 @@
+{ "type": "correction-parity", "name": "GCSAR.ClimateCorrection parity with the research code (Python/C#)",
+  "cases": "tests/correction_parity_cases.json", "model": "data/correction/correction_coefficients.json", "tolerance": 1e-9 }

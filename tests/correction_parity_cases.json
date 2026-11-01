@@ -1,0 +1,1552 @@
+[
+ {
+  "site": {
+   "name": "Al-Nashabiyah",
+   "lat": 33.5097,
+   "lon": 36.4831,
+   "elev": 618,
+   "site_type": "protected",
+   "measured": null
+  },
+  "day": {
+   "date": "2024-01-15",
+   "tmax": 10.08,
+   "tmin": 1.85,
+   "tdew": 3.53,
+   "rs": 9.82,
+   "ws2m": 2.31
+  },
+  "expected": {
+   "tmax": 12.625610511619708,
+   "tmin": 1.545627143581786,
+   "tdew": 1.545627143581786,
+   "rs": 9.990985304117924,
+   "u2": 1.5195883565565962,
+   "et0_raw": 1.2770523282971034,
+   "et0": 1.3671206042086155,
+   "unc": 0.435,
+   "level": 3,
+   "wind_source": "cell",
+   "n_warnings": 1
+  }
+ },
+ {
+  "site": {
+   "name": "Al-Nashabiyah",
+   "lat": 33.5097,
+   "lon": 36.4831,
+   "elev": 618,
+   "site_type": "protected",
+   "measured": null
+  },
+  "day": {
+   "date": "2024-04-10",
+   "tmax": 16.84,
+   "tmin": 6.66,
+   "tdew": 6.57,
+   "rs": 13.68,
+   "ws2m": 2.75
+  },
+  "expected": {
+   "tmax": 21.304944466807687,
+   "tmin": 8.72972522664148,
+   "tdew": 6.002208236563942,
+   "rs": 13.198629542631462,
+   "u2": 2.0416350482701495,
+   "et0_raw": 2.6842641326885186,
+   "et0": 3.322034617683168,
+   "unc": 0.435,
+   "level": 3,
+   "wind_source": "cell",
+   "n_warnings": 1
+  }
+ },
+ {
+  "site": {
+   "name": "Al-Nashabiyah",
+   "lat": 33.5097,
+   "lon": 36.4831,
+   "elev": 618,
+   "site_type": "protected",
+   "measured": null
+  },
+  "day": {
+   "date": "2024-07-20",
+   "tmax": 35.18,
+   "tmin": 19.9,
+   "tdew": 10.63,
+   "rs": 28.73,
+   "ws2m": 3.26
+  },
+  "expected": {
+   "tmax": 37.77846323809221,
+   "tmin": 18.861122813286357,
+   "tdew": 16.20408116867853,
+   "rs": 27.63988758363228,
+   "u2": 2.6081442188794663,
+   "et0_raw": 8.701370849972891,
+   "et0": 7.8694120131661744,
+   "unc": 0.435,
+   "level": 3,
+   "wind_source": "cell",
+   "n_warnings": 1
+  }
+ },
+ {
+  "site": {
+   "name": "Al-Nashabiyah",
+   "lat": 33.5097,
+   "lon": 36.4831,
+   "elev": 618,
+   "site_type": "protected",
+   "measured": null
+  },
+  "day": {
+   "date": "2024-10-05",
+   "tmax": 30.34,
+   "tmin": 15.14,
+   "tdew": 2.19,
+   "rs": 19.97,
+   "ws2m": 1.77
+  },
+  "expected": {
+   "tmax": 33.46525448083944,
+   "tmin": 12.56095364307373,
+   "tdew": 4.342384799128296,
+   "rs": 19.078323148678997,
+   "u2": 1.2196770996140507,
+   "et0_raw": 4.8589238824054295,
+   "et0": 4.2874572200676555,
+   "unc": 0.435,
+   "level": 3,
+   "wind_source": "cell",
+   "n_warnings": 1
+  }
+ },
+ {
+  "site": {
+   "name": "Al-Nashabiyah",
+   "lat": 33.5097,
+   "lon": 36.4831,
+   "elev": 618,
+   "site_type": "protected",
+   "measured": null
+  },
+  "day": {
+   "date": "2025-12-31",
+   "tmax": 11.02,
+   "tmin": 4.21,
+   "tdew": 4.2,
+   "rs": 7.81,
+   "ws2m": 4.87
+  },
+  "expected": {
+   "tmax": 13.330032779436815,
+   "tmin": 3.3467279525997014,
+   "tdew": 3.3467279525997014,
+   "rs": 7.91219323012204,
+   "u2": 3.1585534590847706,
+   "et0_raw": 1.4057435447944246,
+   "et0": 1.6383032038673377,
+   "unc": 0.435,
+   "level": 3,
+   "wind_source": "cell",
+   "n_warnings": 1
+  }
+ },
+ {
+  "site": {
+   "name": "Damascus airport (exposed, same cell)",
+   "lat": 33.4115,
+   "lon": 36.5156,
+   "elev": 616,
+   "site_type": "exposed",
+   "measured": null
+  },
+  "day": {
+   "date": "2024-01-15",
+   "tmax": 10.08,
+   "tmin": 1.85,
+   "tdew": 3.53,
+   "rs": 9.82,
+   "ws2m": 2.31
+  },
+  "expected": {
+   "tmax": 12.625610511619708,
+   "tmin": 1.545627143581786,
+   "tdew": 1.545627143581786,
+   "rs": 9.990985304117924,
+   "u2": 2.5410000000000004,
+   "et0_raw": 1.2798157295276948,
+   "et0": 1.6405608391755042,
+   "unc": 0.4848753080315688,
+   "level": 3,
+   "wind_source": "default",
+   "n_warnings": 3
+  }
+ },
+ {
+  "site": {
+   "name": "Damascus airport (exposed, same cell)",
+   "lat": 33.4115,
+   "lon": 36.5156,
+   "elev": 616,
+   "site_type": "exposed",
+   "measured": null
+  },
+  "day": {
+   "date": "2024-04-10",
+   "tmax": 16.84,
+   "tmin": 6.66,
+   "tdew": 6.57,
+   "rs": 13.68,
+   "ws2m": 2.75
+  },
+  "expected": {
+   "tmax": 21.304944466807687,
+   "tmin": 8.72972522664148,
+   "tdew": 6.002208236563942,
+   "rs": 13.198629542631462,
+   "u2": 3.0250000000000004,
+   "et0_raw": 2.6846423785660294,
+   "et0": 3.756301347553751,
+   "unc": 0.6241086899165549,
+   "level": 3,
+   "wind_source": "default",
+   "n_warnings": 3
+  }
+ },
+ {
+  "site": {
+   "name": "Damascus airport (exposed, same cell)",
+   "lat": 33.4115,
+   "lon": 36.5156,
+   "elev": 616,
+   "site_type": "exposed",
+   "measured": null
+  },
+  "day": {
+   "date": "2024-07-20",
+   "tmax": 35.18,
+   "tmin": 19.9,
+   "tdew": 10.63,
+   "rs": 28.73,
+   "ws2m": 3.26
+  },
+  "expected": {
+   "tmax": 37.77846323809221,
+   "tmin": 18.861122813286357,
+   "tdew": 16.20408116867853,
+   "rs": 27.63988758363228,
+   "u2": 3.586,
+   "et0_raw": 8.701500922559102,
+   "et0": 8.688918192441076,
+   "unc": 1.029006003177862,
+   "level": 3,
+   "wind_source": "default",
+   "n_warnings": 3
+  }
+ },
+ {
+  "site": {
+   "name": "Damascus airport (exposed, same cell)",
+   "lat": 33.4115,
+   "lon": 36.5156,
+   "elev": 616,
+   "site_type": "exposed",
+   "measured": null
+  },
+  "day": {
+   "date": "2024-10-05",
+   "tmax": 30.34,
+   "tmin": 15.14,
+   "tdew": 2.19,
+   "rs": 19.97,
+   "ws2m": 1.77
+  },
+  "expected": {
+   "tmax": 33.46525448083944,
+   "tmin": 12.56095364307373,
+   "tdew": 4.342384799128296,
+   "rs": 19.078323148678997,
+   "u2": 1.9470000000000003,
+   "et0_raw": 4.863357040372836,
+   "et0": 5.3004867981441475,
+   "unc": 0.798794201582945,
+   "level": 3,
+   "wind_source": "default",
+   "n_warnings": 3
+  }
+ },
+ {
+  "site": {
+   "name": "Damascus airport (exposed, same cell)",
+   "lat": 33.4115,
+   "lon": 36.5156,
+   "elev": 616,
+   "site_type": "exposed",
+   "measured": null
+  },
+  "day": {
+   "date": "2025-12-31",
+   "tmax": 11.02,
+   "tmin": 4.21,
+   "tdew": 4.2,
+   "rs": 7.81,
+   "ws2m": 4.87
+  },
+  "expected": {
+   "tmax": 13.330032779436815,
+   "tmin": 3.3467279525997014,
+   "tdew": 3.3467279525997014,
+   "rs": 7.91219323012204,
+   "u2": 5.357,
+   "et0_raw": 1.4078059132096084,
+   "et0": 1.9959685982284638,
+   "unc": 0.5412366937520535,
+   "level": 3,
+   "wind_source": "default",
+   "n_warnings": 3
+  }
+ },
+ {
+  "site": {
+   "name": "Mafraq (cell wind equation)",
+   "lat": 32.356,
+   "lon": 36.259,
+   "elev": 683,
+   "site_type": "ordinary",
+   "measured": null
+  },
+  "day": {
+   "date": "2024-01-15",
+   "tmax": 10.91,
+   "tmin": 5.65,
+   "tdew": 5.89,
+   "rs": 10.53,
+   "ws2m": 1.9
+  },
+  "expected": {
+   "tmax": 10.700028988298419,
+   "tmin": 5.0304509072708825,
+   "tdew": 5.0304509072708825,
+   "rs": 10.53,
+   "u2": 1.015943741269273,
+   "et0_raw": 1.161688987236173,
+   "et0": 1.0807149649153178,
+   "unc": 0.371,
+   "level": 3,
+   "wind_source": "cell",
+   "n_warnings": 0
+  }
+ },
+ {
+  "site": {
+   "name": "Mafraq (cell wind equation)",
+   "lat": 32.356,
+   "lon": 36.259,
+   "elev": 683,
+   "site_type": "ordinary",
+   "measured": null
+  },
+  "day": {
+   "date": "2024-04-10",
+   "tmax": 18.51,
+   "tmin": 9.84,
+   "tdew": 9.37,
+   "rs": 12.35,
+   "ws2m": 3.28
+  },
+  "expected": {
+   "tmax": 18.484733403335834,
+   "tmin": 9.548013631354838,
+   "tdew": 9.548013631354838,
+   "rs": 12.35,
+   "u2": 2.4412226653627718,
+   "et0_raw": 2.7652512495227786,
+   "et0": 2.55849649904002,
+   "unc": 0.78,
+   "level": 3,
+   "wind_source": "cell",
+   "n_warnings": 0
+  }
+ },
+ {
+  "site": {
+   "name": "Mafraq (cell wind equation)",
+   "lat": 32.356,
+   "lon": 36.259,
+   "elev": 683,
+   "site_type": "ordinary",
+   "measured": null
+  },
+  "day": {
+   "date": "2024-07-20",
+   "tmax": 37.15,
+   "tmin": 20.53,
+   "tdew": 15.48,
+   "rs": 28.71,
+   "ws2m": 3.16
+  },
+  "expected": {
+   "tmax": 35.07399895382098,
+   "tmin": 19.68310747389655,
+   "tdew": 18.472663452521235,
+   "rs": 28.71,
+   "u2": 2.4033462401588737,
+   "et0_raw": 8.540776969132061,
+   "et0": 7.102016626305645,
+   "unc": 0.6,
+   "level": 3,
+   "wind_source": "cell",
+   "n_warnings": 0
+  }
+ },
+ {
+  "site": {
+   "name": "Mafraq (cell wind equation)",
+   "lat": 32.356,
+   "lon": 36.259,
+   "elev": 683,
+   "site_type": "ordinary",
+   "measured": null
+  },
+  "day": {
+   "date": "2024-10-05",
+   "tmax": 34.73,
+   "tmin": 16.06,
+   "tdew": 3.77,
+   "rs": 20.41,
+   "ws2m": 1.61
+  },
+  "expected": {
+   "tmax": 33.889732838389996,
+   "tmin": 14.37661193954246,
+   "tdew": 5.943777280737344,
+   "rs": 20.41,
+   "u2": 0.975350122446312,
+   "et0_raw": 5.167546293773034,
+   "et0": 4.11511109268248,
+   "unc": 0.663,
+   "level": 3,
+   "wind_source": "cell",
+   "n_warnings": 0
+  }
+ },
+ {
+  "site": {
+   "name": "Mafraq (cell wind equation)",
+   "lat": 32.356,
+   "lon": 36.259,
+   "elev": 683,
+   "site_type": "ordinary",
+   "measured": null
+  },
+  "day": {
+   "date": "2025-12-31",
+   "tmax": 14.91,
+   "tmin": 5.76,
+   "tdew": 3.94,
+   "rs": 9.88,
+   "ws2m": 4.37
+  },
+  "expected": {
+   "tmax": 14.722595823916354,
+   "tmin": 4.7830141381236775,
+   "tdew": 4.7830141381236775,
+   "rs": 9.88,
+   "u2": 2.1696441558690034,
+   "et0_raw": 2.314710379351841,
+   "et0": 1.5695936299094706,
+   "unc": 0.434,
+   "level": 3,
+   "wind_source": "cell",
+   "n_warnings": 0
+  }
+ },
+ {
+  "site": {
+   "name": "Latakia coast",
+   "lat": 35.52,
+   "lon": 35.78,
+   "elev": 7,
+   "site_type": "ordinary",
+   "measured": null
+  },
+  "day": {
+   "date": "2024-01-15",
+   "tmax": 17.11,
+   "tmin": 15.02,
+   "tdew": 10.04,
+   "rs": 8.56,
+   "ws2m": 3.49
+  },
+  "expected": {
+   "tmax": 17.670749588372317,
+   "tmin": 10.601301839785965,
+   "tdew": 6.536297381053764,
+   "rs": 9.027451527980737,
+   "u2": 2.3383000000000003,
+   "et0_raw": 2.256122191540615,
+   "et0": 2.0809482421745717,
+   "unc": 0.5275191273512083,
+   "level": 3,
+   "wind_source": "default",
+   "n_warnings": 2
+  }
+ },
+ {
+  "site": {
+   "name": "Latakia coast",
+   "lat": 35.52,
+   "lon": 35.78,
+   "elev": 7,
+   "site_type": "ordinary",
+   "measured": null
+  },
+  "day": {
+   "date": "2024-04-10",
+   "tmax": 18.28,
+   "tmin": 17.03,
+   "tdew": 14.44,
+   "rs": 19.95,
+   "ws2m": 3.11
+  },
+  "expected": {
+   "tmax": 20.973967521183486,
+   "tmin": 13.937443654412743,
+   "tdew": 12.332356137315976,
+   "rs": 17.99617080169608,
+   "u2": 2.0837,
+   "et0_raw": 3.1773040872008207,
+   "et0": 3.3052759193772214,
+   "unc": 0.655690947577187,
+   "level": 3,
+   "wind_source": "default",
+   "n_warnings": 2
+  }
+ },
+ {
+  "site": {
+   "name": "Latakia coast",
+   "lat": 35.52,
+   "lon": 35.78,
+   "elev": 7,
+   "site_type": "ordinary",
+   "measured": null
+  },
+  "day": {
+   "date": "2024-07-20",
+   "tmax": 30.27,
+   "tmin": 27.94,
+   "tdew": 26.32,
+   "rs": 27.22,
+   "ws2m": 4.6
+  },
+  "expected": {
+   "tmax": 33.29344032599987,
+   "tmin": 26.74818264108673,
+   "tdew": 25.28040693139395,
+   "rs": 24.802002642949645,
+   "u2": 3.082,
+   "et0_raw": 5.633420847607028,
+   "et0": 6.015184852757905,
+   "unc": 0.5117309657743634,
+   "level": 3,
+   "wind_source": "default",
+   "n_warnings": 2
+  }
+ },
+ {
+  "site": {
+   "name": "Latakia coast",
+   "lat": 35.52,
+   "lon": 35.78,
+   "elev": 7,
+   "site_type": "ordinary",
+   "measured": null
+  },
+  "day": {
+   "date": "2024-10-05",
+   "tmax": 27.4,
+   "tmin": 24.8,
+   "tdew": 18.74,
+   "rs": 18.75,
+   "ws2m": 1.82
+  },
+  "expected": {
+   "tmax": 29.76484115494534,
+   "tmin": 20.835979750601474,
+   "tdew": 16.61740088136836,
+   "rs": 18.211434622508534,
+   "u2": 1.2194,
+   "et0_raw": 4.0136662496268105,
+   "et0": 3.6944897636193743,
+   "unc": 0.5502264442658293,
+   "level": 3,
+   "wind_source": "default",
+   "n_warnings": 2
+  }
+ },
+ {
+  "site": {
+   "name": "Latakia coast",
+   "lat": 35.52,
+   "lon": 35.78,
+   "elev": 7,
+   "site_type": "ordinary",
+   "measured": null
+  },
+  "day": {
+   "date": "2025-12-31",
+   "tmax": 18.53,
+   "tmin": 16.32,
+   "tdew": 13.35,
+   "rs": 4.16,
+   "ws2m": 9.46
+  },
+  "expected": {
+   "tmax": 18.9710812745573,
+   "tmin": 11.469061539946132,
+   "tdew": 9.661554093082753,
+   "rs": 4.464531314024782,
+   "u2": 6.338200000000001,
+   "et0_raw": 2.5544829637667856,
+   "et0": 2.723006591576266,
+   "unc": 0.5997542052571004,
+   "level": 3,
+   "wind_source": "default",
+   "n_warnings": 2
+  }
+ },
+ {
+  "site": {
+   "name": "Palmyra",
+   "lat": 34.557,
+   "lon": 38.317,
+   "elev": 403,
+   "site_type": "ordinary",
+   "measured": null
+  },
+  "day": {
+   "date": "2024-01-15",
+   "tmax": 13.66,
+   "tmin": 2.97,
+   "tdew": 4.42,
+   "rs": 11.32,
+   "ws2m": 1.52
+  },
+  "expected": {
+   "tmax": 13.534462263562054,
+   "tmin": 4.657229707073807,
+   "tdew": 4.657229707073807,
+   "rs": 11.32,
+   "u2": 1.0184,
+   "et0_raw": 1.3831849196420705,
+   "et0": 1.178123174261926,
+   "unc": 0.3229341038302006,
+   "level": 3,
+   "wind_source": "default",
+   "n_warnings": 1
+  }
+ },
+ {
+  "site": {
+   "name": "Palmyra",
+   "lat": 34.557,
+   "lon": 38.317,
+   "elev": 403,
+   "site_type": "ordinary",
+   "measured": null
+  },
+  "day": {
+   "date": "2024-04-10",
+   "tmax": 21.2,
+   "tmin": 9.52,
+   "tdew": 7.42,
+   "rs": 20.0,
+   "ws2m": 2.41
+  },
+  "expected": {
+   "tmax": 21.96110037516244,
+   "tmin": 12.261040441426298,
+   "tdew": 8.287916581893176,
+   "rs": 20.0,
+   "u2": 1.6147000000000002,
+   "et0_raw": 3.9227084491963815,
+   "et0": 3.8271481125564932,
+   "unc": 0.4701206213234332,
+   "level": 3,
+   "wind_source": "default",
+   "n_warnings": 1
+  }
+ },
+ {
+  "site": {
+   "name": "Palmyra",
+   "lat": 34.557,
+   "lon": 38.317,
+   "elev": 403,
+   "site_type": "ordinary",
+   "measured": null
+  },
+  "day": {
+   "date": "2024-07-20",
+   "tmax": 38.4,
+   "tmin": 24.7,
+   "tdew": 14.75,
+   "rs": 28.04,
+   "ws2m": 5.93
+  },
+  "expected": {
+   "tmax": 39.95142556705762,
+   "tmin": 26.570019184845926,
+   "tdew": 16.45580512921491,
+   "rs": 28.04,
+   "u2": 3.9731,
+   "et0_raw": 11.712996056985256,
+   "et0": 10.325487371857793,
+   "unc": 1.0523719673802145,
+   "level": 3,
+   "wind_source": "default",
+   "n_warnings": 1
+  }
+ },
+ {
+  "site": {
+   "name": "Palmyra",
+   "lat": 34.557,
+   "lon": 38.317,
+   "elev": 403,
+   "site_type": "ordinary",
+   "measured": null
+  },
+  "day": {
+   "date": "2024-10-05",
+   "tmax": 31.15,
+   "tmin": 15.58,
+   "tdew": 5.75,
+   "rs": 19.92,
+   "ws2m": 1.34
+  },
+  "expected": {
+   "tmax": 31.955076455305857,
+   "tmin": 16.608585610280706,
+   "tdew": 8.173334975909041,
+   "rs": 19.92,
+   "u2": 0.8978000000000002,
+   "et0_raw": 4.278595414114316,
+   "et0": 3.763946194682841,
+   "unc": 0.47591770389184335,
+   "level": 3,
+   "wind_source": "default",
+   "n_warnings": 1
+  }
+ },
+ {
+  "site": {
+   "name": "Palmyra",
+   "lat": 34.557,
+   "lon": 38.317,
+   "elev": 403,
+   "site_type": "ordinary",
+   "measured": null
+  },
+  "day": {
+   "date": "2025-12-31",
+   "tmax": 14.13,
+   "tmin": 2.94,
+   "tdew": 3.63,
+   "rs": 7.22,
+   "ws2m": 3.78
+  },
+  "expected": {
+   "tmax": 13.923258144249917,
+   "tmin": 4.19128411055705,
+   "tdew": 4.19128411055705,
+   "rs": 7.22,
+   "u2": 2.5326,
+   "et0_raw": 1.893613024512011,
+   "et0": 1.4756479090811765,
+   "unc": 0.35211347819686095,
+   "level": 3,
+   "wind_source": "default",
+   "n_warnings": 1
+  }
+ },
+ {
+  "site": {
+   "name": "Badia, no station (regional)",
+   "lat": 33.9,
+   "lon": 38.9,
+   "elev": 650,
+   "site_type": "ordinary",
+   "measured": null
+  },
+  "day": {
+   "date": "2024-01-15",
+   "tmax": 13.66,
+   "tmin": 2.97,
+   "tdew": 4.42,
+   "rs": 11.32,
+   "ws2m": 1.52
+  },
+  "expected": {
+   "tmax": 13.711836331907548,
+   "tmin": 4.405703928137658,
+   "tdew": 4.405703928137658,
+   "rs": 11.32,
+   "u2": 1.0184,
+   "et0_raw": 1.4213168048957734,
+   "et0": 1.2379814454810703,
+   "unc": 0.5047125604731816,
+   "level": 2,
+   "wind_source": "default",
+   "n_warnings": 1
+  }
+ },
+ {
+  "site": {
+   "name": "Badia, no station (regional)",
+   "lat": 33.9,
+   "lon": 38.9,
+   "elev": 650,
+   "site_type": "ordinary",
+   "measured": null
+  },
+  "day": {
+   "date": "2024-04-10",
+   "tmax": 21.2,
+   "tmin": 9.52,
+   "tdew": 7.42,
+   "rs": 20.0,
+   "ws2m": 2.41
+  },
+  "expected": {
+   "tmax": 21.145201761062374,
+   "tmin": 11.429938532132516,
+   "tdew": 9.70125123361812,
+   "rs": 20.0,
+   "u2": 1.6147000000000002,
+   "et0_raw": 3.9454426926602677,
+   "et0": 3.5792831705985093,
+   "unc": 0.5247067477236711,
+   "level": 2,
+   "wind_source": "default",
+   "n_warnings": 1
+  }
+ },
+ {
+  "site": {
+   "name": "Badia, no station (regional)",
+   "lat": 33.9,
+   "lon": 38.9,
+   "elev": 650,
+   "site_type": "ordinary",
+   "measured": null
+  },
+  "day": {
+   "date": "2024-07-20",
+   "tmax": 38.4,
+   "tmin": 24.7,
+   "tdew": 14.75,
+   "rs": 28.04,
+   "ws2m": 5.93
+  },
+  "expected": {
+   "tmax": 38.7424254132185,
+   "tmin": 26.50682182582364,
+   "tdew": 18.154345892905496,
+   "rs": 28.04,
+   "u2": 3.9731,
+   "et0_raw": 11.636056116688547,
+   "et0": 9.701825392126779,
+   "unc": 0.9434706203466718,
+   "level": 2,
+   "wind_source": "default",
+   "n_warnings": 1
+  }
+ },
+ {
+  "site": {
+   "name": "Badia, no station (regional)",
+   "lat": 33.9,
+   "lon": 38.9,
+   "elev": 650,
+   "site_type": "ordinary",
+   "measured": null
+  },
+  "day": {
+   "date": "2024-10-05",
+   "tmax": 31.15,
+   "tmin": 15.58,
+   "tdew": 5.75,
+   "rs": 19.92,
+   "ws2m": 1.34
+  },
+  "expected": {
+   "tmax": 31.187229368890304,
+   "tmin": 16.07035888651499,
+   "tdew": 9.487752967270426,
+   "rs": 19.92,
+   "u2": 0.8978000000000002,
+   "et0_raw": 4.305711397330567,
+   "et0": 3.7434475244775935,
+   "unc": 0.5378091964103686,
+   "level": 2,
+   "wind_source": "default",
+   "n_warnings": 1
+  }
+ },
+ {
+  "site": {
+   "name": "Badia, no station (regional)",
+   "lat": 33.9,
+   "lon": 38.9,
+   "elev": 650,
+   "site_type": "ordinary",
+   "measured": null
+  },
+  "day": {
+   "date": "2025-12-31",
+   "tmax": 14.13,
+   "tmin": 2.94,
+   "tdew": 3.63,
+   "rs": 7.22,
+   "ws2m": 3.78
+  },
+  "expected": {
+   "tmax": 14.158490872507452,
+   "tmin": 3.9956271077428447,
+   "tdew": 3.9956271077428447,
+   "rs": 7.22,
+   "u2": 2.5326,
+   "et0_raw": 1.9073873848422487,
+   "et0": 1.540595171749688,
+   "unc": 0.5238703295031639,
+   "level": 2,
+   "wind_source": "default",
+   "n_warnings": 1
+  }
+ },
+ {
+  "site": {
+   "name": "Suwayda (no cell, warning)",
+   "lat": 32.709,
+   "lon": 36.566,
+   "elev": 1000,
+   "site_type": "ordinary",
+   "measured": null
+  },
+  "day": {
+   "date": "2024-01-15",
+   "tmax": 10.91,
+   "tmin": 5.65,
+   "tdew": 5.89,
+   "rs": 10.53,
+   "ws2m": 1.9
+  },
+  "expected": {
+   "tmax": 10.91,
+   "tmin": 5.65,
+   "tdew": 5.65,
+   "rs": 10.53,
+   "u2": 1.273,
+   "et0_raw": 1.168544861163327,
+   "et0": 1.1145802991211817,
+   "unc": 0.8012538535127484,
+   "level": 1,
+   "wind_source": "default",
+   "n_warnings": 3
+  }
+ },
+ {
+  "site": {
+   "name": "Suwayda (no cell, warning)",
+   "lat": 32.709,
+   "lon": 36.566,
+   "elev": 1000,
+   "site_type": "ordinary",
+   "measured": null
+  },
+  "day": {
+   "date": "2024-04-10",
+   "tmax": 18.51,
+   "tmin": 9.84,
+   "tdew": 9.37,
+   "rs": 12.35,
+   "ws2m": 3.28
+  },
+  "expected": {
+   "tmax": 18.51,
+   "tmin": 9.84,
+   "tdew": 9.37,
+   "rs": 12.35,
+   "u2": 2.1976,
+   "et0_raw": 2.777039584512452,
+   "et0": 2.588253889160753,
+   "unc": 0.8133013286097042,
+   "level": 1,
+   "wind_source": "default",
+   "n_warnings": 3
+  }
+ },
+ {
+  "site": {
+   "name": "Suwayda (no cell, warning)",
+   "lat": 32.709,
+   "lon": 36.566,
+   "elev": 1000,
+   "site_type": "ordinary",
+   "measured": null
+  },
+  "day": {
+   "date": "2024-07-20",
+   "tmax": 37.15,
+   "tmin": 20.53,
+   "tdew": 15.48,
+   "rs": 28.71,
+   "ws2m": 3.16
+  },
+  "expected": {
+   "tmax": 37.15,
+   "tmin": 20.53,
+   "tdew": 15.48,
+   "rs": 28.71,
+   "u2": 2.1172000000000004,
+   "et0_raw": 8.513788873065064,
+   "et0": 7.594989147672058,
+   "unc": 0.915580173505621,
+   "level": 1,
+   "wind_source": "default",
+   "n_warnings": 3
+  }
+ },
+ {
+  "site": {
+   "name": "Suwayda (no cell, warning)",
+   "lat": 32.709,
+   "lon": 36.566,
+   "elev": 1000,
+   "site_type": "ordinary",
+   "measured": null
+  },
+  "day": {
+   "date": "2024-10-05",
+   "tmax": 34.73,
+   "tmin": 16.06,
+   "tdew": 3.77,
+   "rs": 20.41,
+   "ws2m": 1.61
+  },
+  "expected": {
+   "tmax": 34.73,
+   "tmin": 16.06,
+   "tdew": 3.77,
+   "rs": 20.41,
+   "u2": 1.0787000000000002,
+   "et0_raw": 5.12725719940895,
+   "et0": 4.321730260010433,
+   "unc": 0.8568321136193833,
+   "level": 1,
+   "wind_source": "default",
+   "n_warnings": 3
+  }
+ },
+ {
+  "site": {
+   "name": "Suwayda (no cell, warning)",
+   "lat": 32.709,
+   "lon": 36.566,
+   "elev": 1000,
+   "site_type": "ordinary",
+   "measured": null
+  },
+  "day": {
+   "date": "2025-12-31",
+   "tmax": 14.91,
+   "tmin": 5.76,
+   "tdew": 3.94,
+   "rs": 9.88,
+   "ws2m": 4.37
+  },
+  "expected": {
+   "tmax": 14.91,
+   "tmin": 5.76,
+   "tdew": 3.94,
+   "rs": 9.88,
+   "u2": 2.9279,
+   "et0_raw": 2.2999976783351492,
+   "et0": 1.9607934102272666,
+   "unc": 0.8256983879372398,
+   "level": 1,
+   "wind_source": "default",
+   "n_warnings": 3
+  }
+ },
+ {
+  "site": {
+   "name": "Ghab (warnings)",
+   "lat": 35.5,
+   "lon": 36.35,
+   "elev": 180,
+   "site_type": "ordinary",
+   "measured": null
+  },
+  "day": {
+   "date": "2024-01-15",
+   "tmax": 14.55,
+   "tmin": 6.47,
+   "tdew": 7.04,
+   "rs": 5.6,
+   "ws2m": 1.7
+  },
+  "expected": {
+   "tmax": 14.55,
+   "tmin": 6.47,
+   "tdew": 6.47,
+   "rs": 5.6,
+   "u2": 1.139,
+   "et0_raw": 1.1877753208566066,
+   "et0": 1.0424624021981275,
+   "unc": 0.8030627713157097,
+   "level": 1,
+   "wind_source": "default",
+   "n_warnings": 4
+  }
+ },
+ {
+  "site": {
+   "name": "Ghab (warnings)",
+   "lat": 35.5,
+   "lon": 36.35,
+   "elev": 180,
+   "site_type": "ordinary",
+   "measured": null
+  },
+  "day": {
+   "date": "2024-04-10",
+   "tmax": 19.16,
+   "tmin": 9.63,
+   "tdew": 10.14,
+   "rs": 15.09,
+   "ws2m": 1.73
+  },
+  "expected": {
+   "tmax": 19.16,
+   "tmin": 9.63,
+   "tdew": 9.63,
+   "rs": 15.09,
+   "u2": 1.1591,
+   "et0_raw": 2.708197495776244,
+   "et0": 2.5791306450744584,
+   "unc": 0.8053445007214267,
+   "level": 1,
+   "wind_source": "default",
+   "n_warnings": 4
+  }
+ },
+ {
+  "site": {
+   "name": "Ghab (warnings)",
+   "lat": 35.5,
+   "lon": 36.35,
+   "elev": 180,
+   "site_type": "ordinary",
+   "measured": null
+  },
+  "day": {
+   "date": "2024-07-20",
+   "tmax": 37.46,
+   "tmin": 23.64,
+   "tdew": 17.87,
+   "rs": 27.66,
+   "ws2m": 4.34
+  },
+  "expected": {
+   "tmax": 37.46,
+   "tmin": 23.64,
+   "tdew": 17.87,
+   "rs": 27.66,
+   "u2": 2.9078,
+   "et0_raw": 9.38902152862765,
+   "et0": 8.248159713026649,
+   "unc": 0.9930350622650037,
+   "level": 1,
+   "wind_source": "default",
+   "n_warnings": 4
+  }
+ },
+ {
+  "site": {
+   "name": "Ghab (warnings)",
+   "lat": 35.5,
+   "lon": 36.35,
+   "elev": 180,
+   "site_type": "ordinary",
+   "measured": null
+  },
+  "day": {
+   "date": "2024-10-05",
+   "tmax": 33.36,
+   "tmin": 16.24,
+   "tdew": 9.49,
+   "rs": 19.24,
+   "ws2m": 1.19
+  },
+  "expected": {
+   "tmax": 33.36,
+   "tmin": 16.24,
+   "tdew": 9.49,
+   "rs": 19.24,
+   "u2": 0.7973,
+   "et0_raw": 4.140464909800088,
+   "et0": 3.6089615470939647,
+   "unc": 0.8253319144307808,
+   "level": 1,
+   "wind_source": "default",
+   "n_warnings": 4
+  }
+ },
+ {
+  "site": {
+   "name": "Ghab (warnings)",
+   "lat": 35.5,
+   "lon": 36.35,
+   "elev": 180,
+   "site_type": "ordinary",
+   "measured": null
+  },
+  "day": {
+   "date": "2025-12-31",
+   "tmax": 16.16,
+   "tmin": 6.99,
+   "tdew": 6.63,
+   "rs": 1.59,
+   "ws2m": 4.33
+  },
+  "expected": {
+   "tmax": 16.16,
+   "tmin": 6.99,
+   "tdew": 6.63,
+   "rs": 1.59,
+   "u2": 2.9011,
+   "et0_raw": 1.767304032588991,
+   "et0": 1.4272856713198943,
+   "unc": 0.820332052881669,
+   "level": 1,
+   "wind_source": "default",
+   "n_warnings": 4
+  }
+ },
+ {
+  "site": {
+   "name": "Hama, measured wind 0.80",
+   "lat": 35.12,
+   "lon": 36.7,
+   "elev": 300,
+   "site_type": "ordinary",
+   "measured": 0.8
+  },
+  "day": {
+   "date": "2024-01-15",
+   "tmax": 14.55,
+   "tmin": 6.47,
+   "tdew": 7.04,
+   "rs": 5.6,
+   "ws2m": 1.7
+  },
+  "expected": {
+   "tmax": 12.808124747013741,
+   "tmin": 6.793074574072756,
+   "tdew": 6.793074574072756,
+   "rs": 5.6,
+   "u2": 1.36,
+   "et0_raw": 1.198546689962768,
+   "et0": 0.9587476555194451,
+   "unc": 0.416,
+   "level": 3,
+   "wind_source": "measured",
+   "n_warnings": 1
+  }
+ },
+ {
+  "site": {
+   "name": "Hama, measured wind 0.80",
+   "lat": 35.12,
+   "lon": 36.7,
+   "elev": 300,
+   "site_type": "ordinary",
+   "measured": 0.8
+  },
+  "day": {
+   "date": "2024-04-10",
+   "tmax": 19.16,
+   "tmin": 9.63,
+   "tdew": 10.14,
+   "rs": 15.09,
+   "ws2m": 1.73
+  },
+  "expected": {
+   "tmax": 19.462632040716585,
+   "tmin": 10.595589212450413,
+   "tdew": 10.595589212450413,
+   "rs": 15.09,
+   "u2": 1.3840000000000001,
+   "et0_raw": 2.720799926254913,
+   "et0": 2.6481385403132593,
+   "unc": 0.416,
+   "level": 3,
+   "wind_source": "measured",
+   "n_warnings": 1
+  }
+ },
+ {
+  "site": {
+   "name": "Hama, measured wind 0.80",
+   "lat": 35.12,
+   "lon": 36.7,
+   "elev": 300,
+   "site_type": "ordinary",
+   "measured": 0.8
+  },
+  "day": {
+   "date": "2024-07-20",
+   "tmax": 37.46,
+   "tmin": 23.64,
+   "tdew": 17.87,
+   "rs": 27.66,
+   "ws2m": 4.34
+  },
+  "expected": {
+   "tmax": 36.933687224881474,
+   "tmin": 26.222073148613656,
+   "tdew": 18.030343018503462,
+   "rs": 27.66,
+   "u2": 3.472,
+   "et0_raw": 9.370924719346103,
+   "et0": 8.834052424904868,
+   "unc": 0.416,
+   "level": 3,
+   "wind_source": "measured",
+   "n_warnings": 1
+  }
+ },
+ {
+  "site": {
+   "name": "Hama, measured wind 0.80",
+   "lat": 35.12,
+   "lon": 36.7,
+   "elev": 300,
+   "site_type": "ordinary",
+   "measured": 0.8
+  },
+  "day": {
+   "date": "2024-10-05",
+   "tmax": 33.36,
+   "tmin": 16.24,
+   "tdew": 9.49,
+   "rs": 19.24,
+   "ws2m": 1.19
+  },
+  "expected": {
+   "tmax": 33.19344156440374,
+   "tmin": 16.426411264088404,
+   "tdew": 10.710556892372232,
+   "rs": 19.24,
+   "u2": 0.952,
+   "et0_raw": 4.157102823726676,
+   "et0": 3.827845271498145,
+   "unc": 0.416,
+   "level": 3,
+   "wind_source": "measured",
+   "n_warnings": 1
+  }
+ },
+ {
+  "site": {
+   "name": "Hama, measured wind 0.80",
+   "lat": 35.12,
+   "lon": 36.7,
+   "elev": 300,
+   "site_type": "ordinary",
+   "measured": 0.8
+  },
+  "day": {
+   "date": "2025-12-31",
+   "tmax": 16.16,
+   "tmin": 6.99,
+   "tdew": 6.63,
+   "rs": 1.59,
+   "ws2m": 4.33
+  },
+  "expected": {
+   "tmax": 14.31066227533438,
+   "tmin": 6.888773398254967,
+   "tdew": 6.888773398254967,
+   "rs": 1.59,
+   "u2": 3.4640000000000004,
+   "et0_raw": 1.7611005152730201,
+   "et0": 1.2034272541065132,
+   "unc": 0.416,
+   "level": 3,
+   "wind_source": "measured",
+   "n_warnings": 1
+  }
+ },
+ {
+  "site": {
+   "name": "Golan",
+   "lat": 33.125,
+   "lon": 35.8222,
+   "elev": 941,
+   "site_type": "ordinary",
+   "measured": null
+  },
+  "day": {
+   "date": "2024-01-15",
+   "tmax": 14.59,
+   "tmin": 7.8,
+   "tdew": 6.89,
+   "rs": 8.09,
+   "ws2m": 0.61
+  },
+  "expected": {
+   "tmax": 10.016657486141543,
+   "tmin": 5.13623152697728,
+   "tdew": 3.9288237174016247,
+   "rs": 8.09,
+   "u2": 0.4087,
+   "et0_raw": 1.0970958744160764,
+   "et0": 0.9052731229409884,
+   "unc": 0.08848678152116861,
+   "level": 3,
+   "wind_source": "default",
+   "n_warnings": 2
+  }
+ },
+ {
+  "site": {
+   "name": "Golan",
+   "lat": 33.125,
+   "lon": 35.8222,
+   "elev": 941,
+   "site_type": "ordinary",
+   "measured": null
+  },
+  "day": {
+   "date": "2024-04-10",
+   "tmax": 22.26,
+   "tmin": 11.32,
+   "tdew": 11.1,
+   "rs": 15.57,
+   "ws2m": 0.41
+  },
+  "expected": {
+   "tmax": 17.37166441315762,
+   "tmin": 9.234741638780092,
+   "tdew": 8.627003954923314,
+   "rs": 15.57,
+   "u2": 0.2747,
+   "et0_raw": 2.7258322412976796,
+   "et0": 2.4365100434361215,
+   "unc": 0.11797320784340529,
+   "level": 3,
+   "wind_source": "default",
+   "n_warnings": 2
+  }
+ },
+ {
+  "site": {
+   "name": "Golan",
+   "lat": 33.125,
+   "lon": 35.8222,
+   "elev": 941,
+   "site_type": "ordinary",
+   "measured": null
+  },
+  "day": {
+   "date": "2024-07-20",
+   "tmax": 38.68,
+   "tmin": 22.08,
+   "tdew": 19.02,
+   "rs": 26.81,
+   "ws2m": 0.76
+  },
+  "expected": {
+   "tmax": 32.947743726487545,
+   "tmin": 20.81958777969268,
+   "tdew": 17.3977808713076,
+   "rs": 26.81,
+   "u2": 0.5092,
+   "et0_raw": 6.112407918722035,
+   "et0": 5.448983069812799,
+   "unc": 0.15798918411957477,
+   "level": 3,
+   "wind_source": "default",
+   "n_warnings": 2
+  }
+ },
+ {
+  "site": {
+   "name": "Golan",
+   "lat": 33.125,
+   "lon": 35.8222,
+   "elev": 941,
+   "site_type": "ordinary",
+   "measured": null
+  },
+  "day": {
+   "date": "2024-10-05",
+   "tmax": 36.08,
+   "tmin": 16.26,
+   "tdew": 9.02,
+   "rs": 19.14,
+   "ws2m": 0.75
+  },
+  "expected": {
+   "tmax": 31.226805636060284,
+   "tmin": 13.490379245164092,
+   "tdew": 6.992202029704579,
+   "rs": 19.14,
+   "u2": 0.5025000000000001,
+   "et0_raw": 3.8221236727785692,
+   "et0": 3.1798264644895946,
+   "unc": 0.17594997067584212,
+   "level": 3,
+   "wind_source": "default",
+   "n_warnings": 2
+  }
+ },
+ {
+  "site": {
+   "name": "Golan",
+   "lat": 33.125,
+   "lon": 35.8222,
+   "elev": 941,
+   "site_type": "ordinary",
+   "measured": null
+  },
+  "day": {
+   "date": "2025-12-31",
+   "tmax": 16.57,
+   "tmin": 6.74,
+   "tdew": 6.61,
+   "rs": 5.98,
+   "ws2m": 0.7
+  },
+  "expected": {
+   "tmax": 11.925935790445385,
+   "tmin": 3.7030151905776414,
+   "tdew": 3.7030151905776414,
+   "rs": 5.98,
+   "u2": 0.469,
+   "et0_raw": 1.0622389842912487,
+   "et0": 0.8288070105289869,
+   "unc": 0.11948665440420005,
+   "level": 3,
+   "wind_source": "default",
+   "n_warnings": 2
+  }
+ }
+]

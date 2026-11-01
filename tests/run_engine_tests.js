@@ -2,7 +2,7 @@
  * The same JSON vectors in tests/vectors/ are the acceptance tests for the future C# engine (xUnit). */
 const fs = require('fs'), path = require('path'), vm = require('vm');
 const root = path.join(__dirname, '..');
-for (const f of ['fao56', 'crops', 'soils', 'waterbalance']) vm.runInThisContext(fs.readFileSync(path.join(root, 'js/engine', f + '.js'), 'utf8'), { filename: f + '.js' });
+for (const f of ['fao56', 'crops', 'soils', 'waterbalance', 'correction']) vm.runInThisContext(fs.readFileSync(path.join(root, 'js/engine', f + '.js'), 'utf8'), { filename: f + '.js' });
 const { Fao56, WaterBalance, Crops } = globalThis.GCSAR;
 let fail = 0;
 const near = (name, got, exp, tol) => { const ok = Math.abs(got - exp) <= tol; if (!ok) fail++; console.log(`${ok ? 'PASS' : 'FAIL'}  ${name}: ${got} (expected ${exp} ± ${tol})`); };
@@ -15,6 +15,22 @@ for (const file of fs.readdirSync(path.join(__dirname, 'vectors')).sort()) {
   } else if (v.type === 'function') {
     const fn = v.fn.split('.').reduce((o, k) => o[k], globalThis.GCSAR);
     near(v.name, +fn(...v.args).toFixed(4), v.expect[0], v.expect[1]);
+  } else if (v.type === 'correction-parity') {
+    const eng = globalThis.GCSAR.Correction.engine(JSON.parse(fs.readFileSync(path.join(root, v.model), 'utf8')));
+    const cases = JSON.parse(fs.readFileSync(path.join(root, v.cases), 'utf8'));
+    let worst = 0, bad = 0;
+    for (const c of cases) {
+      const s = c.site, d = c.day, e = c.expected;
+      const site = { lat: s.lat, lon: s.lon, elevationM: s.elev, siteType: s.site_type, measuredWindFactor: s.measured };
+      const res = eng.resolve(site), r = eng.correct(site, { date: d.date, tmax: d.tmax, tmin: d.tmin, tdew: d.tdew, rs: d.rs, ws2m: d.ws2m }, res);
+      for (const [k, x] of [['tmax', r.tmax], ['tmin', r.tmin], ['tdew', r.tdew], ['rs', r.rs], ['u2', r.u2], ['et0_raw', r.et0Raw], ['et0', r.et0], ['unc', r.unc]]) {
+        const diff = Math.abs(x - e[k]); worst = Math.max(worst, diff);
+        if (diff > Math.max(v.tolerance, v.tolerance * Math.abs(e[k]))) { bad++; console.log(`  ${s.name} ${d.date} ${k}: JS ${x} expected ${e[k]}`); }
+      }
+      if (r.level !== e.level || res.windSource !== e.wind_source || res.warnings.length !== e.n_warnings) { bad++; console.log(`  ${s.name} ${d.date}: level ${r.level}/${e.level} wind ${res.windSource}/${e.wind_source} warnings ${res.warnings.length}/${e.n_warnings}`); }
+    }
+    if (bad) fail++;
+    console.log(`${bad ? 'FAIL' : 'PASS'}  ${v.name}: ${cases.length} cases, largest difference ${worst.toExponential(2)}`);
   } else if (v.type === 'season') {
     const input = { ...v.input, crop: { ...Crops.get(v.input.cropKey), ...(v.input.cropOverride || {}) }, weather: expandWeather(v.input.weatherGen) };
     const out = WaterBalance.run(input);

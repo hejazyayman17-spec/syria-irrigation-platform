@@ -142,7 +142,7 @@
       const RAW = p * TAW;
       const Ks = Dr <= RAW ? 1 : clamp((TAW - Dr) / ((1 - p) * TAW), 0, 1);
       let ETcAdj = Ks * ETc;
-      let rainRaw = w && Number.isFinite(w.rain) ? Math.max(0, w.rain) : 0, rainSrc = isFc ? 'forecast' : 'grid';
+      let rainRaw = w && Number.isFinite(w.rain) ? Math.max(0, w.rain) : 0, rainSrc = isFc ? 'forecast' : (w && w.rainSrc) || 'grid';   // grid | chirps | provisional (js/rain.js)
       if (!isFc && rainObs.has(k)) { rainRaw = rainObs.get(k); rainSrc = 'gauge'; }
       else if (!isFc && rainMode === 'gauge' && k >= gFrom && k <= gTo) { rainRaw = 0; rainSrc = 'gauge'; }
       const rainProb = w && Number.isFinite(w.rainProb) ? w.rainProb : null;

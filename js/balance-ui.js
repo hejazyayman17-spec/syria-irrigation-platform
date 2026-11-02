@@ -113,6 +113,7 @@
   function weather() {
     return (state.rows || []).filter(r => r._date && Number.isFinite(r._et0)).map(r => ({
       date: dateKey(r._date), tmin: num(r.Tmin_C), tmax: num(r.Tmax_C), et0: r._et0, rain: num(r.Rain_mm) ?? 0,
+      rainSrc: r._rainSrc !== undefined && window.RAIN && RAIN.product === 'hybrid' ? r._rainSrc : undefined,
       u2: r._res && Number.isFinite(r._res.u2) ? r._res.u2 : null, rhmin: E().Fao56.rhMin(r)
     }));
   }
@@ -148,7 +149,7 @@
     if (!state.rows.length) { el.innerHTML = '<span class="status warn">لا توجد بيانات مناخية</span> حمّل سلسلة من «أرشيف المنصة» أو ملف محطة في شاشة المناخ، ثم راجعها واعتمدها.'; return false; }
     if (!state.approved) { el.innerHTML = '<span class="status warn">البيانات غير معتمدة</span> لا تُحسب الموازنة إلا على سلسلة مناخية معتمدة (المعاينة البصرية + زر الاعتماد في شاشة المناخ).'; return false; }
     const cl = window.CORRUI ? CORRUI.summaryLine() : '';
-    el.innerHTML = `<span class="status ok">مناخ معتمد</span> ${state.sourceLabel || state.station?.StationName || ''} — ${w.length} يوماً (${w[0]?.date} → ${w[w.length - 1]?.date}).${cl ? ` <span class="status info">${cl}</span>` : ''}`;
+    el.innerHTML = `<span class="status ok">مناخ معتمد</span> ${state.sourceLabel || state.station?.StationName || ''} — ${w.length} يوماً (${w[0]?.date} → ${w[w.length - 1]?.date}).${cl ? ` <span class="status info">${cl}</span>` : ''}${state.rainSummary ? ` <span class="status info">${state.rainSummary}</span>` : ''}${(state.rainNotes || []).map(t => `<div class="mini" style="color:#9a5b00;margin-top:4px">⚠ ${t}</div>`).join('')}`;
     return true;
   }
 
@@ -238,7 +239,7 @@
       + kpi('التسرب العميق DP', `${fmt(s.DP, 0)} مم`, `إغلاق التوازن ${fmt(s.MassClosureMm, 3)} مم`);
   }
   function renderTable() {
-    const rows = last.out.days.slice().reverse().map(d => `<tr${d.Inet > 0 ? ' style="background:#fff4ec"' : ''}><td>${d.Date}${d.Kind === 'forecast' ? '<span class="wb-badge">توقع</span>' : d.Kind === 'model' ? '<span class="wb-badge">نموذج</span>' : ''}</td><td>${d.StageName}</td><td>${fmt(d.GDD, 0)}</td><td>${fmt(d.Kc, 2)}</td><td>${fmt(d.Zr, 2)}</td><td>${fmt(d.ET0, 2)}</td><td>${fmt(d.ETc, 2)}</td><td>${fmt(d.Ks, 2)}</td><td>${fmt(d.ETcAdj, 2)}</td><td>${fmt(d.P)}${d.RainSource === 'gauge' && d.P > 0 ? '<span class="wb-badge">مقيس</span>' : ''}</td><td>${fmt(d.RO)}</td><td>${fmt(d.Inet)}</td><td>${fmt(d.DP)}</td><td>${fmt(d.TAW, 0)}</td><td>${fmt(d.RAW, 0)}</td><td>${fmt(d.Dr)}</td></tr>`);
+    const rows = last.out.days.slice().reverse().map(d => `<tr${d.Inet > 0 ? ' style="background:#fff4ec"' : ''}><td>${d.Date}${d.Kind === 'forecast' ? '<span class="wb-badge">توقع</span>' : d.Kind === 'model' ? '<span class="wb-badge">نموذج</span>' : ''}</td><td>${d.StageName}</td><td>${fmt(d.GDD, 0)}</td><td>${fmt(d.Kc, 2)}</td><td>${fmt(d.Zr, 2)}</td><td>${fmt(d.ET0, 2)}</td><td>${fmt(d.ETc, 2)}</td><td>${fmt(d.Ks, 2)}</td><td>${fmt(d.ETcAdj, 2)}</td><td>${fmt(d.P)}${d.P > 0 ? (d.RainSource === 'gauge' ? '<span class="wb-badge">مقيس</span>' : d.RainSource === 'provisional' ? '<span class="wb-badge" title="ناسا خام حتى صدور CHIRPS لهذا الشهر">مؤقت</span>' : '') : ''}</td><td>${fmt(d.RO)}</td><td>${fmt(d.Inet)}</td><td>${fmt(d.DP)}</td><td>${fmt(d.TAW, 0)}</td><td>${fmt(d.RAW, 0)}</td><td>${fmt(d.Dr)}</td></tr>`);
     $('wbTable').querySelector('tbody').innerHTML = rows.join('');
   }
 
@@ -346,5 +347,5 @@
     if (force || !$('wbEnd').value) $('wbEnd').value = lastD;
   }
   function onShow() { notice(); defaultDates(false); }
-  window.WB = { init, onShow, run: runBalance, get last() { return last; }, readField, writeField };
+  window.WB = { init, onShow, refresh: notice, run: runBalance, get last() { return last; }, readField, writeField };
 })();

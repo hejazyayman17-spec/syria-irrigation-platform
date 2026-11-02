@@ -1,0 +1,19 @@
+{ "note": "Reference rain stations for the rain-source evaluation (coordinates only; the station records stay in the research repository).",
+  "start": "1995-01-01", "end": "2026-10-31",
+  "stations": [
+    { "id": "homs", "name": "حمص (الأرصاد)", "lat": 34.7292, "lon": 36.725 },
+    { "id": "latakia", "name": "اللاذقية (الأرصاد)", "lat": 35.5236, "lon": 35.7792 },
+    { "id": "quneitra", "name": "القنيطرة (الأرصاد)", "lat": 33.125, "lon": 35.8222 },
+    { "id": "tartous", "name": "طرطوس (الأرصاد)", "lat": 34.8711, "lon": 35.8825 },
+    { "id": "gaziantep", "name": "غازي عنتاب (أوغوزلي)", "lat": 36.9472, "lon": 37.4787 },
+    { "id": "sanliurfa", "name": "شانلي أورفا", "lat": 37.1333, "lon": 38.7667 },
+    { "id": "kilis", "name": "كلس", "lat": 36.7167, "lon": 37.1167 },
+    { "id": "mafraq", "name": "المفرق (الأردن)", "lat": 32.3564, "lon": 36.2592 },
+    { "id": "irbid", "name": "إربد (الأردن)", "lat": 32.55, "lon": 35.85 },
+    { "id": "princehasan", "name": "الأمير حسن (الأردن)", "lat": 32.1607, "lon": 37.1494 },
+    { "id": "harknaan", "name": "هار كنعان", "lat": 32.97, "lon": 35.50 },
+    { "id": "deirezzor", "name": "دير الزور", "lat": 35.2854, "lon": 40.176 },
+    { "id": "aleppo", "name": "حلب", "lat": 36.1807, "lon": 37.2244 },
+    { "id": "hasakah", "name": "الحسكة", "lat": 36.5, "lon": 40.75 },
+    { "id": "raqqa", "name": "الرقة", "lat": 35.9333, "lon": 39.0167 }
+  ] }

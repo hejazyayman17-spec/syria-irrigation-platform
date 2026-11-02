@@ -1,0 +1,35 @@
+# One-off: fetch NASA POWER, ERA5-Land and CHIRPS rain at the reference stations for the rain-source evaluation.
+# Triggered by a change to tools/rain_eval/stations.json (or manually). Commits tools/rain_eval/out/products.json.
+name: Rain source evaluation (fetch)
+
+on:
+  push:
+    paths: ['tools/rain_eval/stations.json']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: data-sync
+  cancel-in-progress: false
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install rasterio==1.4.3 numpy
+      - run: python tools/rain_eval/fetch.py
+      - name: Commit
+        run: |
+          git config user.name  "nasa-sync-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add tools/rain_eval/out
+          git diff --cached --quiet && exit 0
+          git commit -m "data: rain-source evaluation products"
+          git pull --rebase && git push

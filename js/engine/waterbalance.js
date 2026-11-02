@@ -36,8 +36,8 @@
   const STAGE_NAMES = ['أولي', 'تطور', 'منتصف الموسم', 'نهاية الموسم', 'بعد الحصاد'];
 
   /** Four-stage Kc curve interpolated in thermal time (FAO-56 Fig. 25, Eq. 66 with GDD in place of days) */
-  function kcAt(g, c, kcMid, kcEnd) {
-    const s = c.gdd;
+  function kcAt(g, c, kcMid, kcEnd, lim) {
+    const s = lim || c.gdd;
     if (g < s.iniEnd) return c.kcIni;
     if (g < s.devEnd) return c.kcIni + (kcMid - c.kcIni) * (g - s.iniEnd) / (s.devEnd - s.iniEnd);
     if (g < s.midEnd) return kcMid;
@@ -46,7 +46,7 @@
   }
 
   /** Root depth: linear in thermal time from Zr,min at sowing to Zr,max at end of development (full cover) */
-  function zrAt(g, c) { return c.zrMin + (c.zrMax - c.zrMin) * clamp(g / c.gdd.devEnd, 0, 1); }
+  function zrAt(g, c, lim) { return c.zrMin + (c.zrMax - c.zrMin) * clamp(g / (lim || c.gdd).devEnd, 0, 1); }
 
   /** SCS curve-number runoff [mm] for daily rain P [mm] */
   function runoffSCS(P, cn) {
@@ -94,18 +94,24 @@
     for (let d = new Date(t0); d <= t1; d.setDate(d.getDate() + 1)) dates.push(iso(d));
     let cum = 0; const g = [];
     for (const k of dates) { const w = wx.get(k); cum += w ? gdd(w.tmin, w.tmax, c.tbase, c.tupper) : 0; g.push(cum); }
+    // phenological clock: thermal time (GDD from sowing, calibrated crops) or calendar days (crops given as FAO-56 stage
+    // lengths L1–L4, e.g. the local Syrian annex — the CROPWAT form). 'clk(i)' is the clock value on day i, 'lim' its stage limits.
+    const byDays = Array.isArray(c.stageDays) && c.stageDays.length === 4;
+    const lim = byDays ? (() => { const d = c.stageDays.map(Number), a = d[0], b = a + d[1], m = b + d[2]; return { iniEnd: a, devEnd: b, midEnd: m, lateEnd: m + d[3] }; })() : c.gdd;
+    const clk = i => byDays ? i : g[i];
     // the season ends at harvest maturity (GDD ≥ lateEnd): later days are not part of the crop water balance
     // an OBSERVED maturity/harvest date (field record) overrides the thermal-time limit: the season ends that day,
     // and before it the crop stays in the late stage even if GDD already passed lateEnd (calibration not yet local)
     const mat = input.maturityDate ? String(input.maturityDate).slice(0, 10) : null;
     const mi = mat ? dates.indexOf(mat) : -1;
-    const hv = mi >= 0 ? mi : g.findIndex(x => x >= c.gdd.lateEnd);
+    const hv = mi >= 0 ? mi : g.findIndex((x, i) => clk(i) >= lim.lateEnd);
     if (hv >= 0) { dates.length = hv + 1; g.length = hv + 1; }
-    const stageAt = i => mi >= 0 ? (i === mi ? 4 : Math.min(3, stageOf(g[i], c.gdd))) : stageOf(g[i], c.gdd);
+    const stageAt = i => mi >= 0 ? (i === mi ? 4 : Math.min(3, stageOf(clk(i), lim))) : stageOf(clk(i), lim);
     const meanOver = (stage, f) => { const v = dates.map((k, i) => stageAt(i) === stage ? f(wx.get(k)) : null).filter(Number.isFinite); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null; };
     const adj = (kc, st) => { const u = meanOver(st, w => w && w.u2), rh = meanOver(st, w => w && w.rhmin); return (u === null || rh === null) ? kc : F().kcClimateAdjust(kc, u, rh, c.h); };
-    const kcMidAdj = adj(c.kcMid, 2);
-    const kcEndAdj = c.kcEnd >= 0.45 ? adj(c.kcEnd, 3) : c.kcEnd;   // Eq. 65 applies only when Kc end ≥ 0.45
+    // local (measured) Kc values are already for the local climate: no Eq. 62 adjustment
+    const kcMidAdj = c.kcLocal ? c.kcMid : adj(c.kcMid, 2);
+    const kcEndAdj = c.kcLocal ? c.kcEnd : (c.kcEnd >= 0.45 ? adj(c.kcEnd, 3) : c.kcEnd);   // Eq. 65 applies only when Kc end ≥ 0.45
 
     // ---- pass 2: daily balance
     let zrPrev = c.zrMin;
@@ -120,8 +126,8 @@
     dates.forEach((k, i) => {
       const w = wx.get(k);
       const kind = (w && w.kind) || 'obs', isFc = kind === 'forecast';
-      const G_ = g[i], st = stageAt(i), kc = st === 4 ? null : (st === 3 && G_ >= c.gdd.lateEnd ? kcEndAdj : kcAt(G_, c, kcMidAdj, kcEndAdj));
-      const zr = zrAt(G_, c);
+      const G_ = g[i], st = stageAt(i), kc = st === 4 ? null : (st === 3 && clk(i) >= lim.lateEnd ? kcEndAdj : kcAt(clk(i), c, kcMidAdj, kcEndAdj, lim));
+      const zr = zrAt(clk(i), c, lim);
       // root growth: bring the new slice's share of subsoil depletion into the root zone
       if (zr > zrPrev + 1e-9) {
         const thick = c.zrMax - zrPrev;

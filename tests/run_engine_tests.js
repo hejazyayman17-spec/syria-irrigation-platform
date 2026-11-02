@@ -36,7 +36,7 @@ for (const file of fs.readdirSync(path.join(__dirname, 'vectors')).sort()) {
     const out = WaterBalance.run(input);
     const lastDay = out.days[out.days.length - 1];
     const derived = { MaxSingleNetMm: Math.max(...out.days.map(d => d.Inet)), ForecastRainCountedMm: out.forecast.P,
-      LastDayIsMaturity: lastDay.Date === v.input.maturityDate ? 1 : 0, LastStage: lastDay.Stage };
+      LastDayIsMaturity: lastDay.Date === v.input.maturityDate ? 1 : 0, LastStage: lastDay.Stage, SeasonDays: out.days.length, KcMidUsed: out.kcMidAdj };
     for (const [k, [exp, tol]] of Object.entries(v.expect)) near(`${v.name} ${k}`, k in derived ? derived[k] : out.summary[k], exp, tol);
   }
 }

@@ -15,8 +15,15 @@
     $('wbKcIni').value = c.kcIni; $('wbKcMid').value = c.kcMid; $('wbKcEnd').value = c.kcEnd; $('wbH').value = c.h;
     $('wbZrMin').value = c.zrMin; $('wbZrMax').value = c.zrMax; $('wbP').value = c.p;
     $('wbTbase').value = c.tbase; $('wbTupper').value = c.tupper ?? '';
-    $('wbG1').value = c.gdd.iniEnd; $('wbG2').value = c.gdd.devEnd; $('wbG3').value = c.gdd.midEnd; $('wbG4').value = c.gdd.lateEnd;
+    setStageInputs(c);
     $('wbCropNote').textContent = c.note || '';
+  }
+  // stage limits: thermal time (GDD at the END of each stage) or, for crops given by stage lengths (local annex), L1–L4 in days
+  const STAGE_LBL = { gdd: ['نهاية الطور الأولي (GDD)', 'نهاية التطور / تغطية كاملة (GDD)', 'نهاية منتصف الموسم (GDD)', 'الحصاد (GDD)'],
+    days: ['طول الطور الأولي L1 (يوم)', 'طول طور التطور L2 (يوم)', 'طول منتصف الموسم L3 (يوم)', 'طول نهاية الموسم L4 (يوم)'] };
+  function setStageInputs(c) {
+    const d = Array.isArray(c.stageDays), v = d ? c.stageDays : [c.gdd.iniEnd, c.gdd.devEnd, c.gdd.midEnd, c.gdd.lateEnd];
+    [1, 2, 3, 4].forEach(i => { $('wbG' + i).value = v[i - 1]; $('wbG' + i + 'L').textContent = STAGE_LBL[d ? 'days' : 'gdd'][i - 1]; $('wbG' + i).step = d ? 1 : 10; });
   }
   function fillSoil(key) { const s = E().Soils.SOILS[key]; $('wbFC').value = s.thetaFC; $('wbWP').value = s.thetaWP; $('wbCN').value = s.cn; }
   function fillSystem(key) { const y = E().Soils.SYSTEMS[key]; $('wbEa').value = y.ea; $('wbMaxNet').value = y.maxNetMm ?? ''; }
@@ -32,7 +39,8 @@
         climateCorrection: state.corrRes ? { level: state.corrRes.level, cellId: state.corrRes.cellId, siteType: state.corrRes.site.siteType, measuredWindFactor: state.corrRes.site.measuredWindFactor } : null },
       sowingDate: $('wbSow').value, endDate: $('wbEnd').value, maturityDate: $('wbMaturity').value || null,
       crop: { ...base, kcIni: n('wbKcIni'), kcMid: n('wbKcMid'), kcEnd: n('wbKcEnd'), h: n('wbH'), zrMin: n('wbZrMin'), zrMax: n('wbZrMax'), p: n('wbP'),
-        tbase: n('wbTbase'), tupper: n('wbTupper'), gdd: { iniEnd: n('wbG1'), devEnd: n('wbG2'), midEnd: n('wbG3'), lateEnd: n('wbG4') } },
+        tbase: n('wbTbase'), tupper: n('wbTupper'),
+        ...(Array.isArray(base.stageDays) ? { stageDays: [n('wbG1'), n('wbG2'), n('wbG3'), n('wbG4')], gdd: null } : { gdd: { iniEnd: n('wbG1'), devEnd: n('wbG2'), midEnd: n('wbG3'), lateEnd: n('wbG4') } }) },
       soil: { texture: $('wbSoil').value, thetaFC: n('wbFC'), thetaWP: n('wbWP'), cn: n('wbCN'),
         initialDepletionFrac: (n('wbDr0') ?? 50) / 100, subsoilDepletionFrac: (n('wbDsub0') ?? 50) / 100 },
       irrigation: { system: $('wbSystem').value, mode: $('wbMode').value, efficiency: n('wbEa'),
@@ -46,7 +54,8 @@
     $('wbCrop').value = f.crop.key; fillCrop(f.crop.key);
     const c = f.crop;
     Object.entries({ wbKcIni: c.kcIni, wbKcMid: c.kcMid, wbKcEnd: c.kcEnd, wbH: c.h, wbZrMin: c.zrMin, wbZrMax: c.zrMax, wbP: c.p, wbTbase: c.tbase, wbTupper: c.tupper ?? '',
-      wbG1: c.gdd.iniEnd, wbG2: c.gdd.devEnd, wbG3: c.gdd.midEnd, wbG4: c.gdd.lateEnd }).forEach(([k, v]) => $(k).value = v);
+    }).forEach(([k, v]) => $(k).value = v);
+    setStageInputs(Array.isArray(c.stageDays) || c.gdd ? c : E().Crops.get(c.key));
     $('wbSow').value = f.sowingDate || ''; $('wbEnd').value = f.endDate || ''; $('wbMaturity').value = f.maturityDate || '';
     $('wbSoil').value = f.soil.texture || 'loam'; $('wbFC').value = f.soil.thetaFC; $('wbWP').value = f.soil.thetaWP; $('wbCN').value = f.soil.cn;
     $('wbDr0').value = Math.round(100 * f.soil.initialDepletionFrac); $('wbDsub0').value = Math.round(100 * f.soil.subsoilDepletionFrac);
@@ -176,9 +185,9 @@
       const sm = last.out.summary, ld = last.out.days.filter(d => d.Kind !== 'forecast').pop() || {};
       const harvested = t.action === 'harvested';
       return { level: 'history', html: `<div class="big wb-ok">تحليل موسم سابق</div><div>نهاية الفترة المحسوبة <b>${t.date}</b>، فلا يُصدر تنبيه ري لهذا التاريخ.<br>
-        خلال الموسم: ${sm.irrigations} ${sm.irrigations >= 3 && sm.irrigations <= 10 ? 'ريات' : 'رية'}، الري الإجمالي <b>${vol(sm.Igross)}</b>، الهطول ${fmt(sm.P, 0)} مم، أيام الإجهاد المائي ${sm.stressDays}.${harvested ? `<br>${f.maturityDate ? 'النضج المرصود' : 'بلغ المحصول حد النضج'} في ${t.date}.` : `<br>لم يبلغ المحصول حد النضج حتى هذا التاريخ (GDD ${fmt(ld.GDD, 0)} من ${fmt(f.crop.gdd.lateEnd, 0)})؛ إن كان تاريخ النضج الفعلي معروفاً فأدخله في بطاقة الحقل.`}</div>` };
+        خلال الموسم: ${sm.irrigations} ${sm.irrigations >= 3 && sm.irrigations <= 10 ? 'ريات' : 'رية'}، الري الإجمالي <b>${vol(sm.Igross)}</b>، الهطول ${fmt(sm.P, 0)} مم، أيام الإجهاد المائي ${sm.stressDays}.${harvested ? `<br>${f.maturityDate ? 'النضج المرصود' : f.crop.stageDays ? 'انتهت أطوار المحصول' : 'بلغ المحصول حد النضج'} في ${t.date}.` : `<br>لم يبلغ المحصول نهاية أطواره حتى هذا التاريخ (${f.crop.stageDays ? `${last.out.days.length - 1} يوماً من ${f.crop.stageDays.reduce((x, y) => x + y, 0)}` : `GDD ${fmt(ld.GDD, 0)} من ${fmt(f.crop.gdd.lateEnd, 0)}`})؛ إن كان تاريخ النضج الفعلي معروفاً فأدخله في بطاقة الحقل.`}</div>` };
     }
-    if (t.action === 'harvested') return { level: 'harvested', html: `<div class="big">انتهى الموسم</div><div>${last.field.maturityDate ? 'النضج المرصود' : 'بلغ التراكم الحراري حد النضج'} في <b>${t.date}</b>؛ لا توصيات ري بعد هذا التاريخ.</div>` };
+    if (t.action === 'harvested') return { level: 'harvested', html: `<div class="big">انتهى الموسم</div><div>${last.field.maturityDate ? 'النضج المرصود' : last.field.crop.stageDays ? 'انتهت أطوار المحصول' : 'بلغ التراكم الحراري حد النضج'} في <b>${t.date}</b>؛ لا توصيات ري بعد هذا التاريخ.</div>` };
     if (t.action === 'irrigate') return { level: 'now', html: `<div class="big wb-alert-now">ري الآن</div><div>آخر يوم معلوم <b>${t.date}</b>: العجز <b>${fmt(t.Dr)} مم</b> تجاوز العتبة ${fmt(t.trigger)} مم (TAW ${fmt(t.TAW, 0)} مم).<br>
       الرية: صافي <b>${fmt(t.netMm)} مم</b> — إجمالي عند Ea ${ea}: <b>${vol(t.grossMm)}</b>.${t.limited ? `<br>محدودة بأقصى عمق للنظام؛ يبقى عجز ${fmt(t.remainingMm)} مم تغطيه الرية التالية.` : ''}</div>` };
     if (a && a.level === 'soon') {
@@ -312,7 +321,7 @@
   // ---------- init
   function init() {
     const C = E().Crops, S = E().Soils;
-    $('wbCrop').innerHTML = C.keys.map(k => `<option value="${k}">${C.CROPS[k].name}</option>`).join('');
+    $('wbCrop').innerHTML = (C.GROUPS || [null]).map(g => { const ks = C.keys.filter(k => !g || C.CROPS[k].group === g); return g ? `<optgroup label="${g}">${ks.map(k => `<option value="${k}">${C.CROPS[k].name}</option>`).join('')}</optgroup>` : ks.map(k => `<option value="${k}">${C.CROPS[k].name}</option>`).join(''); }).join('');
     $('wbSoil').innerHTML = Object.entries(S.SOILS).map(([k, s]) => `<option value="${k}">${s.name}</option>`).join('');
     $('wbSystem').innerHTML = Object.entries(S.SYSTEMS).map(([k, s]) => `<option value="${k}">${s.name} (Ea ${s.ea})</option>`).join('');
     $('wbCrop').value = 'wheat'; fillCrop('wheat'); $('wbSoil').value = 'siltLoam'; fillSoil('siltLoam'); $('wbSystem').value = 'sprinkler'; fillSystem('sprinkler');

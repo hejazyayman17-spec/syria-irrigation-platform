@@ -39,20 +39,21 @@ def era5land(st):
     return {d: v for d, v in zip(j['daily']['time'], j['daily']['precipitation_sum']) if v is not None}
 
 
-def chirps_month(y, m):
-    """(array reader, version) for one month — v3 first, then v2."""
+def chirps_points(y, m, pts):
+    """Monthly CHIRPS at the station pixels — v3 first, then v2. Point reads over HTTP range requests (/vsicurl),
+    so only the needed strips are fetched; a bad file is retried, then the other version is tried."""
     import rasterio
-    from rasterio.io import MemoryFile
-    for ver, url, gz in (('v3', f'https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.{y}.{m:02d}.tif', False),
-                         ('v2', f'https://data.chc.ucsb.edu/products/CHIRPS-2.0/global_monthly/tifs/chirps-v2.0.{y}.{m:02d}.tif.gz', True)):
-        try:
-            raw = get(url, tries=2)
-        except Exception:
-            continue
-        if gz:
-            raw = gzip.decompress(raw)
-        mf = MemoryFile(raw)
-        return mf.open(), ver
+    srcs = (('v3', f'/vsicurl/https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.{y}.{m:02d}.tif'),
+            ('v2', f'/vsigzip//vsicurl/https://data.chc.ucsb.edu/products/CHIRPS-2.0/global_monthly/tifs/chirps-v2.0.{y}.{m:02d}.tif.gz'))
+    for ver, path in srcs:
+        for k in range(3):
+            try:
+                with rasterio.Env(GDAL_HTTP_MAX_RETRY='4', GDAL_HTTP_RETRY_DELAY='5', CPL_VSIL_CURL_ALLOWED_EXTENSIONS='.tif,.gz'):
+                    with rasterio.open(path) as ds:
+                        vals = [float(v[0]) for v in ds.sample(pts)]
+                return vals, ver
+            except Exception as e:
+                print('  CHIRPS', ver, y, m, 'try', k + 1, str(e)[:120]); time.sleep(5 * (k + 1))
     return None, None
 
 
@@ -65,24 +66,23 @@ def main():
         try: res[st['id']]['era5land'] = era5land(st)
         except Exception as e: print('  ERA5-Land failed', e)
         time.sleep(1)
+    json.dump(res, open(os.path.join(OUT, 'products.json'), 'w'), separators=(',', ':'))  # keep NASA/ERA5 even if CHIRPS fails
+    pts = [(st['lon'], st['lat']) for st in CFG['stations']]
     y0, y1 = int(CFG['start'][:4]), int(CFG['end'][:4])
     last = dt.date.today()
     for y in range(y0, y1 + 1):
         for m in range(1, 13):
             if dt.date(y, m, 1) > last:
                 break
-            ds, ver = chirps_month(y, m)
-            if ds is None:
+            vals, ver = chirps_points(y, m, pts)
+            if vals is None:
                 print('  CHIRPS missing', y, m); continue
-            band = ds.read(1)
-            for st in CFG['stations']:
-                r, c = ds.index(st['lon'], st['lat'])
-                v = float(band[r, c])
+            for st, v in zip(CFG['stations'], vals):
                 if v >= 0:
                     res[st['id']]['chirps'][f'{y}-{m:02d}'] = round(v, 2)
                     res[st['id']]['chirps_version'][f'{y}-{m:02d}'] = ver
-            ds.close()
-        print('  CHIRPS year', y, 'done')
+        print('  CHIRPS year', y, 'done', flush=True)
+        json.dump(res, open(os.path.join(OUT, 'products.json'), 'w'), separators=(',', ':'))
     json.dump(res, open(os.path.join(OUT, 'products.json'), 'w'), separators=(',', ':'))
     print('wrote products.json')
 

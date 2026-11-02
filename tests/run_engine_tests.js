@@ -52,5 +52,27 @@ function expandWeather(g) {
   }
   return out;
 }
-console.log(fail ? `\n${fail} test(s) FAILED` : '\nAll engine tests passed');
-process.exit(fail ? 1 : 0);
+/* rain-hybrid vectors run js/rain.js with a stubbed archive (no network) */
+async function rainVectors() {
+  for (const file of fs.readdirSync(path.join(__dirname, 'vectors')).sort()) {
+    const v = JSON.parse(fs.readFileSync(path.join(__dirname, 'vectors', file), 'utf8'));
+    if (v.type !== 'rain-hybrid') continue;
+    globalThis.window = globalThis; globalThis.archiveBase = () => 'data/nasa/';
+    globalThis.fetch = async u => ({ ok: u.endsWith(`${v.chirps.year}.json`), json: async () => v.chirps });
+    delete globalThis.RAIN; vm.runInThisContext(fs.readFileSync(path.join(root, 'js/rain.js'), 'utf8'), { filename: 'rain.js' });
+    const dates = [], pr = [];
+    for (const m of ['01', '02', '03']) { const n = new Date(Date.UTC(v.chirps.year, +m, 0)).getUTCDate();
+      for (let d = 1; d <= n; d++) { dates.push(`${v.chirps.year}${m}${String(d).padStart(2, '0')}`); pr.push((v.days[`${v.chirps.year}-${m}`] || {})[d] || 0); } }
+    const r = await RAIN.adjust(v.lat, v.lon, dates, pr), at = d => dates.indexOf(d), sum = m => dates.reduce((a, d, j) => a + (d.slice(4, 6) === m ? r.rain[j] : 0), 0);
+    const got = { jan15: r.rain[at('20250101')], jan30: r.rain[at('20250115')], janTotal: sum('01'), febTotal: sum('02'), mar5: r.rain[at('20250305')],
+      scaled: r.months.scaled, provisional: r.months.provisional, srcJan: r.src[at('20250101')], srcFeb: r.src[at('20250203')], srcMar: r.src[at('20250305')] };
+    for (const [k, e] of Object.entries(v.expect)) {
+      if (typeof e[0] === 'string') { const ok = got[k] === e[0]; if (!ok) fail++; console.log(`${ok ? 'PASS' : 'FAIL'}  ${v.name} ${k}: ${got[k]} (expected ${e[0]})`); }
+      else near(`${v.name} ${k}`, +got[k].toFixed(6), e[0], e[1]);
+    }
+  }
+}
+rainVectors().then(() => {
+  console.log(fail ? `\n${fail} test(s) FAILED` : '\nAll engine tests passed');
+  process.exit(fail ? 1 : 0);
+});

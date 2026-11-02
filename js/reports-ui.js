@@ -46,10 +46,11 @@
       if (useCorr && !corrSite) { corrSite = { lat: site.lat, lon: site.lon, elevationM: elev, siteType: cfg.siteType, measuredWindFactor: Number.isFinite(cfg.windFactor) ? cfg.windFactor : null }; res = eng.resolve(corrSite); }
       const V = p => a.vars[p][ci];
       const tx = V('T2M_MAX'), tn = V('T2M_MIN'), td = V('T2MDEW'), rh = V('RH2M'), ws = V('WS2M'), rs = V('ALLSKY_SFC_SW_DWN'), pr = V('PRECTOTCORR');
+      const adj = window.RAIN ? await RAIN.adjust(site.lat, site.lon, a.dates, pr) : null;   // NASA timing × CHIRPS month (js/rain.js)
       a.dates.forEach((d8, j) => {
         const d = `${d8.slice(0, 4)}-${d8.slice(4, 6)}-${d8.slice(6, 8)}`;
         if (d < from || d > to) return;
-        const row = { date: d, rain: pr[j] ?? 0 };
+        const pk = adj ? RAIN.pick(adj, pr, j) : { mm: pr[j], src: 'grid' }, row = { date: d, rain: pk.mm ?? 0, rainSrc: pk.src };
         const ok = [tx[j], tn[j], td[j], ws[j], rs[j]].every(v => v !== null && v !== undefined);
         if (useCorr && ok) {
           const c = eng.correct(corrSite, { date: d, tmax: tx[j], tmin: tn[j], tdew: td[j], rs: rs[j], ws2m: ws[j] }, res);
@@ -85,12 +86,14 @@
   const RAINY = new Map();
   const rainYearOf = (y, month) => month >= 9 ? y : y - 1;          // rain year starts 1 Sep of this year
   async function rainYears(site) {
-    const key = `${site.lat.toFixed(3)}_${site.lon.toFixed(3)}`;
+    const key = `${site.lat.toFixed(3)}_${site.lon.toFixed(3)}_${window.RAIN ? RAIN.product : 'nasa'}`;
     if (RAINY.has(key)) return RAINY.get(key);
     const tot = new Map(), cnt = new Map();
     for (const y of ARCHIVE_YEARS) {
       let a; try { a = await year(y); } catch (e) { continue; }
-      const ci = nearestCell(a.cells, site.lat, site.lon), pr = a.vars.PRECTOTCORR[ci];
+      const ci = nearestCell(a.cells, site.lat, site.lon), raw = a.vars.PRECTOTCORR[ci];
+      const adj = window.RAIN ? await RAIN.adjust(site.lat, site.lon, a.dates, raw) : null;
+      const pr = raw.map((v, j) => adj ? RAIN.pick(adj, raw, j).mm : v);
       a.dates.forEach((d8, j) => { const yy = +d8.slice(0, 4), mm = +d8.slice(4, 6), ry = mm >= 9 ? yy : yy - 1;
         if (pr[j] !== null && pr[j] !== undefined) { tot.set(ry, (tot.get(ry) || 0) + pr[j]); cnt.set(ry, (cnt.get(ry) || 0) + 1); } });
     }
@@ -110,6 +113,7 @@
   async function season(site, y, F) {
     const sow = iso(y, F.month, F.day), end = addDays(sow, 330);
     const W = await weather(site, sow, end);
+    const notes = window.RAIN ? RAIN.warnings(site.lat, site.lon, Number.isFinite(site.elev) ? site.elev : (W.cell ? W.cell[2] : null), await RAIN.annualMean(site.lat, site.lon)) : [];
     if (!W.rows.length) return { site, y, sow, error: 'لا توجد بيانات أرشيف لهذا الموسم' };
     // rain year of this season and its standing among the other years of the cell
     const ry = rainYearOf(y, F.month), RY = await rainYears(site), cur = RY.get(ry);
@@ -126,16 +130,17 @@
     const out = E().WaterBalance.run({ crop: F.crop, soil: F.soil, irrigation: F.irrigation, sowingDate: sow, endDate: last < end ? last : end, weather: W.rows });
     const days = out.days, hv = days.find(d => d.Stage === 4), s = out.summary;
     const et0 = days.reduce((a, d) => a + (d.ET0 || 0), 0);
+    const provisional = W.rows.filter(r => r.date >= sow && r.date <= (hv ? hv.Date : end) && r.rainSrc === 'provisional').length;
     const unc = W.rows.filter(r => r.date >= sow && (!hv || r.date <= hv.Date) && Number.isFinite(r.unc));
     return { site, y, sow, label, harvest: hv ? hv.Date : null, complete: !!hv, len: days.length, et0, etc: s.ETc, etcAdj: s.ETcAdj, p: s.P, pe: s.P - s.RO,
       inet: s.Inet, igross: s.Igross, n: s.irrigations, dp: s.DP, stress: s.stressDays, missing: s.missing, closure: s.MassClosureMm,
       level: W.corr ? W.corr.level : 0, levelAr: W.corr ? W.corr.levelAr : 'ناسا خام', cell: W.cell, uncMean: unc.length ? unc.reduce((a, r) => a + r.unc, 0) / unc.length : null,
       rainYear: `${ry}/${String((ry + 1) % 100).padStart(2, '0')}`, rainYearComplete: !!(cur && cur.complete), rainNasa, rainMedian: med, rainRatio: ratio, rainFlag: flag,
-      rainUsedMode: factor !== 1 ? rainMode : 'nasa', rainFactor: factor, rainTarget: factor !== 1 ? target : null, nOthers: others.length };
+      rainUsedMode: factor !== 1 ? rainMode : 'nasa', rainFactor: factor, rainTarget: factor !== 1 ? target : null, nOthers: others.length, notes, provisional };
   }
 
   // ---------- statistics over the complete rows
-  const COLS = [['et0', 'ET₀ للموسم'], ['etc', 'الاحتياج المائي للمحصول ETc'], ['rainNasa', 'مطر السنة المطرية (ناسا)'], ['pe', 'المطر الفعال (P − RO)'], ['inet', 'الري الصافي'], ['igross', 'الري الإجمالي (م³/دونم)'], ['n', 'عدد الريات'], ['dp', 'التسرب العميق'], ['len', 'طول الموسم (يوم)']];
+  const COLS = [['et0', 'ET₀ للموسم'], ['etc', 'الاحتياج المائي للمحصول ETc'], ['rainNasa', 'مطر السنة المطرية'], ['pe', 'المطر الفعال (P − RO)'], ['inet', 'الري الصافي'], ['igross', 'الري الإجمالي (م³/دونم)'], ['n', 'عدد الريات'], ['dp', 'التسرب العميق'], ['len', 'طول الموسم (يوم)']];
   function stats(rows) {
     const ok = rows.filter(r => !r.error && r.complete);
     return Object.fromEntries(COLS.map(([k]) => {
@@ -152,20 +157,20 @@
     const temporal = R.mode === 'temporal';
     const label = r => temporal ? `${r.y}/${String((r.y + 1) % 100).padStart(2, '0')}` : r.site.name;
     const body = R.rows.map(r => r.error ? `<tr><td>${label(r)}</td><td colspan="13" style="color:#b4342b">${r.error}</td></tr>` :
-      `<tr${r.complete ? '' : ' style="background:#fff8ea"'}><td><b>${label(r)}</b>${r.complete ? '' : '<br><span class="status warn">موسم غير مكتمل</span>'}${r.rainFlag ? `<br><span class="status ${r.rainFlag === 'wet' ? 'bad' : 'warn'}" title="مطر السنة المطرية ${r.rainYear} مقارنة بوسيط ${r.nOthers} سنوات أخرى للخلية نفسها">${r.rainFlag === 'wet' ? 'مطر استثنائي مرتفع' : 'مطر استثنائي منخفض'} ×${f(r.rainRatio, 1)}</span>` : ''}</td><td>${dm(r.sow)}</td><td>${r.complete ? dm(r.harvest) : 'لم يُبلغ'}</td><td>${r.len}</td>
+      `<tr${r.complete ? '' : ' style="background:#fff8ea"'}><td><b>${label(r)}</b>${r.complete ? '' : '<br><span class="status warn">موسم غير مكتمل</span>'}${r.rainFlag ? `<br><span class="status ${r.rainFlag === 'wet' ? 'bad' : 'warn'}" title="مطر السنة المطرية ${r.rainYear} مقارنة بوسيط ${r.nOthers} سنوات أخرى للخلية نفسها">${r.rainFlag === 'wet' ? 'مطر استثنائي مرتفع' : 'مطر استثنائي منخفض'} ×${f(r.rainRatio, 1)}</span>` : ''}${(r.notes || []).length ? `<br><span class="status warn" title="${r.notes.join(' — ')}">⚠ ${r.notes.length > 1 ? 'ملاحظتا مطر' : r.notes[0].startsWith('المطر غير') ? 'مطر غير متحقَّق أرضياً' : 'مرتفعات: مطر بحذر'}</span>` : ''}${r.provisional ? `<br><span class="mini" title="أيام بمطر ناسا الخام لأن CHIRPS لهذا الشهر لم يصدر بعد">${r.provisional} يوم مطر مؤقت</span>` : ''}</td><td>${dm(r.sow)}</td><td>${r.complete ? dm(r.harvest) : 'لم يُبلغ'}</td><td>${r.len}</td>
         <td>${f(r.et0)}</td><td><b>${f(r.etc)}</b></td><td>${f(r.rainNasa)}${r.rainYearComplete ? '' : '*'}${r.rainTarget !== null ? ` ← <b>${f(r.rainTarget)}</b>` : ''}<br><span class="mini">الوسيط ${f(r.rainMedian)}</span></td><td>${f(r.pe)}</td><td><b>${f(r.inet)}</b></td><td>${f(r.igross)}</td><td>${r.n}</td><td>${f(r.dp)}</td><td>${r.stress}</td>
         <td><span class="mini">${r.levelAr}${Number.isFinite(r.uncMean) ? ` (±${f(r.uncMean, 2)} مم/يوم)` : ''}</span></td></tr>`).join('');
     const S = stats(R.rows), sv = (k, p, d = 0) => S[k] ? f(S[k][p], d) : '—';
     const srow = (t, p, d = 0, suf = '') => `<tr style="background:#f1f6f7"><td><b>${t}</b></td><td></td><td></td><td>${sv('len', p, d)}${suf}</td>${['et0', 'etc', 'rainNasa', 'pe', 'inet', 'igross', 'n', 'dp'].map(k => `<td>${sv(k, p, d)}${suf}</td>`).join('')}<td></td><td></td></tr>`;
     const nOk = R.rows.filter(r => !r.error && r.complete).length;
     $('rpOut').innerHTML = `
-      <div class="mini" style="margin-bottom:8px">${R.title}. القيم بالمليمتر للموسم (1 مم = 1 م³/دونم). الإحصاء على المواسم أو المواقع المكتملة فقط (${nOk}).</div>
+      <div class="mini" style="margin-bottom:8px">${R.title}. المطر اليومي: ${window.RAIN ? RAIN.LABEL[R.rainProduct] : 'ناسا الخام'}. القيم بالمليمتر للموسم (1 مم = 1 م³/دونم). الإحصاء على المواسم أو المواقع المكتملة فقط (${nOk}).</div>
       <div class="table-wrap" style="max-height:none"><table><thead><tr><th>${temporal ? 'الموسم' : 'الموقع'}</th><th>الزراعة</th><th>الحصاد</th><th>الطول يوم</th><th>ET₀</th><th>ETc</th><th>مطر السنة المطرية</th><th>المطر الفعال</th><th>الري الصافي</th><th>الري الإجمالي</th><th>الريات</th><th>التسرب</th><th>أيام إجهاد</th><th>تصحيح ناسا</th></tr></thead>
       <tbody>${body}${nOk > 1 ? srow('المتوسط', 'mean') + srow('الانحراف المعياري', 'sd') + srow('معامل الاختلاف CV', 'cv', 0, '%') + srow('الأدنى', 'min') + srow('الأعلى', 'max') : ''}</tbody></table></div>
       <h4 style="margin:16px 0 6px">${temporal ? 'التباين الزماني' : 'التباين المكاني'}: الاحتياج المائي والمطر الفعال والري الصافي</h4>
       <div class="chart-shell" style="height:auto"><svg id="rpChart" viewBox="0 0 1000 360" style="width:100%;height:auto;direction:ltr"></svg></div>
       <div class="chart-legend" style="display:flex;gap:16px;flex-wrap:wrap">${[["#C0571B","الاحتياج المائي ETc"],["#2F6FB3","المطر الفعال"],["#2E8B57","الري الصافي"]].map(([c,t])=>`<span style="display:inline-flex;align-items:center;gap:6px"><i style="display:inline-block;width:12px;height:12px;border-radius:3px;background:${c}"></i>${t}</span>`).join("")}</div>
-      <div class="mini" style="margin-top:8px">المنهجية: موازنة مائية يومية FAO-56 (Kc مفرد) بنفس محرك بطاقة الحقل، ري تلقائي عند RAW بكفاءة النظام وحده الأقصى للرية، استنزاف أولي 50%، الحصاد بنهاية الأطوار: بالتراكم الحراري للمحاصيل المعايرة حرارياً، وبأطوال الأطوار بالأيام للمحاصيل المحلية (الملحقان 1 و2، دون تعديل مناخي لـ Kc). المناخ: أرشيف NASA POWER ${R.corrOn ? 'مصححاً محلياً بإعدادات شاشة المناخ (نوع الموقع ومعامل الرياح)' : 'دون تصحيح'}. الارتفاع ارتفاع الموقع إن أُدخل، وإلا ارتفاع خلية ناسا. المطر: ${({ nasa: 'من ناسا كما هو', median: 'مطر ناسا اليومي معدّلاً بالنسبة حتى يساوي مجموع السنة المطرية وسيطَ السنوات الأخرى للخلية (سنة مطرية نموذجية)', station: 'مطر ناسا اليومي معدّلاً بالنسبة حتى يساوي مجموع السنة المطرية مطرَ المحطة المُدخل' })[R.rainMode]}. السنة المطرية من 1 أيلول إلى 31 آب؛ يُنبَّه إلى السنة التي يبلغ مطرها ضعف وسيط السنوات الأخرى للخلية أو نصفه. * سنة مطرية غير مكتملة في الأرشيف.</div>`;
+      <div class="mini" style="margin-top:8px">المنهجية: موازنة مائية يومية FAO-56 (Kc مفرد) بنفس محرك بطاقة الحقل، ري تلقائي عند RAW بكفاءة النظام وحده الأقصى للرية، استنزاف أولي 50%، الحصاد بنهاية الأطوار: بالتراكم الحراري للمحاصيل المعايرة حرارياً، وبأطوال الأطوار بالأيام للمحاصيل المحلية (الملحقان 1 و2، دون تعديل مناخي لـ Kc). المناخ: أرشيف NASA POWER ${R.corrOn ? 'مصححاً محلياً بإعدادات شاشة المناخ (نوع الموقع ومعامل الرياح)' : 'دون تصحيح'}. الارتفاع ارتفاع الموقع إن أُدخل، وإلا ارتفاع خلية ناسا. مجموع السنة المطرية: ${({ nasa: 'كما هو', median: 'المطر اليومي معدّلاً بالنسبة حتى يساوي مجموع السنة المطرية وسيطَ السنوات الأخرى للخلية (سنة مطرية نموذجية)', station: 'المطر اليومي معدّلاً بالنسبة حتى يساوي مجموع السنة المطرية مطرَ المحطة المُدخل' })[R.rainMode]}. السنة المطرية من 1 أيلول إلى 31 آب؛ يُنبَّه إلى السنة التي يبلغ مطرها ضعف وسيط السنوات الأخرى للخلية أو نصفه. * سنة مطرية غير مكتملة في الأرشيف.</div>`;
     drawChart(R, label);
     $('rpExport').disabled = false;
   }
@@ -210,21 +215,21 @@
       await new Promise(r => setTimeout(r));
     }
     btn.disabled = false; st.textContent = `اكتمل: ${rows.length} حساب.`;
-    LAST = { mode, title, rows, F, rainMode: F.rainMode, corrOn: !!(window.CORRUI && CORRUI.cfg.on), at: new Date().toISOString().slice(0, 16).replace('T', ' ') };
+    LAST = { mode, title, rows, F, rainMode: F.rainMode, rainProduct: window.RAIN ? RAIN.product : 'nasa', corrOn: !!(window.CORRUI && CORRUI.cfg.on), at: new Date().toISOString().slice(0, 16).replace('T', ' ') };
     render(LAST);
   }
 
   function exportXlsx() {
     if (!LAST || typeof XLSX === 'undefined') { toast('مكتبة Excel غير محمّلة'); return; }
     const t = LAST.mode === 'temporal';
-    const head = [t ? 'الموسم' : 'الموقع', 'خط العرض', 'خط الطول', 'الزراعة', 'الحصاد', 'مكتمل', 'طول الموسم يوم', 'ET0 مم', 'ETc مم', 'المطر مم', 'المطر الفعال مم', 'الري الصافي مم', 'الري الإجمالي مم (م3/دونم)', 'عدد الريات', 'السنة المطرية', 'مطر السنة المطرية ناسا مم', 'وسيط السنوات الأخرى مم', 'النسبة إلى الوسيط', 'تنبيه المطر', 'المطر المستخدم للسنة مم', 'طريقة المطر', 'التسرب مم', 'أيام إجهاد', 'مستوى التصحيح', 'هامش ET0 اليومي مم', 'إغلاق الكتلة مم'];
+    const head = [t ? 'الموسم' : 'الموقع', 'خط العرض', 'خط الطول', 'الزراعة', 'الحصاد', 'مكتمل', 'طول الموسم يوم', 'ET0 مم', 'ETc مم', 'المطر مم', 'المطر الفعال مم', 'الري الصافي مم', 'الري الإجمالي مم (م3/دونم)', 'عدد الريات', 'السنة المطرية', 'مطر السنة المطرية مم', 'وسيط السنوات الأخرى مم', 'النسبة إلى الوسيط', 'تنبيه المطر', 'المطر المستخدم للسنة مم', 'طريقة المطر', 'التسرب مم', 'أيام إجهاد', 'مستوى التصحيح', 'هامش ET0 اليومي مم', 'إغلاق الكتلة مم'];
     const data = LAST.rows.map(r => r.error ? [t ? r.y : r.site.name, r.site.lat, r.site.lon, r.error] :
       [t ? `${r.y}/${r.y + 1}` : r.site.name, r.site.lat, r.site.lon, r.sow, r.harvest || '', r.complete ? 'نعم' : 'لا', r.len, +f(r.et0, 1), +f(r.etc, 1), +f(r.p, 1), +f(r.pe, 1), +f(r.inet, 1), +f(r.igross, 1), r.n, r.rainYear, +f(r.rainNasa, 0), +f(r.rainMedian, 0), +f(r.rainRatio, 2), r.rainFlag === 'wet' ? 'مرتفع استثنائي' : r.rainFlag === 'dry' ? 'منخفض استثنائي' : '', r.rainTarget !== null ? +f(r.rainTarget, 0) : +f(r.rainNasa, 0), ({ nasa: 'ناسا كما هو', median: 'معدّل إلى الوسيط', station: 'معدّل إلى مطر المحطة' })[r.rainUsedMode], +f(r.dp, 1), r.stress, r.levelAr, Number.isFinite(r.uncMean) ? +f(r.uncMean, 2) : '', r.closure]);
     const S = stats(LAST.rows), keys = ['len', 'et0', 'etc', 'rainNasa', 'pe', 'inet', 'igross', 'n', 'dp'];
     const sheetS = [['المؤشر', 'n', 'المتوسط', 'الانحراف المعياري', 'CV %', 'الأدنى', 'الأعلى'], ...keys.filter(k => S[k]).map(k => [COLS.find(c => c[0] === k)[1], S[k].n, +f(S[k].mean, 1), +f(S[k].sd, 1), +f(S[k].cv, 1), +f(S[k].min, 1), +f(S[k].max, 1)])];
     const F = LAST.F, inputs = [['التقرير', LAST.title], ['المحصول', F.crop.name], ['موعد الزراعة', `${F.day} ${MONTHS[F.month - 1]}`], ['التربة', E().Soils.SOILS[F.soilKey].name], ['نظام الري', E().Soils.SYSTEMS[F.sysKey].name],
       ['كفاءة الإضافة Ea', F.irrigation.efficiency], ['أقصى عمق صافٍ للرية مم', F.irrigation.maxNetMm], F.crop.stageDays ? ['أطوال الأطوار L1–L4 (يوم)', F.crop.stageDays.join('/')] : ['حدود الأطوار GDD', `${F.crop.gdd.iniEnd}/${F.crop.gdd.devEnd}/${F.crop.gdd.midEnd}/${F.crop.gdd.lateEnd}`], ['معامل المحصول Kc ini/mid/end', `${F.crop.kcIni}/${F.crop.kcMid}/${F.crop.kcEnd}${F.crop.kcLocal ? ' (محلي، دون تعديل مناخي)' : ''}`],
-      ['تصحيح ناسا', LAST.corrOn ? 'مفعّل' : 'معطّل'], ['المطر', ({ nasa: 'ناسا كما هو', median: 'معدّل إلى وسيط السنوات الأخرى للخلية', station: 'معدّل إلى مطر المحطة المُدخل' })[LAST.rainMode]], ['المنهجية', 'FAO-56 Kc مفرد، ري تلقائي عند RAW، استنزاف أولي 50%، الحصاد بالتراكم الحراري'], ['أُنتج', LAST.at + ' — المنصة السورية لإدارة وجدولة الري']];
+      ['تصحيح ناسا', LAST.corrOn ? 'مفعّل' : 'معطّل'], ['المطر', ({ nasa: 'كما هو', median: 'معدّل إلى وسيط السنوات الأخرى للخلية', station: 'معدّل إلى مطر المحطة المُدخل' })[LAST.rainMode]], ['مصدر المطر اليومي', window.RAIN ? RAIN.LABEL[LAST.rainProduct] : 'ناسا الخام'], ['المنهجية', 'FAO-56 Kc مفرد، ري تلقائي عند RAW، استنزاف أولي 50%، الحصاد بالتراكم الحراري'], ['أُنتج', LAST.at + ' — المنصة السورية لإدارة وجدولة الري']];
     const wb = XLSX.utils.book_new();
     const ws1 = XLSX.utils.aoa_to_sheet([head, ...data]); ws1['!views'] = [{ RTL: true }];
     const ws2 = XLSX.utils.aoa_to_sheet(sheetS); ws2['!views'] = [{ RTL: true }];
@@ -263,6 +268,7 @@
     ARCHIVE_YEARS = years;
     fillForm(years);
     $('rpRun').onclick = produce; $('rpExport').onclick = exportXlsx;
+    if ($('rpRainProduct') && window.RAIN) { $('rpRainProduct').value = RAIN.product; $('rpRainProduct').onchange = () => { const g = $('rainProduct'); if (g) { g.value = $('rpRainProduct').value; g.dispatchEvent(new Event('change')); } else RAIN.set($('rpRainProduct').value); }; }
     $('rpRainMode').onchange = () => { if ($('rpRainMode').value === 'station') $('rpStationBox').open = true; };
   }
   window.REPORTS = { produce, season, stats, last: () => LAST };

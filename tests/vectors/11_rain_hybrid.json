@@ -1,0 +1,10 @@
+{
+  "type": "rain-hybrid",
+  "name": "Hybrid rain: NASA daily timing scaled to the CHIRPS monthly total (js/rain.js)",
+  "note": "Jan: NASA 10+30 = 40 mm, CHIRPS box 60 mm -> factor 1.5 (15, 45). Feb: NASA 0.4 mm (<1), CHIRPS 0 -> kept, 'chirps'. Mar: CHIRPS not published -> raw NASA, 'provisional'. Site in box (0,0) of a 2x2 grid of 0.1 deg; box value 600 = 60.0 mm.",
+  "lat": 32.05, "lon": 35.55,
+  "chirps": { "year": 2025, "grid": { "lat0": 32.0, "lon0": 35.5, "step": 0.1, "nlat": 2, "nlon": 2 }, "months": ["2025-01", "2025-02"], "v": [[600, -1, -1, -1], [0, -1, -1, -1]] },
+  "days": { "2025-01": { "1": 10, "15": 30 }, "2025-02": { "3": 0.4 }, "2025-03": { "5": 12 } },
+  "expect": { "jan15": [15, 1e-9], "jan30": [45, 1e-9], "janTotal": [60, 1e-9], "febTotal": [0.4, 1e-9], "mar5": [12, 1e-9],
+              "scaled": [2, 0], "provisional": [1, 0], "srcJan": ["chirps"], "srcFeb": ["chirps"], "srcMar": ["provisional"] }
+}

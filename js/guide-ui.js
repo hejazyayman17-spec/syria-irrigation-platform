@@ -4,7 +4,7 @@
 (function () {
   'use strict';
   const $ = id => document.getElementById(id);
-  const VERSION = 'v1.2';
+  const VERSION = 'v1.3';
   let CFG = { email: '', whatsapp: '' };
   const LS_WELCOME = 'gcsar.welcome.dismissed.v1';
 

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>المنصة السورية لإدارة وجدولة الري — Prototype v1.2</title>
+<title>المنصة السورية لإدارة وجدولة الري — Prototype v1.3</title>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#103941">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -56,7 +56,7 @@ button,input,select{font:inherit}.app{display:grid;grid-template-columns:270px 1
 <body>
 <div class="app">
   <aside class="sidebar">
-    <div class="brand"><div class="drop"></div><div><h1>المنصة السورية لإدارة وجدولة الري</h1><small>Prototype v1.2 — وثيقة اختبار حيّة</small></div></div>
+    <div class="brand"><div class="drop"></div><div><h1>المنصة السورية لإدارة وجدولة الري</h1><small>Prototype v1.3 — وثيقة اختبار حيّة</small></div></div>
     <div class="nav">
       <button class="active" data-section="dashboard">▦ لوحة التحكم</button>
       <button data-section="climate">☁ المناخ و ET₀</button>
@@ -301,6 +301,13 @@ button,input,select{font:inherit}.app{display:grid;grid-template-columns:270px 1
           </div>
           <div id="rpTemporalBox" style="margin-top:10px"><div class="mini"><b>المواسم</b> (سنة الزراعة/سنة الحصاد)</div><div id="rpYears" class="rp-grid"></div></div>
           <div id="rpSpatialBox" style="margin-top:10px"><div class="mini"><b>المواقع</b> (للتباين المكاني)</div><div id="rpSites" class="rp-grid"></div></div>
+          <div class="form-row" style="margin-top:10px">
+            <div class="field"><label>المطر</label><select id="rpRainMode"><option value="nasa">ناسا كما هو، مع التنبيه إلى السنوات الاستثنائية</option><option value="median">سنة مطرية نموذجية: معدّل إلى وسيط السنوات الأخرى للخلية</option><option value="station">مطر المحطة: معدّل إلى المجموع المُدخل أدناه</option></select></div>
+          </div>
+          <details id="rpStationBox" style="margin-top:8px"><summary style="cursor:pointer;font-weight:700;font-size:13px">مطر المحطة للسنة المطرية (1 أيلول – 31 آب)</summary>
+            <div class="mini" style="margin:6px 0">سطر لكل موسم أو موقع: <code>الموسم أو اسم الموقع، المطر مم</code>، مثل <code>2025/26، 165</code> في التباين الزماني أو <code>دير الزور، 165</code> في التباين المكاني. يُعدَّل مطر ناسا اليومي بالنسبة نفسها فيبقى توزيعه الزمني، ويساوي مجموعه مطر المحطة. ما لا يُدخل له مطر يبقى على ناسا.</div>
+            <textarea id="rpStationRain" rows="3" style="width:100%;border:1px solid #cfdde0;border-radius:9px;padding:9px;font-family:monospace" placeholder="2025/26، 165"></textarea>
+          </details>
           <details style="margin-top:10px"><summary style="cursor:pointer;font-weight:700;font-size:13px">مواقع مخصصة</summary>
             <div class="mini" style="margin:6px 0">سطر لكل موقع: <code>الاسم، خط العرض، خط الطول، الارتفاع</code> (الارتفاع اختياري؛ دونه يُستخدم ارتفاع خلية ناسا). في التباين الزماني اختر «أول موقع في مواقع مخصصة».</div>
             <textarea id="rpCustom" rows="3" style="width:100%;border:1px solid #cfdde0;border-radius:9px;padding:9px;font-family:monospace;direction:ltr" placeholder="حقل البحوث، 35.01، 37.05، 475"></textarea>
@@ -392,7 +399,7 @@ button,input,select{font:inherit}.app{display:grid;grid-template-columns:270px 1
       <div class="grid"><div class="card span12"><h3>سجل البيانات والمسار النقطي</h3><p>هذا العرض يبين كيف تُحفظ القيمة مع مصدرها وحالة اعتمادها. في النسخ القادمة سيصبح هذا الجدول أساس Field-Point Daily Record وقاعدة البيانات.</p><div class="table-wrap"><table id="dataLedger"><thead><tr><th>التاريخ</th><th>Field/Point</th><th>المتغير</th><th>القيمة</th><th>المصدر</th><th>QC</th><th>الحالة</th></tr></thead><tbody><tr><td colspan="7">لا توجد بيانات معتمدة بعد.</td></tr></tbody></table></div></div></div>
     </section>
 
-    <div class="footer">المنصة السورية لإدارة وجدولة الري — Prototype v1.2 — للاختبار والتطوير المشترك</div>
+    <div class="footer">المنصة السورية لإدارة وجدولة الري — Prototype v1.3 — للاختبار والتطوير المشترك</div>
   </main>
 </div>
 <button class="fb-fab js-feedback" title="أرسل ملاحظة">✉ ملاحظة</button>

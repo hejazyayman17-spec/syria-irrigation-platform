@@ -1,0 +1,37 @@
+# CHIRPS v3.0 monthly rain over Syria (0.1° boxes) for the CHIRPS-scaled NASA daily rain (js/rain.js).
+# Daily check: a new month is published ~3–5 weeks after it ends; only missing months are read.
+name: CHIRPS rain sync
+
+on:
+  schedule:
+    - cron: '41 5 * * *'        # daily 05:41 UTC
+  push:
+    paths: ['tools/chirps_sync.py']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: chirps-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install rasterio==1.4.3 numpy
+      - run: python -u tools/chirps_sync.py
+      - name: Commit
+        run: |
+          git config user.name  "nasa-sync-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/rain
+          git diff --cached --quiet && echo "no changes" && exit 0
+          git commit -m "data: CHIRPS monthly rain sync $(date -u +%Y-%m-%d)"
+          for i in 1 2 3; do git pull --rebase && git push && break; sleep 10; done

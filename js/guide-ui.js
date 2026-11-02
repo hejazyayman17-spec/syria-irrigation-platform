@@ -4,7 +4,7 @@
 (function () {
   'use strict';
   const $ = id => document.getElementById(id);
-  const VERSION = 'v1.0';
+  const VERSION = 'v1.1';
   let CFG = { email: '', whatsapp: '' };
   const LS_WELCOME = 'gcsar.welcome.dismissed.v1';
 
@@ -37,7 +37,7 @@
   // ---------- feedback
   function context() {
     const sec = document.querySelector('.section.active')?.id || '';
-    const names = { dashboard: 'لوحة التحكم', climate: 'المناخ و ET₀', crop: 'المحصول والفينولوجيا', balance: 'الموازنة المائية والري', map: 'خريطة سورية', data: 'سجل البيانات', guide: 'الدليل' };
+    const names = { dashboard: 'لوحة التحكم', climate: 'المناخ و ET₀', crop: 'المحصول والفينولوجيا', balance: 'الموازنة المائية والري', map: 'خريطة سورية', reports: 'إنتاج التقارير', data: 'سجل البيانات', guide: 'الدليل' };
     const lines = [`الشاشة: ${names[sec] || sec}`, `الإصدار: ${VERSION} — ${new Date().toLocaleString('ar-SY')}`];
     if (state.rows?.length) lines.push(`المناخ: ${state.sourceLabel || state.station?.StationName || ''} (${state.station?.Latitude}, ${state.station?.Longitude}) — ${state.rows.length} يوماً${state.approved ? ' — معتمد' : ''}`);
     const L = window.WB && WB.last;

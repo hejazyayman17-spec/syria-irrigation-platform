@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>المنصة السورية لإدارة وجدولة الري — Prototype v1.0</title>
+<title>المنصة السورية لإدارة وجدولة الري — Prototype v1.1</title>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#103941">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -50,18 +50,20 @@ button,input,select{font:inherit}.app{display:grid;grid-template-columns:270px 1
 .wb-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:8px;margin-top:12px}.wb-day{border:1px solid var(--line);border-radius:11px;padding:8px 10px;font-size:12px;line-height:1.7;background:#fbfdfd}.wb-day.irr{border-color:#c2410c;background:#fff6f0}.wb-day.need{border-color:#b7791f}.wb-day b{font-size:13px}.wb-day .wd{color:var(--muted);font-size:11px}.wb-badge{display:inline-block;font-size:10px;padding:1px 6px;border-radius:8px;background:#eef3f4;color:#4b6066;margin-inline-start:4px}.wb-alert-now{color:#c2410c}.wb-alert-soon{color:#b7791f}
 .ex-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}.ex-card{display:flex;flex-direction:column;gap:6px;text-align:right;border:1px solid var(--line);background:#f8fbfb;border-radius:13px;padding:14px;cursor:pointer;font:inherit;color:var(--ink)}.ex-card:hover{border-color:#008c99;background:#f0f8f8}.ex-card span{font-size:12px;color:var(--muted);line-height:1.7}.guide-steps{margin:0;padding-inline-start:22px;line-height:2}.guide-steps li{margin-bottom:6px}.guide-list{margin:0;padding-inline-start:20px;line-height:1.9;font-size:13px}.btn.sm{padding:3px 10px;font-size:12px;margin-inline-start:6px}.welcome{background:linear-gradient(180deg,#f2fafa,#fff);border-color:#cfe5e7}.fb-fab{position:fixed;left:18px;bottom:18px;z-index:40;border:0;border-radius:24px;padding:11px 16px;background:#103941;color:#fff;font-weight:700;box-shadow:0 6px 18px rgba(0,0,0,.18);cursor:pointer}.fb-modal{position:fixed;inset:0;background:rgba(16,57,65,.35);z-index:50;display:flex;align-items:center;justify-content:center;padding:16px}.fb-modal[hidden]{display:none}.fb-dialog{width:min(720px,100%);max-height:92vh;overflow:auto}.fb-preview{white-space:pre-wrap;background:#f6f9f9;border:1px solid var(--line);border-radius:9px;padding:8px 10px;font-size:11px;color:#4b6066;max-height:140px;overflow:auto;margin-top:8px;font-family:inherit}@media(max-width:650px){.fb-dialog .form-row{grid-template-columns:1fr!important}.fb-fab{left:12px;bottom:12px;padding:9px 13px}}
 .kpi .pv{display:inline-block;margin-inline-end:12px;white-space:nowrap}.kpi .pv small{font-size:12px;font-weight:600;color:#6b8086}
+.rp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:4px 12px;margin-top:6px}.rp-chk{display:flex;gap:6px;align-items:center;font-size:13px}
 </style>
 </head>
 <body>
 <div class="app">
   <aside class="sidebar">
-    <div class="brand"><div class="drop"></div><div><h1>المنصة السورية لإدارة وجدولة الري</h1><small>Prototype v1.0 — وثيقة اختبار حيّة</small></div></div>
+    <div class="brand"><div class="drop"></div><div><h1>المنصة السورية لإدارة وجدولة الري</h1><small>Prototype v1.1 — وثيقة اختبار حيّة</small></div></div>
     <div class="nav">
       <button class="active" data-section="dashboard">▦ لوحة التحكم</button>
       <button data-section="climate">☁ المناخ و ET₀</button>
       <button data-section="crop">🌾 المحصول والفينولوجيا</button>
       <button data-section="balance">💧 الموازنة المائية والري</button>
       <button data-section="map">◉ خريطة سورية</button>
+      <button data-section="reports">📊 إنتاج التقارير</button>
       <button data-section="data">≋ سجل البيانات</button>
       <button data-section="guide">📘 الدليل والملاحظات</button>
     </div>
@@ -280,6 +282,38 @@ button,input,select{font:inherit}.app{display:grid;grid-template-columns:270px 1
       </div>
     </section>
 
+    <section id="reports" class="section">
+      <div class="grid">
+        <div class="card span12">
+          <h3>إنتاج التقارير: الاحتياج المائي لموسم كامل</h3>
+          <div class="mini" style="margin-bottom:10px">يحسب الاحتياج المائي للمحصول نفسه وموعد الزراعة نفسه، إما في موقع واحد عبر عدة مواسم (<b>تباين زماني</b>)، أو في عدة مواقع لموسم واحد (<b>تباين مكاني</b>). المناخ من أرشيف المنصة (NASA POWER منذ 2021) مصححاً بإعدادات شاشة المناخ، والحساب بمحرك الموازنة نفسه.</div>
+          <div class="form-row">
+            <div class="field"><label>نوع التقرير</label><select id="rpMode"><option value="temporal">تباين زماني: موقع واحد، عدة مواسم</option><option value="spatial">تباين مكاني: موسم واحد، عدة مواقع</option></select></div>
+            <div class="field"><label>المحصول</label><select id="rpCrop"></select></div>
+            <div class="field"><label>موعد الزراعة: اليوم</label><select id="rpDay"></select></div>
+            <div class="field"><label>الشهر</label><select id="rpMonth"></select></div>
+          </div>
+          <div class="form-row" style="margin-top:10px">
+            <div class="field"><label>قوام التربة</label><select id="rpSoil"></select></div>
+            <div class="field"><label>نظام الري</label><select id="rpSystem"></select></div>
+            <div class="field" id="rpTemporal"><label>الموقع</label><select id="rpSite"></select></div>
+            <div class="field" id="rpSpatial" hidden><label>الموسم (سنة الزراعة)</label><select id="rpYear"></select></div>
+          </div>
+          <div id="rpTemporalBox" style="margin-top:10px"><div class="mini"><b>المواسم</b> (سنة الزراعة/سنة الحصاد)</div><div id="rpYears" class="rp-grid"></div></div>
+          <div id="rpSpatialBox" style="margin-top:10px"><div class="mini"><b>المواقع</b> (للتباين المكاني)</div><div id="rpSites" class="rp-grid"></div></div>
+          <details style="margin-top:10px"><summary style="cursor:pointer;font-weight:700;font-size:13px">مواقع مخصصة</summary>
+            <div class="mini" style="margin:6px 0">سطر لكل موقع: <code>الاسم، خط العرض، خط الطول، الارتفاع</code> (الارتفاع اختياري؛ دونه يُستخدم ارتفاع خلية ناسا). في التباين الزماني اختر «أول موقع في مواقع مخصصة».</div>
+            <textarea id="rpCustom" rows="3" style="width:100%;border:1px solid #cfdde0;border-radius:9px;padding:9px;font-family:monospace;direction:ltr" placeholder="حقل البحوث، 35.01، 37.05، 475"></textarea>
+          </details>
+          <div class="actions" style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+            <button class="btn primary" id="rpRun">إنتاج التقارير</button>
+            <button class="btn secondary" id="rpExport" disabled>تصدير Excel</button>
+            <span class="mini" id="rpStatus"></span>
+          </div>
+        </div>
+        <div class="card span12"><div id="rpOut" class="mini">اختر المعطيات ثم اضغط «إنتاج التقارير».</div></div>
+      </div>
+    </section>
     <section id="guide" class="section">
       <div class="grid">
         <div class="card span12">
@@ -358,7 +392,7 @@ button,input,select{font:inherit}.app{display:grid;grid-template-columns:270px 1
       <div class="grid"><div class="card span12"><h3>سجل البيانات والمسار النقطي</h3><p>هذا العرض يبين كيف تُحفظ القيمة مع مصدرها وحالة اعتمادها. في النسخ القادمة سيصبح هذا الجدول أساس Field-Point Daily Record وقاعدة البيانات.</p><div class="table-wrap"><table id="dataLedger"><thead><tr><th>التاريخ</th><th>Field/Point</th><th>المتغير</th><th>القيمة</th><th>المصدر</th><th>QC</th><th>الحالة</th></tr></thead><tbody><tr><td colspan="7">لا توجد بيانات معتمدة بعد.</td></tr></tbody></table></div></div></div>
     </section>
 
-    <div class="footer">المنصة السورية لإدارة وجدولة الري — Prototype v1.0 — للاختبار والتطوير المشترك</div>
+    <div class="footer">المنصة السورية لإدارة وجدولة الري — Prototype v1.1 — للاختبار والتطوير المشترك</div>
   </main>
 </div>
 <button class="fb-fab js-feedback" title="أرسل ملاحظة">✉ ملاحظة</button>
@@ -412,6 +446,7 @@ button,input,select{font:inherit}.app{display:grid;grid-template-columns:270px 1
 <script src="data/correction/correction_data.js"></script>
 <script src="js/engine/correction.js"></script>
 <script src="js/correction-ui.js"></script>
+<script src="js/reports-ui.js"></script>
 <script src="js/balance-ui.js"></script>
 <script src="js/guide-ui.js"></script>
 <script>
@@ -456,7 +491,7 @@ function syncCropFromField(cropKey,sow,last,crop){const sel=document.getElementB
 /** Tbase / Tupper typed on the crop screen are copied to the field card when both screens show the same crop (one set of values). */
 function pushTempsToField(){const k=document.getElementById('cropSelect').value,w=document.getElementById('wbCrop');if(!w||w.value!==k)return;document.getElementById('wbTbase').value=document.getElementById('tbase').value;document.getElementById('wbTupper').value=document.getElementById('tupper').value}
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
-function showSection(id){document.querySelectorAll('.section').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.section===id));const titles={dashboard:'لوحة التحكم',climate:'المناخ وحساب ET₀',crop:'المحصول والفينولوجيا',balance:'الموازنة المائية في منطقة الجذور وتوصيات الري',map:'خريطة سورية',data:'سجل البيانات',guide:'دليل الاستخدام والملاحظات'};document.getElementById('pageTitle').textContent=titles[id]; if(id==='map')renderMaps();if(id==='balance'&&window.WB)WB.onShow();}
+function showSection(id){document.querySelectorAll('.section').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.section===id));const titles={dashboard:'لوحة التحكم',climate:'المناخ وحساب ET₀',crop:'المحصول والفينولوجيا',balance:'الموازنة المائية في منطقة الجذور وتوصيات الري',map:'خريطة سورية',data:'سجل البيانات',reports:'إنتاج التقارير — الاحتياج المائي الموسمي',guide:'دليل الاستخدام والملاحظات'};document.getElementById('pageTitle').textContent=titles[id]; if(id==='map')renderMaps();if(id==='balance'&&window.WB)WB.onShow();}
 document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>{showSection(b.dataset.section);window.scrollTo({top:0});b.scrollIntoView({inline:'center',block:'nearest'})});
 document.getElementById('todayBox').textContent='جلسة الاختبار: '+new Date().toLocaleDateString('ar-SY',{year:'numeric',month:'long',day:'numeric'});
 

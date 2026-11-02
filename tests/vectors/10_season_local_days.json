@@ -1,0 +1,6 @@
+{ "type": "season", "name": "Local Syrian crop (tomato, Annex 1): day-based stages 30/40/45/30, local Kc not climate-adjusted",
+  "input": { "cropKey": "tomato", "sowingDate": "2026-03-01", "endDate": "2026-10-31",
+    "soil": { "thetaFC": 0.25, "thetaWP": 0.12, "cn": 78, "initialDepletionFrac": 0.3, "subsoilDepletionFrac": 0.3 },
+    "irrigation": { "mode": "scheduled", "efficiency": 0.9, "triggerFrac": null, "events": [], "maxNetMm": 20, "forecastRainProbMin": 60 },
+    "weatherGen": { "start": "2026-03-01", "days": 240, "tmin": 14, "tmax": 28, "amp": 4, "et0": 5.0, "et0amp": 1.5, "rain": 0, "rainEvery": 30, "rainMm": 5, "u2": 3.5, "rhmin": 25 } },
+  "expect": { "MassClosureMm": [0, 0.01], "SeasonDays": [146, 0], "KcMidUsed": [1.10, 1e-9], "LastStage": [4, 0] } }

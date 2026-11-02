@@ -113,12 +113,12 @@
     const nOk = R.rows.filter(r => !r.error && r.complete).length;
     $('rpOut').innerHTML = `
       <div class="mini" style="margin-bottom:8px">${R.title}. القيم بالمليمتر للموسم (1 مم = 1 م³/دونم). الإحصاء على المواسم أو المواقع المكتملة فقط (${nOk}).</div>
-      <div class="table-wrap" style="max-height:none"><table><thead><tr><th>${temporal ? 'الموسم' : 'الموقع'}</th><th>الزراعة</th><th>الحصاد (GDD)</th><th>الطول يوم</th><th>ET₀</th><th>ETc</th><th>المطر الفعال</th><th>الري الصافي</th><th>الري الإجمالي</th><th>الريات</th><th>التسرب</th><th>أيام إجهاد</th><th>تصحيح ناسا</th></tr></thead>
+      <div class="table-wrap" style="max-height:none"><table><thead><tr><th>${temporal ? 'الموسم' : 'الموقع'}</th><th>الزراعة</th><th>الحصاد</th><th>الطول يوم</th><th>ET₀</th><th>ETc</th><th>المطر الفعال</th><th>الري الصافي</th><th>الري الإجمالي</th><th>الريات</th><th>التسرب</th><th>أيام إجهاد</th><th>تصحيح ناسا</th></tr></thead>
       <tbody>${body}${nOk > 1 ? srow('المتوسط', 'mean') + srow('الانحراف المعياري', 'sd') + srow('معامل الاختلاف CV', 'cv', 0, '%') + srow('الأدنى', 'min') + srow('الأعلى', 'max') : ''}</tbody></table></div>
       <h4 style="margin:16px 0 6px">${temporal ? 'التباين الزماني' : 'التباين المكاني'}: الاحتياج المائي والمطر الفعال والري الصافي</h4>
       <div class="chart-shell" style="height:auto"><svg id="rpChart" viewBox="0 0 1000 360" style="width:100%;height:auto;direction:ltr"></svg></div>
       <div class="chart-legend" style="display:flex;gap:16px;flex-wrap:wrap">${[["#C0571B","الاحتياج المائي ETc"],["#2F6FB3","المطر الفعال"],["#2E8B57","الري الصافي"]].map(([c,t])=>`<span style="display:inline-flex;align-items:center;gap:6px"><i style="display:inline-block;width:12px;height:12px;border-radius:3px;background:${c}"></i>${t}</span>`).join("")}</div>
-      <div class="mini" style="margin-top:8px">المنهجية: موازنة مائية يومية FAO-56 (Kc مفرد) بنفس محرك بطاقة الحقل، ري تلقائي عند RAW بكفاءة النظام وحده الأقصى للرية، استنزاف أولي 50%، الحصاد عند بلوغ التراكم الحراري حد النضج. المناخ: أرشيف NASA POWER ${R.corrOn ? 'مصححاً محلياً بإعدادات شاشة المناخ (نوع الموقع ومعامل الرياح)' : 'دون تصحيح'}. الارتفاع ارتفاع الموقع إن أُدخل، وإلا ارتفاع خلية ناسا. المطر من ناسا (لا قراءات مقياس في التقارير).</div>`;
+      <div class="mini" style="margin-top:8px">المنهجية: موازنة مائية يومية FAO-56 (Kc مفرد) بنفس محرك بطاقة الحقل، ري تلقائي عند RAW بكفاءة النظام وحده الأقصى للرية، استنزاف أولي 50%، الحصاد بنهاية الأطوار: بالتراكم الحراري للمحاصيل المعايرة حرارياً، وبأطوال الأطوار بالأيام للمحاصيل المحلية (الملحقان 1 و2، دون تعديل مناخي لـ Kc). المناخ: أرشيف NASA POWER ${R.corrOn ? 'مصححاً محلياً بإعدادات شاشة المناخ (نوع الموقع ومعامل الرياح)' : 'دون تصحيح'}. الارتفاع ارتفاع الموقع إن أُدخل، وإلا ارتفاع خلية ناسا. المطر من ناسا (لا قراءات مقياس في التقارير).</div>`;
     drawChart(R, label);
     $('rpExport').disabled = false;
   }
@@ -176,7 +176,7 @@
     const S = stats(LAST.rows), keys = ['len', 'et0', 'etc', 'pe', 'inet', 'igross', 'n', 'dp'];
     const sheetS = [['المؤشر', 'n', 'المتوسط', 'الانحراف المعياري', 'CV %', 'الأدنى', 'الأعلى'], ...keys.filter(k => S[k]).map(k => [COLS.find(c => c[0] === k)[1], S[k].n, +f(S[k].mean, 1), +f(S[k].sd, 1), +f(S[k].cv, 1), +f(S[k].min, 1), +f(S[k].max, 1)])];
     const F = LAST.F, inputs = [['التقرير', LAST.title], ['المحصول', F.crop.name], ['موعد الزراعة', `${F.day} ${MONTHS[F.month - 1]}`], ['التربة', E().Soils.SOILS[F.soilKey].name], ['نظام الري', E().Soils.SYSTEMS[F.sysKey].name],
-      ['كفاءة الإضافة Ea', F.irrigation.efficiency], ['أقصى عمق صافٍ للرية مم', F.irrigation.maxNetMm], ['حدود الأطوار GDD', `${F.crop.gdd.iniEnd}/${F.crop.gdd.devEnd}/${F.crop.gdd.midEnd}/${F.crop.gdd.lateEnd}`],
+      ['كفاءة الإضافة Ea', F.irrigation.efficiency], ['أقصى عمق صافٍ للرية مم', F.irrigation.maxNetMm], F.crop.stageDays ? ['أطوال الأطوار L1–L4 (يوم)', F.crop.stageDays.join('/')] : ['حدود الأطوار GDD', `${F.crop.gdd.iniEnd}/${F.crop.gdd.devEnd}/${F.crop.gdd.midEnd}/${F.crop.gdd.lateEnd}`], ['معامل المحصول Kc ini/mid/end', `${F.crop.kcIni}/${F.crop.kcMid}/${F.crop.kcEnd}${F.crop.kcLocal ? ' (محلي، دون تعديل مناخي)' : ''}`],
       ['تصحيح ناسا', LAST.corrOn ? 'مفعّل' : 'معطّل'], ['المنهجية', 'FAO-56 Kc مفرد، ري تلقائي عند RAW، استنزاف أولي 50%، الحصاد بالتراكم الحراري'], ['أُنتج', LAST.at + ' — المنصة السورية لإدارة وجدولة الري']];
     const wb = XLSX.utils.book_new();
     const ws1 = XLSX.utils.aoa_to_sheet([head, ...data]); ws1['!views'] = [{ RTL: true }];
@@ -189,7 +189,7 @@
   // ---------- form
   function fillForm(years) {
     const C = E().Crops, S = E().Soils;
-    $('rpCrop').innerHTML = C.keys.map(k => `<option value="${k}">${C.CROPS[k].name}</option>`).join('');
+    $('rpCrop').innerHTML = (C.GROUPS || []).map(g => `<optgroup label="${g}">${C.keys.filter(k => C.CROPS[k].group === g).map(k => `<option value="${k}">${C.CROPS[k].name}</option>`).join('')}</optgroup>`).join('');
     $('rpSoil').innerHTML = Object.entries(S.SOILS).map(([k, v]) => `<option value="${k}"${k === 'siltLoam' ? ' selected' : ''}>${v.name}</option>`).join('');
     $('rpSystem').innerHTML = Object.entries(S.SYSTEMS).map(([k, v]) => `<option value="${k}"${k === 'sprinkler' ? ' selected' : ''}>${v.name} (Ea ${v.ea})</option>`).join('');
     $('rpMonth').innerHTML = MONTHS.map((m, i) => `<option value="${i + 1}">${m}</option>`).join('');

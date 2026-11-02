@@ -32,11 +32,23 @@ def nasa(st):
 
 
 def era5land(st):
-    end = min(dt.date.fromisoformat(CFG['end']), dt.date.today() - dt.timedelta(days=7)).isoformat()
-    url = (f'https://archive-api.open-meteo.com/v1/archive?latitude={st["lat"]}&longitude={st["lon"]}'
-           f'&start_date={CFG["start"]}&end_date={end}&daily=precipitation_sum&models=era5_land&timezone=auto')
-    j = json.loads(get(url))
-    return {d: v for d, v in zip(j['daily']['time'], j['daily']['precipitation_sum']) if v is not None}
+    """ERA5-Land daily totals from Open-Meteo, requested in 5-year chunks; falls back to the hourly series summed per local day."""
+    end = min(dt.date.fromisoformat(CFG['end']), dt.date.today() - dt.timedelta(days=7))
+    out, y = {}, int(CFG['start'][:4])
+    while dt.date(y, 1, 1) <= end:
+        a, b = f'{y}-01-01', min(dt.date(y + 4, 12, 31), end).isoformat()
+        base = f'https://archive-api.open-meteo.com/v1/archive?latitude={st["lat"]}&longitude={st["lon"]}&start_date={a}&end_date={b}&models=era5_land&timezone=auto'
+        j = json.loads(get(base + '&daily=precipitation_sum', timeout=300))
+        got = {d: v for d, v in zip(j.get('daily', {}).get('time', []), j.get('daily', {}).get('precipitation_sum', [])) if v is not None}
+        if not got:
+            j = json.loads(get(base + '&hourly=precipitation', timeout=300)); acc = {}
+            for t, v in zip(j['hourly']['time'], j['hourly']['precipitation']):
+                if v is not None: acc[t[:10]] = acc.get(t[:10], 0.0) + v
+            got = {d: round(v, 2) for d, v in acc.items()}
+            print('  ERA5-Land hourly fallback', a, len(got))
+        print('  ERA5-Land', a, b, len(got), flush=True)
+        out.update(got); y += 5; time.sleep(3)
+    return out
 
 
 def chirps_points(y, m, pts):
@@ -58,15 +70,20 @@ def chirps_points(y, m, pts):
 
 
 def main():
+    only = os.environ.get('ONLY', '')
     res = {s['id']: {'nasa': {}, 'era5land': {}, 'chirps': {}, 'chirps_version': {}} for s in CFG['stations']}
+    fp = os.path.join(OUT, 'products.json')
+    if only and os.path.exists(fp): res.update(json.load(open(fp)))
     for st in CFG['stations']:
         print('station', st['id'])
-        try: res[st['id']]['nasa'] = nasa(st)
-        except Exception as e: print('  NASA failed', e)
+        if not only:
+            try: res[st['id']]['nasa'] = nasa(st)
+            except Exception as e: print('  NASA failed', e)
         try: res[st['id']]['era5land'] = era5land(st)
-        except Exception as e: print('  ERA5-Land failed', e)
+        except Exception as e: print('  ERA5-Land failed', repr(e)[:200])
         time.sleep(1)
     json.dump(res, open(os.path.join(OUT, 'products.json'), 'w'), separators=(',', ':'))  # keep NASA/ERA5 even if CHIRPS fails
+    if only: print('wrote products.json (ERA5-Land only)'); return
     pts = [(st['lon'], st['lat']) for st in CFG['stations']]
     y0, y1 = int(CFG['start'][:4]), int(CFG['end'][:4])
     last = dt.date.today()

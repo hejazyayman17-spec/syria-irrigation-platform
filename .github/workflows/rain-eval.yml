@@ -25,6 +25,8 @@ jobs:
           python-version: '3.12'
       - run: pip install rasterio==1.4.3 numpy
       - run: python -u tools/rain_eval/fetch.py
+        env:
+          ONLY: era5
       - name: Commit
         if: always()
         run: |

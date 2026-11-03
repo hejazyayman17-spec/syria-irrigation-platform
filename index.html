@@ -445,7 +445,7 @@ button,input,select{font:inherit}.app{display:grid;grid-template-columns:270px 1
 // Owner bypass: open the link once with ?key=<owner key>; the browser remembers it.
 (async function accessGate(){
  // mode 'perVisitor': each browser gets windowHours from its FIRST visit (remembered locally);
- // optional accessUntil = global backstop date for everyone. Client-side only (clearing site data resets the window).
+ // optional accessUntil = global backstop date for everyone; windowStart = visits before it start a fresh window. Client-side only (clearing site data resets the window).
  const FALLBACK={mode:'perVisitor',windowHours:24,accessUntil:null,title:'نسخة استكشافية للباحثين'};
  let cfg=FALLBACK;
  try{const r=await fetch('access.json',{cache:'no-store'});if(r.ok)cfg={...FALLBACK,...await r.json()}}catch(e){}
@@ -455,7 +455,7 @@ button,input,select{font:inherit}.app{display:grid;grid-template-columns:270px 1
  let owner=false;try{owner=!!cfg.ownerKeySha256&&localStorage.getItem('gcsar.owner')===cfg.ownerKeySha256}catch(e){}
  const fmt=t=>{const x=new Date(t);return `${String(x.getDate()).padStart(2,'0')}/${String(x.getMonth()+1).padStart(2,'0')}/${x.getFullYear()} ${String(x.getHours()).padStart(2,'0')}:${String(x.getMinutes()).padStart(2,'0')}`};
  let end=Infinity;
- if(cfg.mode==='perVisitor'&&cfg.windowHours>0){let first=null;try{first=+localStorage.getItem('gcsar.firstVisit')||null;if(!first){first=Date.now();localStorage.setItem('gcsar.firstVisit',String(first))}}catch(e){first=Date.now()}end=first+cfg.windowHours*3600e3}
+ if(cfg.mode==='perVisitor'&&cfg.windowHours>0){let first=null;try{first=+localStorage.getItem('gcsar.firstVisit')||null;const ws=cfg.windowStart?new Date(cfg.windowStart).getTime():0;if(!first||first<ws){first=Date.now();localStorage.setItem('gcsar.firstVisit',String(first))}}catch(e){first=Date.now()}end=first+cfg.windowHours*3600e3}
  if(cfg.accessUntil)end=Math.min(end,new Date(cfg.accessUntil).getTime());
  const tag=document.querySelector('.topbar .tag');
  if(owner){if(tag)tag.textContent='وضع المالك';return}

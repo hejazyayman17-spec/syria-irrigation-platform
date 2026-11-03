@@ -51,21 +51,32 @@ button,input,select{font:inherit}.app{display:grid;grid-template-columns:270px 1
 .ex-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}.ex-card{display:flex;flex-direction:column;gap:6px;text-align:right;border:1px solid var(--line);background:#f8fbfb;border-radius:13px;padding:14px;cursor:pointer;font:inherit;color:var(--ink)}.ex-card:hover{border-color:#008c99;background:#f0f8f8}.ex-card span{font-size:12px;color:var(--muted);line-height:1.7}.guide-steps{margin:0;padding-inline-start:22px;line-height:2}.guide-steps li{margin-bottom:6px}.guide-list{margin:0;padding-inline-start:20px;line-height:1.9;font-size:13px}.btn.sm{padding:3px 10px;font-size:12px;margin-inline-start:6px}.welcome{background:linear-gradient(180deg,#f2fafa,#fff);border-color:#cfe5e7}.fb-fab{position:fixed;left:18px;bottom:18px;z-index:40;border:0;border-radius:24px;padding:11px 16px;background:#103941;color:#fff;font-weight:700;box-shadow:0 6px 18px rgba(0,0,0,.18);cursor:pointer}.fb-modal{position:fixed;inset:0;background:rgba(16,57,65,.35);z-index:50;display:flex;align-items:center;justify-content:center;padding:16px}.fb-modal[hidden]{display:none}.fb-dialog{width:min(720px,100%);max-height:92vh;overflow:auto}.fb-preview{white-space:pre-wrap;background:#f6f9f9;border:1px solid var(--line);border-radius:9px;padding:8px 10px;font-size:11px;color:#4b6066;max-height:140px;overflow:auto;margin-top:8px;font-family:inherit}@media(max-width:650px){.fb-dialog .form-row{grid-template-columns:1fr!important}.fb-fab{left:12px;bottom:12px;padding:9px 13px}}
 .kpi .pv{display:inline-block;margin-inline-end:12px;white-space:nowrap}.kpi .pv small{font-size:12px;font-weight:600;color:#6b8086}
 .rp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:4px 12px;margin-top:6px}.rp-chk{display:flex;gap:6px;align-items:center;font-size:13px}
+.nav-group{display:grid;gap:5px}.nav-group+.nav-group{border-top:1px solid #24545c;padding-top:9px;margin-top:4px}.nav-items{display:grid;gap:5px}
+.nav-head{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:#8fc3c6;padding:4px 14px}.nav .nav-head:not(.static){font-size:14px;color:#e6f2f2;padding:11px 14px;font-weight:700}.nav-head i{font-style:normal;margin-inline-start:auto;transition:transform .2s}.nav-head .nav-sub{display:block;font-size:11px;font-weight:400;color:#8fc3c6;margin-top:2px}
+.nav-group.collapsed .nav-items{display:none}.nav-group.collapsed .nav-head i{transform:rotate(90deg)}.nav-group:not([data-group=general]) .nav-items button{padding-inline-start:28px}
+@media(max-width:1100px){.nav{grid-template-columns:1fr!important}.nav-items{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:650px){.nav-group,.nav-items{display:contents}.nav-group.collapsed .nav-items{display:none}.nav-head.static{display:none}.nav .nav-head:not(.static){flex:0 0 auto;white-space:nowrap;padding:8px 12px;font-size:13px;background:#1a4a52;border-radius:11px}.nav-head .nav-sub{display:none}.nav-group:not([data-group=general]) .nav-items button{padding-inline-start:12px}}
+.guide-bar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.guide-bar b{font-size:15px}
 </style>
 </head>
 <body>
 <div class="app">
   <aside class="sidebar">
-    <div class="brand"><div class="drop"></div><div><h1>المنصة السورية لإدارة وجدولة الري</h1><small>Prototype v1.4 — وثيقة اختبار حيّة</small></div></div>
+    <div class="brand"><div class="drop"></div><div><h1>المنصة السورية لإدارة وجدولة الري</h1><small>Prototype v1.4.2 — وثيقة اختبار حيّة</small></div></div>
     <div class="nav">
-      <button class="active" data-section="dashboard">▦ لوحة التحكم</button>
-      <button data-section="climate">☁ المناخ و ET₀</button>
-      <button data-section="crop">🌾 المحصول والفينولوجيا</button>
-      <button data-section="balance">💧 الموازنة المائية والري</button>
-      <button data-section="map">◉ خريطة سورية</button>
-      <button data-section="reports">📊 إنتاج التقارير</button>
-      <button data-section="data">≋ سجل البيانات</button>
-      <button data-section="guide">📘 الدليل والملاحظات</button>
+      <div class="nav-group" data-group="general"><div class="nav-head static">الاستخدام العام</div><div class="nav-items">
+        <button class="active" data-section="dashboard">▦ لوحة التحكم</button>
+        <button data-section="map">◉ خريطة سورية</button>
+      </div></div>
+      <div class="nav-group" data-group="expert"><button class="nav-head" aria-expanded="false"><span>🧪 وضع الخبير<span class="nav-sub">المناخ · المحصول · الموازنة المائية</span></span><i>▾</i></button><div class="nav-items">
+        <button data-section="climate">☁ المناخ و ET₀</button>
+        <button data-section="crop">🌾 المحصول والفينولوجيا</button>
+        <button data-section="balance">💧 الموازنة المائية والري</button>
+      </div></div>
+      <div class="nav-group" data-group="research"><button class="nav-head" aria-expanded="false"><span>🎓 وضع الباحث<span class="nav-sub">التقارير · سجل البيانات</span></span><i>▾</i></button><div class="nav-items">
+        <button data-section="reports">📊 إنتاج التقارير</button>
+        <button data-section="data">≋ سجل البيانات</button>
+      </div></div>
     </div>
     <div class="side-note"><b>قاعدة النسخة التجريبية:</b><br>المعادلات المعتمدة موسومة بوضوح، أما معاملات الأطوار والمحطات التجريبية فتبقى قابلة للمعايرة قبل اعتمادها وطنياً.</div>
   </aside>
@@ -83,6 +94,7 @@ button,input,select{font:inherit}.app{display:grid;grid-template-columns:270px 1
           <div class="actions" style="margin-top:12px"><button class="btn primary" data-go="guide">الدليل المختصر</button><button class="btn secondary js-feedback">أرسل ملاحظة</button></div>
         </div>
         <div class="card span12" id="dashAlert" hidden></div>
+        <div class="card span12 guide-bar"><div><b>📘 الدليل والملاحظات</b><div class="mini" style="margin-top:4px">طريقة الاستخدام، والمنهجية والمصادر، وحالة المعايرة، وإرسال ملاحظاتكم</div></div><div class="actions"><button class="btn primary" data-go="guide">فتح الدليل</button><button class="btn secondary js-feedback">أرسل ملاحظة</button></div></div>
         <div class="card span12">
           <div class="kpis">
             <div class="kpi"><div class="label">حالة ملف المناخ</div><div class="value" id="kpiFile">—</div><div class="sub" id="kpiFileSub">لم يتم رفع ملف</div></div>
@@ -408,7 +420,7 @@ button,input,select{font:inherit}.app{display:grid;grid-template-columns:270px 1
       <div class="grid"><div class="card span12"><h3>سجل البيانات والمسار النقطي</h3><p>هذا العرض يبين كيف تُحفظ القيمة مع مصدرها وحالة اعتمادها. في النسخ القادمة سيصبح هذا الجدول أساس Field-Point Daily Record وقاعدة البيانات.</p><div class="table-wrap"><table id="dataLedger"><thead><tr><th>التاريخ</th><th>Field/Point</th><th>المتغير</th><th>القيمة</th><th>المصدر</th><th>QC</th><th>الحالة</th></tr></thead><tbody><tr><td colspan="7">لا توجد بيانات معتمدة بعد.</td></tr></tbody></table></div></div></div>
     </section>
 
-    <div class="footer">المنصة السورية لإدارة وجدولة الري — Prototype v1.4 — للاختبار والتطوير المشترك</div>
+    <div class="footer">المنصة السورية لإدارة وجدولة الري — Prototype v1.4.2 — للاختبار والتطوير المشترك</div>
   </main>
 </div>
 <button class="fb-fab js-feedback" title="أرسل ملاحظة">✉ ملاحظة</button>
@@ -517,8 +529,11 @@ function syncCropFromField(cropKey,sow,last,crop){const sel=document.getElementB
 /** Tbase / Tupper typed on the crop screen are copied to the field card when both screens show the same crop (one set of values). */
 function pushTempsToField(){const k=document.getElementById('cropSelect').value,w=document.getElementById('wbCrop');if(!w||w.value!==k)return;document.getElementById('wbTbase').value=document.getElementById('tbase').value;document.getElementById('wbTupper').value=document.getElementById('tupper').value}
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
-function showSection(id){document.querySelectorAll('.section').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.section===id));const titles={dashboard:'لوحة التحكم',climate:'المناخ وحساب ET₀',crop:'المحصول والفينولوجيا',balance:'الموازنة المائية في منطقة الجذور وتوصيات الري',map:'خريطة سورية',data:'سجل البيانات',reports:'إنتاج التقارير — الاحتياج المائي الموسمي',guide:'دليل الاستخدام والملاحظات'};document.getElementById('pageTitle').textContent=titles[id]; if(id==='map')renderMaps();if(id==='balance'&&window.WB)WB.onShow();}
-document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>{showSection(b.dataset.section);window.scrollTo({top:0});b.scrollIntoView({inline:'center',block:'nearest'})});
+function showSection(id){document.querySelectorAll('.section').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');const navId=id==='guide'?'dashboard':id;document.querySelectorAll('.nav button[data-section]').forEach(x=>x.classList.toggle('active',x.dataset.section===navId));const nb=document.querySelector(`.nav button[data-section="${navId}"]`),ng=nb&&nb.closest('.nav-group');if(ng&&ng.classList.contains('collapsed'))navToggle(ng,true);const titles={dashboard:'لوحة التحكم',climate:'وضع الخبير › المناخ وحساب ET₀',crop:'وضع الخبير › المحصول والفينولوجيا',balance:'وضع الخبير › الموازنة المائية في منطقة الجذور وتوصيات الري',map:'خريطة سورية',data:'وضع الباحث › سجل البيانات',reports:'وضع الباحث › إنتاج التقارير — الاحتياج المائي الموسمي',guide:'لوحة التحكم › دليل الاستخدام والملاحظات'};document.getElementById('pageTitle').textContent=titles[id]; if(id==='map')renderMaps();if(id==='balance'&&window.WB)WB.onShow();}
+const NAVLS='gcsar.nav.v1';let navOpen={};try{navOpen=JSON.parse(localStorage.getItem(NAVLS)||'{}')}catch(e){}
+function navToggle(g,open){g.classList.toggle('collapsed',!open);const h=g.querySelector('.nav-head');if(h)h.setAttribute('aria-expanded',open);navOpen[g.dataset.group]=open;try{localStorage.setItem(NAVLS,JSON.stringify(navOpen))}catch(e){}}
+document.querySelectorAll('.nav-group').forEach(g=>{const h=g.querySelector('button.nav-head');if(!h)return;g.classList.toggle('collapsed',!navOpen[g.dataset.group]);h.setAttribute('aria-expanded',!!navOpen[g.dataset.group]);h.onclick=()=>navToggle(g,g.classList.contains('collapsed'))});
+document.querySelectorAll('.nav button[data-section]').forEach(b=>b.onclick=()=>{showSection(b.dataset.section);window.scrollTo({top:0});b.scrollIntoView({inline:'center',block:'nearest'})});
 document.getElementById('todayBox').textContent='جلسة الاختبار: '+new Date().toLocaleDateString('ar-SY',{year:'numeric',month:'long',day:'numeric'});
 
 function num(v){if(v===null||v===undefined||v==='')return null;const n=Number(v);return Number.isFinite(n)?n:null}

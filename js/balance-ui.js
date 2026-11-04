@@ -134,15 +134,22 @@
     const start = next(lastObs), j0 = FC.dates.indexOf(start);
     if (j0 < 0) return { rows: [], note: start < FC.dates[0] ? `فجوة بين آخر يوم معتمد (${lastObs}) وبداية بيانات التوقع (${FC.dates[0]}): حدّث السلسلة المعتمدة من أرشيف المنصة.` : 'السلسلة المعتمدة تتجاوز فترة التوقع.' };
     const meta = { Latitude: lat, Elevation_m: +state.station?.Elevation_m || (cell[2] ?? 0), WindHeight_m: 2 };
+    // Forecast skill (tools/om_eval, 5 reference stations 2024–26, ET0 vs station): recent analysis and days 0–5 ahead
+    // bias −5…+7 %, RMSE 0.4–0.7 mm/d (≈ corrected NASA); day 7 ahead +13…+26 %, RMSE 1.0–1.6 mm/d (wind too strong).
+    const lead = d => Math.round((new Date(d + 'T00:00:00') - new Date(FC.firstForecastDate + 'T00:00:00')) / 864e5);
+    const WEAK_FROM = 6, UNC_GOOD = 0.5, UNC_WEAK = 1.3;
+    // terrain: Open-Meteo values belong to the height of the cell centre; far from the field's height they misrepresent it
+    const omZ = FC.omElev ? FC.omElev[ci] : cell[2], fz = +state.station?.Elevation_m, dz = Number.isFinite(omZ) && Number.isFinite(fz) ? fz - omZ : null;
     const rows = [];
     for (let j = j0; j < FC.dates.length; j++) {
       const d = FC.dates[j], rec = { Tmin_C: V.tmin[ci][j], Tmax_C: V.tmax[ci][j], RHmin_pct: V.rhmin[ci][j], RHmax_pct: V.rhmax[ci][j], WindSpeed_m_s: V.u2[ci][j], WindHeight_m: 2, SolarRadiation_MJ_m2_day: V.rs[ci][j] };
       const r = E().Fao56.et0FromRecord(rec, meta, new Date(d + 'T00:00:00'));
       rows.push({ date: d, tmin: rec.Tmin_C, tmax: rec.Tmax_C, et0: r.et0, rain: V.rain[ci][j] ?? 0, rainProb: V.rainProb[ci][j], u2: rec.WindSpeed_m_s, rhmin: rec.RHmin_pct,
-        kind: d < FC.firstForecastDate ? 'model' : 'forecast' });
+        kind: d < FC.firstForecastDate ? 'model' : 'forecast', weak: d >= FC.firstForecastDate && lead(d) >= WEAK_FROM,
+        et0Unc: d >= FC.firstForecastDate && lead(d) >= WEAK_FROM ? UNC_WEAK : UNC_GOOD });
     }
     const nModel = rows.filter(r => r.kind === 'model').length;
-    return { rows, note: `${nModel ? `${nModel} يوم من تحليل نموذج Open-Meteo لسدّ تأخر NASA، ثم ` : ''}${rows.length - nModel} أيام توقع (إصدار ${FC.issued.replace('T', ' ').replace('Z', ' UTC')}) لخلية ${cell[0]}°N, ${cell[1]}°E.` };
+    return { rows, note: `${nModel ? `${nModel} يوم من تحليل نموذج Open-Meteo لسدّ تأخر NASA، ثم ` : ''}${rows.length - nModel} أيام توقع (إصدار ${FC.issued.replace('T', ' ').replace('Z', ' UTC')}) لخلية ${cell[0]}°N, ${cell[1]}°E. هامش ET₀ ±${UNC_GOOD} مم/يوم حتى اليوم الخامس، و±${UNC_WEAK} لليومين ${WEAK_FROM}–7 (تقدير ضعيف لا يرفع تنبيه الري وحده).${dz !== null && Math.abs(dz) > 300 ? ` <b style="color:#9a5b00">⚠ ارتفاع الحقل ${Math.round(fz)} م يختلف عن ارتفاع نقطة التوقع ${Math.round(omZ)} م بـ${Math.abs(Math.round(dz))} م: حرارة التوقع ${dz > 0 ? 'أعلى' : 'أدنى'} من حرارة الحقل بنحو ${(Math.abs(dz) * 0.0065).toFixed(1)} °م (تضاريس) — تعامل مع أيام التوقع بحذر.</b>` : ''}` };
   }
   function notice() {
     const el = $('wbNotice'), w = weather();
@@ -195,6 +202,7 @@
       const p0 = a.plan[0];
       return { level: 'soon', html: `<div class="big wb-alert-soon">ري متوقع ${wd(a.firstNeedDate)} ${dm(a.firstNeedDate)}</div><div>العجز يبلغ عتبة الري يوم <b>${a.firstNeedDate}</b> حسب التوقعات.${p0 ? `<br>الرية المقترحة <b>${p0.date}</b>: صافي ${fmt(p0.netMm)} مم — إجمالي <b>${vol(p0.grossMm)}</b>.` : ''}${a.plan.length > 1 ? `<br>${a.plan.length} ريات مقترحة خلال الفترة.` : ''}</div>` };
     }
+    if (a && a.weakNeedDate) return { level: 'ok', html: `<div class="big wb-ok">لا حاجة للري حتى ${dm(a.weakNeedDate)}</div><div>قد يبلغ العجز العتبة يوم <b>${a.weakNeedDate}</b>، لكنه يوم توقع بعيد ضعيف الدقة (اليوم 6–7). أعد الحساب بعد يومين لتأكيده.${t.daysUntil !== null ? `<br>بمعدل الاستهلاك الحالي ${fmt(t.rateMmDay, 2)} مم/يوم تُبلغ العتبة بعد نحو ${t.daysUntil} يوماً من ${t.date}.` : ''}</div>` };
     if (a) return { level: 'ok', html: `<div class="big wb-ok">لا حاجة للري حتى ${dm(a.to)}</div><div>العجز يبقى دون العتبة خلال أيام التوقع (${a.days} أيام).${t.daysUntil !== null ? `<br>بمعدل الاستهلاك الحالي ${fmt(t.rateMmDay, 2)} مم/يوم تُبلغ العتبة بعد نحو ${t.daysUntil} يوماً من ${t.date}.` : ''}</div>` };
     return { level: 'wait', html: `<div class="big wb-ok">لا حاجة للري</div><div>بتاريخ <b>${t.date}</b>: العجز <b>${fmt(t.Dr)} مم</b> من عتبة ${fmt(t.trigger)} مم.${t.daysUntil !== null ? `<br>الرية القادمة بعد نحو <b>${t.daysUntil} يوماً</b> بمعدل ${fmt(t.rateMmDay, 2)} مم/يوم (دون توقعات جوية).` : ''}</div>` };
   }
@@ -205,10 +213,10 @@
     let html = `<div class="wb-rec">${h.html}</div>`;
     if (a) {
       const fdays = last.out.days.filter(d => d.Kind === 'forecast');
-      html += `<div class="wb-strip">${fdays.map(d => `<div class="wb-day${d.Inet > 0 ? ' irr' : d.NeedsIrrigation ? ' need' : ''}"><div class="wd">${wd(d.Date)}</div><b>${dm(d.Date)}</b><br>
-        <span dir="ltr">ET₀ ${fmt(d.ET0, 1)} · ETc ${fmt(d.ETcAdj, 1)}</span><br>مطر ${fmt(d.RainForecast)} مم${d.RainProb !== null ? ` (${d.RainProb}%)` : ''}${d.RainForecast > 0 && d.P === 0 ? ' <span class="wb-badge">لم يُحتسب</span>' : ''}<br>
+      html += `<div class="wb-strip">${fdays.map(d => `<div class="wb-day${d.Inet > 0 ? ' irr' : d.NeedsIrrigation ? ' need' : ''}${d.ForecastWeak ? ' weak' : ''}"><div class="wd">${wd(d.Date)}${d.ForecastWeak ? ' <span class="wb-badge">تقدير ضعيف</span>' : ''}</div><b>${dm(d.Date)}</b><br>
+        <span dir="ltr">ET₀ ${fmt(d.ET0, 1)}${d.ET0Unc ? ` ±${fmt(d.ET0Unc, 1)}` : ''} · ETc ${fmt(d.ETcAdj, 1)}</span><br>مطر ${fmt(d.RainForecast)} مم${d.RainProb !== null ? ` (${d.RainProb}%)` : ''}${d.RainForecast > 0 && d.P === 0 ? ' <span class="wb-badge">لم يُحتسب</span>' : ''}<br>
         العجز ${fmt(d.Dr, 0)} مم<br><span class="wd">العتبة ${fmt(d.Trigger, 0)} مم</span>${d.Inet > 0 ? `<br><b style="color:#c2410c">ري ${fmt(d.Igross, 0)} مم</b>` : ''}</div>`).join('')}</div>
-        <div class="mini" style="margin-top:8px">مجموع الأيام ${a.days}: ET₀ ${fmt(a.et0Mm)} مم — مطر متوقع ${fmt(a.rainAllMm)} مم، المحتسب منه ${fmt(a.rainCountedMm)} مم (احتمال ≥ ${a.probMin}%).${a.harvestInHorizon ? ` بلوغ حد النضج متوقع ${a.harvestInHorizon}.` : ''}</div>`;
+        <div class="mini" style="margin-top:8px">مجموع الأيام ${a.days}: ET₀ ${fmt(a.et0Mm)} مم${a.et0UncMm ? ` (مجال ${fmt(Math.max(0, a.et0Mm - a.et0UncMm))}–${fmt(a.et0Mm + a.et0UncMm)} مم إن اتفقت أخطاء الأيام)` : ''} — مطر متوقع ${fmt(a.rainAllMm)} مم، المحتسب منه ${fmt(a.rainCountedMm)} مم (احتمال ≥ ${a.probMin}%).${a.harvestInHorizon ? ` بلوغ حد النضج متوقع ${a.harvestInHorizon}.` : ''}</div>`;
     }
     if (h.level !== 'history') html += `<div class="mini" style="margin-top:6px">${last.fcNote || 'التوصية على آخر يوم في السلسلة المعتمدة.'}</div>`;
     el.innerHTML = html;

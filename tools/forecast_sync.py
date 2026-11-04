@@ -106,6 +106,7 @@ def build(cells, responses):
             'source': 'Open-Meteo forecast API (best_match), timezone Asia/Damascus',
             'firstForecastDate': today, 'pastDays': PAST_DAYS,
             'cell_fields': ['lat', 'lon', 'elev_m', 'gov'], 'cells': cells, 'dates': dates,
+            'omElev': [loc.get('elevation') for loc in responses],   # Open-Meteo's terrain height at each cell centre [m]
             'units': {'tmax': '°C', 'tmin': '°C', 'rhmax': '%', 'rhmin': '%', 'u2': 'm/s (2 m, FAO-56 Eq. 47)',
                       'rs': 'MJ/m2/day', 'rain': 'mm/day', 'rainProb': '% (max of the day)',
                       'et0': 'mm/day (FAO-56 PM, RHmin/RHmax path, this platform)', 'et0om': 'mm/day (Open-Meteo)'},

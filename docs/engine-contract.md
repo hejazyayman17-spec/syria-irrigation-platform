@@ -59,15 +59,17 @@
 | `rhmin` | % | مقاسة، أو مقدّرة من Tdew وTmax (اختياري) |
 | `kind` | — | `obs` (افتراضي) أو `model` (تحليل نموذج حديث) أو `forecast` (توقع) |
 | `rainProb` | % | احتمال المطر، لأيام التوقع فقط |
+| `weak` | منطقي | يوم توقع ضعيف الدقة (اليوم 6–7): يُحسب ويُعرض، ولا يرفع تنبيه `soon` وحده |
+| `et0Unc` | mm/day | هامش خطأ ET₀ لذلك اليوم (تقييم tools/om_eval: ‏0.5 حتى اليوم الخامس، 1.3 بعده) |
 
 ## سجل الموازنة اليومية (مخرج المحرك) — `DailyBalance`
-`Date, GDD, Stage, StageName, Kc, Zr, TAW, RAW, p, ET0, ETc, Ks, ETcAdj, P, RO, Inet, Igross, AutoIrrigation, DP, Recharge, Dr, Dsub, Trigger, NeedsIrrigation, MissingWeather, Kind, RainForecast, RainProb, RainSource`
+`Date, GDD, Stage, StageName, Kc, Zr, TAW, RAW, p, ET0, ETc, Ks, ETcAdj, P, RO, Inet, Igross, AutoIrrigation, DP, Recharge, Dr, Dsub, Trigger, NeedsIrrigation, MissingWeather, Kind, RainForecast, RainProb, RainSource, ForecastWeak, ET0Unc`
 
 مخرجات `run()` الأخرى:
 - `summary`: يغطي أيام الرصد والنموذج فقط.
 - `forecast`: مجاميع أيام التوقع.
 - `recommendation.today`: التوصية في آخر يوم غير متوقَّع.
-- `recommendation.alert`: التنبيه، ويتضمن `level` (`now` أو `soon` أو `ok` أو `harvested`)، و`firstNeedDate`، و`plan[]`، ومجموعَي ET₀ والمطر.
+- `recommendation.alert`: التنبيه، ويتضمن `level` (`now` أو `soon` أو `ok` أو `harvested`)، و`firstNeedDate` (أول بلوغ للعتبة في يوم توقع غير ضعيف)، و`weakNeedDate` (إن ظهر البلوغ أولاً في يوم ضعيف)، و`plan[]` (لكل رية `weak`)، ومجموعَي ET₀ والمطر، و`et0UncMm`، و`weakDays`.
 
 الوحدات: mm، m، °C·day. وتُستخدم أسماء الحقول نفسها كخصائص لـ `record DailyBalance` في C#.
 

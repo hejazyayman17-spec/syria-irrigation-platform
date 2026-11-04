@@ -31,6 +31,12 @@ for (const file of fs.readdirSync(path.join(__dirname, 'vectors')).sort()) {
     }
     if (bad) fail++;
     console.log(`${bad ? 'FAIL' : 'PASS'}  ${v.name}: ${cases.length} cases, largest difference ${worst.toExponential(2)}`);
+  } else if (v.type === 'recommend') {
+    // recommend() is internal to run(); exercise it through a run-shaped call on prepared days
+    for (const c of v.cases) {
+      const r = WaterBalance._recommend(c.days, 0.75), a = r.alert, got = { level: a.level, firstNeedDate: a.firstNeedDate, weakNeedDate: a.weakNeedDate, weakDays: a.weakDays };
+      for (const [k, e] of Object.entries(c.expect)) { const ok = got[k] === e; if (!ok) fail++; console.log(`${ok ? 'PASS' : 'FAIL'}  ${v.name} [${c.label}] ${k}: ${got[k]} (expected ${e})`); }
+    }
   } else if (v.type === 'season') {
     const input = { ...v.input, crop: { ...Crops.get(v.input.cropKey), ...(v.input.cropOverride || {}) }, weather: expandWeather(v.input.weatherGen) };
     const out = WaterBalance.run(input);

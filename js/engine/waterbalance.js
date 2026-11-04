@@ -65,7 +65,9 @@
    *                 forecastRainProbMin (%; forecast rain counts only when its probability ≥ this, default 60) },
    *   rain?: { source: 'gauge'|'listed', events:[{date, mm}] } (measured field rain, see below),
    *   sowingDate: 'YYYY-MM-DD', endDate: 'YYYY-MM-DD', maturityDate?: 'YYYY-MM-DD' (observed; overrides GDD harvest),
-   *   weather: [{ date, tmin, tmax, et0, rain, u2, rhmin, kind, rainProb }]
+   *   weather: [{ date, tmin, tmax, et0, rain, u2, rhmin, kind, rainProb, weak, et0Unc }]
+ *            weak: low-skill forecast day (days 6–7 ahead): shown, but it does not by itself raise the 'soon' alert
+ *            et0Unc: ET0 error band [mm/day] of that day (tools/om_eval evaluation)
    *            u2, rhmin optional (Kc climate adjustment); kind: 'obs' (default) | 'model' (recent analysis) | 'forecast'
    * }
    * Forecast days continue the same balance; their totals are reported separately (summary = observed + model days only).
@@ -176,7 +178,8 @@
         ETc: +ETc.toFixed(2), Ks: +Ks.toFixed(3), ETcAdj: +ETcAdj.toFixed(2), P: +P.toFixed(1), RO: +RO.toFixed(1),
         Inet: +Inet.toFixed(1), Igross: +Igross.toFixed(1), AutoIrrigation: auto, DP: +DP.toFixed(1), Recharge: +recharge.toFixed(1),
         Dr: +Dr.toFixed(1), Dsub: +Dsub.toFixed(1), Trigger: +trig.toFixed(1), NeedsIrrigation: needs, MissingWeather: et0 === null,
-        Kind: kind, RainForecast: isFc ? +rainRaw.toFixed(1) : null, RainProb: rainProb, RainSource: rainSrc });
+        Kind: kind, RainForecast: isFc ? +rainRaw.toFixed(1) : null, RainProb: rainProb, RainSource: rainSrc,
+        ForecastWeak: !!(isFc && w && w.weak), ET0Unc: w && Number.isFinite(w.et0Unc) ? w.et0Unc : null });
     });
 
     // mass closure: water gained by the profile (= decrease of total depletion) must equal inputs − outputs
@@ -220,18 +223,19 @@
     let alert = null;
     if (fdays.length) {
       const sum = f => +fdays.reduce((a, d) => a + (f(d) || 0), 0).toFixed(1);
-      const need = fdays.find(d => d.NeedsIrrigation);
-      const plan = fdays.filter(d => d.AutoIrrigation && d.Inet > 0).map(d => ({ date: d.Date, netMm: d.Inet, grossMm: d.Igross, m3PerDunum: +m3PerDunum(d.Igross).toFixed(1) }));
+      // only skilful forecast days raise the 'soon' alert; a need that first appears on a weak (6–7 days ahead) day is reported apart
+      const need = fdays.find(d => d.NeedsIrrigation && !d.ForecastWeak), weakNeed = need ? null : fdays.find(d => d.NeedsIrrigation);
+      const plan = fdays.filter(d => d.AutoIrrigation && d.Inet > 0).map(d => ({ date: d.Date, netMm: d.Inet, grossMm: d.Igross, m3PerDunum: +m3PerDunum(d.Igross).toFixed(1), weak: d.ForecastWeak }));
       const level = today.action === 'harvested' ? 'harvested' : today.action === 'irrigate' ? 'now' : need ? 'soon' : 'ok';
       alert = { level, from: fdays[0].Date, to: fdays[fdays.length - 1].Date, days: fdays.length,
-        firstNeedDate: need ? need.Date : null, plan,
+        firstNeedDate: need ? need.Date : null, weakNeedDate: weakNeed ? weakNeed.Date : null, plan,
         rainCountedMm: sum(d => d.P), rainAllMm: sum(d => d.RainForecast), probMin,
         rainDays: fdays.filter(d => (d.RainForecast || 0) >= 1).map(d => ({ date: d.Date, mm: d.RainForecast, prob: d.RainProb })),
-        et0Mm: sum(d => d.ET0), etcAdjMm: sum(d => d.ETcAdj), stressDays: fdays.filter(d => d.Ks < 1).length,
+        et0Mm: sum(d => d.ET0), et0UncMm: sum(d => d.ET0Unc), weakDays: fdays.filter(d => d.ForecastWeak).length, etcAdjMm: sum(d => d.ETcAdj), stressDays: fdays.filter(d => d.Ks < 1).length,
         harvestInHorizon: harvestDay && harvestDay.Kind === 'forecast' ? harvestDay.Date : null };
     }
     return { ...today, today, alert };
   }
 
-  G.WaterBalance = { run, gdd, kcAt, zrAt, stageOf, runoffSCS, STAGE_NAMES };
+  G.WaterBalance = { run, gdd, kcAt, zrAt, stageOf, runoffSCS, STAGE_NAMES, _recommend: recommend };
 })(typeof window !== 'undefined' ? window : globalThis);

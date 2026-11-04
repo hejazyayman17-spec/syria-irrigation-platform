@@ -103,6 +103,30 @@ for r in rows('phase2_hama/et0.csv'):
         slot = e.setdefault('et0', {'method': 'أثر تصحيح الحرارة والرطوبة (رياح ناسا نفسها في الطرفين)؛ خطأ الرياح في الهامش'})
         slot['raw' if r['case'] == 'NASA raw' else 'corrected'] = {'n': num(r['n']), 'mean_obs': num(r['et0_ground']), 'bias_pct': num(r['bias%']), 'RMSE': num(r['rmse'])}
 
+# 5) ET0 rows → the StatSuite numbers: raw = NASA as is, corrected = leave-one-year-out (LOYO) on the site's own record.
+#    The research tables above give in-sample ET0 effects for most sites; the platform shows the independent (LOYO) ones.
+#    Full ET0 (all inputs incl. wind) where the station measures wind; ET0_TRH (T and Tdew error only, NASA Rs/u2 both sides) elsewhere.
+SS = os.path.join(R, 'statsuite')
+SS_NAME = {'Al-Nashabiyah': 'Nashabiyah', 'Deir ez-Zor': 'Deir_ez-Zor', 'Abu Kamal': 'Abu_Kamal', 'Mafraq (JO)': 'Mafraq_JO', 'Irbid (JO)': 'Irbid_JO'}
+if os.path.exists(os.path.join(SS, 'metrics_corrected_loyo.csv')):
+    def ss_rows(f):
+        with open(os.path.join(SS, f), encoding='utf-8') as h:
+            return {(r['site'], r['variable']): r for r in csv.DictReader(h)}
+    raw_m, loyo_m = ss_rows('metrics_raw.csv'), ss_rows('metrics_corrected_loyo.csv')
+    conv = lambda r: {k2: num(r.get(k1)) for k1, k2 in (('n', 'n'), ('mean_obs', 'mean_obs'), ('mean_sim', 'mean_sim'), ('r', 'r'), ('MBE', 'MBE'),
+                      ('MAE', 'MAE'), ('RMSE', 'RMSE'), ('nRMSE_mean_%', 'nRMSE'), ('d', 'd'), ('NSE', 'NSE'), ('KGE', 'KGE'))} | (
+                      {'bias_pct': round(100 * (float(r['mean_sim']) - float(r['mean_obs'])) / float(r['mean_obs']), 3)} if r.get('mean_obs') else {})
+    for cid, e in stats.items():
+        x = e['variables'].get('et0'); site = SS_NAME.get(e['station'], e['station'])
+        if not x: continue
+        full = 'كل المدخلات' in (x.get('method') or '')
+        var = 'ET0' if full else 'ET0_TRH'
+        if (site, var) in loyo_m:
+            x['corrected'] = conv(loyo_m[(site, var)])
+            if (site, var) in raw_m: x['raw'] = conv(raw_m[(site, var)])
+            x['method'] = (x.get('method') or '') + ' — تحقق مستقل بترك سنة خارج المعايرة'
+            x['validation'] = 'LOYO'
+
 os.makedirs(OUT, exist_ok=True)
 coef_src = os.path.join(SRC, 'dotnet', 'GCSAR.ClimateCorrection', 'Data', 'correction_coefficients.json')
 shutil.copyfile(coef_src, os.path.join(OUT, 'correction_coefficients.json'))

@@ -1,0 +1,31 @@
+# One-off: NASA POWER inputs and CHIRPS rain at the GCSAR research stations 2002–2012 (tools/station_eval).
+name: Research-station evaluation (fetch)
+on:
+  push:
+    paths: ['tools/station_eval/stations.json', 'tools/station_eval/fetch.py']
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: data-sync
+  cancel-in-progress: false
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install rasterio==1.4.3 numpy
+      - run: python -u tools/station_eval/fetch.py
+      - name: Commit
+        if: always()
+        run: |
+          git config user.name  "nasa-sync-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add tools/station_eval/out
+          git diff --cached --quiet && exit 0
+          git commit -m "data: research-station evaluation products"
+          git pull --rebase && git push

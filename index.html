@@ -73,7 +73,7 @@ button,input,select{font:inherit}.app{display:grid;grid-template-columns:270px 1
 <body>
 <div class="app">
   <aside class="sidebar">
-    <div class="brand"><div class="drop"></div><div><h1>المنصة السورية لإدارة وجدولة الري</h1><small>Prototype v1.6 — وثيقة اختبار حيّة</small></div></div>
+    <div class="brand"><div class="drop"></div><div><h1>المنصة السورية لإدارة وجدولة الري</h1><small>Prototype v1.6.1 — وثيقة اختبار حيّة</small></div></div>
     <div class="nav">
       <div class="nav-group" data-group="general"><div class="nav-head static">الاستخدام العام</div><div class="nav-items">
         <button class="active" data-section="start">🏠 البداية</button>
@@ -433,6 +433,10 @@ button,input,select{font:inherit}.app{display:grid;grid-template-columns:270px 1
                 <div>تحقق مستقل: الأرقام المعروضة في بطاقة التصحيح «سنة خارج المعايرة»، وأُعيد اختبار كل محطة بحجب معادلة خليتها (كما لو كان الحقل في خلية بلا محطة). حيث يطابق نوع الموقع الواقع (غازي عنتاب، كلس، المفرق): انحياز ET₀ بين <span dir="ltr">−1%</span> و<span dir="ltr">+7%</span>، وRMSE ‏0.58–0.70 مم/يوم، والخطأ الحقيقي داخل الهامش في 82–88% من الأيام و95–99% من الأشهر.</div>
                 <div style="margin-top:4px"><b>حدود معروفة:</b> اختيار نوع الموقع هو أكبر مصدر للخطأ: مطار يُعامل «عادياً» أو موقع محمي يُعامل «مكشوفاً» يعطي <span dir="ltr">−11…−13%</span>. فئة «مكشوف» غير مستقرة (معامل الرياح 0.96 في مطار حلب و1.25 في مطار دمشق)، فالنقل بينها يخطئ <span dir="ltr">±9–11%</span>. في الشرق والبادية رياح المحطات غير متجانسة فلم تُختبر ET₀ كاملة. قياس الرياح لسنة في الموقع هو أنجع ما يضيّق الهامش.</div>
               </td><td style="white-space:normal">التحقق في الشرق برياح مقاسة موثوقة (إيكاردا ومحطات الهيئة)</td></tr>
+              <tr><td style="white-space:normal">تحقق مستقل: محطات الهيئة البحثية 2002–2011</td><td><span class="status ok">متحقق</span></td><td style="white-space:normal">
+                <div>12 محطة بحثية لم تدخل في أي معايرة (بعد ضبط الجودة: حذف المحطات المنسوخة وكتل الملء اليدوي). المطر: الطريقة المعتمدة أدق في الغرب (8 محطات، 54 سنة مطرية: انحياز <span dir="ltr">+19%</span> مقابل <span dir="ltr">−20%</span> لناسا الخام)، وفي الشرق انحياز CHIRPS <span dir="ltr">+7%</span> فقط بعد استبعاد محطة مشكوك في مطرها، فلم يُضف معامل إقليمي. ET₀: أثر خطأ الرياح يتبع عجز ضغط البخار (r = 0.99 في المناطق الخمس) ويتركز 48–63% منه في حزيران–أيلول.</div>
+                <div style="margin-top:4px"><b>المطبّق:</b> معادلة رياح لخلية دير الزور من محطة المريعية (رياح المزرعة نحو 0.47 من ناسا صيفاً و0.6 شتاءً). بالتحقق بترك سنة خارجاً صار انحياز ET₀ السنوي <span dir="ltr">+4.5%</span> بدل <span dir="ltr">+15.5%</span>، وفي تموز <span dir="ltr">+0.1</span> مم/يوم بدل <span dir="ltr">+1.5</span>.</div>
+              </td><td style="white-space:normal">تأكيد رياح خان أرنبة وصربايا ومحسة وستخيرس، ومطر النشابية وصربايا ومحسة؛ معادلة رياح للرقة حين تتفق محطتاها</td></tr>
               <tr><td style="white-space:normal">أيام Open-Meteo (تحليل الأيام الأخيرة والتوقع)</td><td><span class="status ok">متحقق</span></td><td style="white-space:normal">
                 <div>قورنت بخمس محطات فيها ET₀ كاملة (النشابية، غازي عنتاب، كلس، المفرق، حلب) وست للحرارة والرطوبة، 2024–2026. تحليل الأيام الأخيرة وتوقع الأيام 0–5: انحياز ET₀ بين <span dir="ltr">−5%</span> و<span dir="ltr">+7%</span>، وRMSE ‏0.4–0.7 مم/يوم، أي بدقة ناسا المصحح تقريباً. اليوم السابع: <span dir="ltr">+13…+26%</span> وRMSE ‏1.0–1.6 مم/يوم، لأن الرياح فيه مضخّمة.</div>
                 <div style="margin-top:4px"><b>المطبّق:</b> هامش ±0.5 مم/يوم حتى اليوم الخامس و±1.3 لليومين 6–7؛ اليومان 6–7 «تقدير ضعيف» يُعرضان ولا يرفعان تنبيه «ري متوقع» وحدهما؛ تحذير إذا اختلف ارتفاع الحقل عن نقطة التوقع بأكثر من 300 م (في خلية إربد مثلاً الحرارة العظمى أعلى بـ5 °م).</div>
@@ -455,7 +459,7 @@ button,input,select{font:inherit}.app{display:grid;grid-template-columns:270px 1
       <div class="grid"><div class="card span12"><h3>سجل البيانات والمسار النقطي</h3><p>هذا العرض يبين كيف تُحفظ القيمة مع مصدرها وحالة اعتمادها. في النسخ القادمة سيصبح هذا الجدول أساس Field-Point Daily Record وقاعدة البيانات.</p><div class="table-wrap"><table id="dataLedger"><thead><tr><th>التاريخ</th><th>Field/Point</th><th>المتغير</th><th>القيمة</th><th>المصدر</th><th>QC</th><th>الحالة</th></tr></thead><tbody><tr><td colspan="7">لا توجد بيانات معتمدة بعد.</td></tr></tbody></table></div></div></div>
     </section>
 
-    <div class="footer">المنصة السورية لإدارة وجدولة الري — Prototype v1.6 — للاختبار والتطوير المشترك</div>
+    <div class="footer">المنصة السورية لإدارة وجدولة الري — Prototype v1.6.1 — للاختبار والتطوير المشترك</div>
   </main>
 </div>
 <button class="fb-fab js-feedback" title="أرسل ملاحظة">✉ ملاحظة</button>

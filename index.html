@@ -57,15 +57,27 @@ button,input,select{font:inherit}.app{display:grid;grid-template-columns:270px 1
 @media(max-width:1100px){.nav{grid-template-columns:1fr!important}.nav-items{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:650px){.nav-group,.nav-items{display:contents}.nav-group.collapsed .nav-items{display:none}.nav-head.static{display:none}.nav .nav-head:not(.static){flex:0 0 auto;white-space:nowrap;padding:8px 12px;font-size:13px;background:#1a4a52;border-radius:11px}.nav-head .nav-sub{display:none}.nav-group:not([data-group=general]) .nav-items button{padding-inline-start:12px}}
 .guide-bar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.guide-bar b{font-size:15px}
+#start{padding-bottom:64px}.st-top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}.st-sel{font:inherit;font-size:16px;font-weight:700;padding:10px 14px;border:2px solid #008c99;border-radius:12px;min-width:220px;background:#fff;color:var(--ink)}
+.st-wrap{display:grid;grid-template-columns:260px 1fr;gap:14px;align-items:stretch}.st-side{background:linear-gradient(180deg,#103941,#174c55);color:#e8f5f6;border-radius:16px;padding:20px 18px}.st-h{font-size:20px;font-weight:700}.st-h small{font-size:12px;color:#9cc9cc;font-weight:400}
+.st-big{font-size:38px;font-weight:800;margin-top:8px;line-height:1.1}.st-big span{display:block;font-size:13px;font-weight:600;color:#9cc9cc}.st-big small{font-size:13px;font-weight:400;color:#bfe0e2}.st-big.sm{font-size:26px;margin-top:16px}.st-sub{font-size:12px;color:#9cc9cc;margin-top:4px}
+.st-wrow{display:grid;gap:12px;margin-top:10px}.st-w{display:flex;gap:10px;align-items:center}.st-ic{font-size:22px;width:30px;text-align:center}.st-w b{font-size:20px}.st-w small{font-size:12px;margin-inline-start:3px}.st-l{font-size:11px;color:#9cc9cc}
+.st-panel{display:flex;flex-direction:column;gap:12px}.st-cal{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px 16px}.st-mh{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:17px}.st-nav{border:0;background:#eef6f7;border-radius:50%;width:34px;height:34px;font-size:20px;cursor:pointer;color:#103941}.st-nav:disabled{opacity:.3;cursor:default}
+.st-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}.st-wd{text-align:center;font-size:12px;font-weight:700;color:var(--muted);padding:4px 0}.st-c{aspect-ratio:1.25;border:1px solid transparent;border-radius:10px;background:#f6f9f9;display:flex;flex-direction:column;align-items:center;justify-content:center;font:inherit;color:var(--ink);padding:2px}
+.st-c.empty{background:none}.st-c.none{color:#b5c3c5}.st-c.has{background:var(--c);cursor:pointer}.st-c .n{font-size:12px}.st-c .v{font-size:15px;font-weight:800}.st-c.fc{border:1.5px dashed #2f6f78}.st-c.weak{opacity:.75}.st-c.today{box-shadow:0 0 0 3px #008c99}.st-c.sel{outline:3px solid #103941;outline-offset:1px}
+.st-legend{display:flex;gap:12px;flex-wrap:wrap;font-size:11px;color:var(--muted);margin-top:10px}.st-legend i{display:inline-block;width:14px;height:10px;border-radius:3px;margin-inline-end:4px;vertical-align:middle}.st-legend .lg-today{box-shadow:0 0 0 2px #008c99;background:#fff}.st-legend .lg-fc{border:1.5px dashed #2f6f78;background:#fff}
+.st-day{background:#008c99;color:#fff;border-radius:16px;padding:14px 18px}.st-dh{font-size:14px;margin-bottom:6px}.st-drow{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}.st-day .st-wrow.big{grid-template-columns:repeat(4,auto);gap:22px}.st-day .st-l{color:#d5eef0}.st-et0{text-align:center;background:rgba(255,255,255,.14);border-radius:12px;padding:8px 14px}.st-et0 b{display:block;font-size:28px}.st-et0 small{font-size:11px}
+.st-cta{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;background:#103941;color:#fff;border-radius:16px;padding:14px 18px}.st-btn{background:#fff;color:#103941;font-weight:800}.st-btn2{background:transparent;color:#fff;border:1px solid #9cc9cc}
+@media(max-width:900px){.st-wrap{grid-template-columns:1fr}.st-day .st-wrow.big{grid-template-columns:repeat(2,auto)}}@media(max-width:650px){.st-c .v{font-size:12px}.st-c .n{font-size:10px}.st-grid{gap:3px}.st-big{font-size:30px}.st-wd{font-size:10px}}
 </style>
 </head>
 <body>
 <div class="app">
   <aside class="sidebar">
-    <div class="brand"><div class="drop"></div><div><h1>المنصة السورية لإدارة وجدولة الري</h1><small>Prototype v1.5 — وثيقة اختبار حيّة</small></div></div>
+    <div class="brand"><div class="drop"></div><div><h1>المنصة السورية لإدارة وجدولة الري</h1><small>Prototype v1.6 — وثيقة اختبار حيّة</small></div></div>
     <div class="nav">
       <div class="nav-group" data-group="general"><div class="nav-head static">الاستخدام العام</div><div class="nav-items">
-        <button class="active" data-section="dashboard">▦ لوحة التحكم</button>
+        <button class="active" data-section="start">🏠 البداية</button>
+        <button data-section="dashboard">▦ لوحة التحكم</button>
         <button data-section="map">◉ خريطة سورية</button>
       </div></div>
       <div class="nav-group" data-group="expert"><button class="nav-head" aria-expanded="false"><span>🧪 وضع الخبير<span class="nav-sub">المناخ · المحصول · الموازنة المائية</span></span><i>▾</i></button><div class="nav-items">
@@ -81,9 +93,24 @@ button,input,select{font:inherit}.app{display:grid;grid-template-columns:270px 1
     <div class="side-note"><b>قاعدة النسخة التجريبية:</b><br>المعادلات المعتمدة موسومة بوضوح، أما معاملات الأطوار والمحطات التجريبية فتبقى قابلة للمعايرة قبل اعتمادها وطنياً.</div>
   </aside>
   <main class="main">
-    <div class="topbar"><div><h2 id="pageTitle">لوحة التحكم</h2><div class="datebox" id="todayBox"></div></div><span class="tag">نسخة أولية للاختبار — غير تشغيلية</span></div>
+    <div class="topbar"><div><h2 id="pageTitle">البداية — طقس محافظتك والبخر-نتح</h2><div class="datebox" id="todayBox"></div></div><span class="tag">نسخة أولية للاختبار — غير تشغيلية</span></div>
 
-    <section id="dashboard" class="section active">
+    <section id="start" class="section active">
+      <div class="st-top card span12"><div><h3 style="margin:0">طقس محافظتك والبخر-نتح المرجعي</h3><div class="mini">اختر المحافظة لترى ET₀ أمس وطقس اليوم وتقويم الشهر</div></div>
+        <select id="stGov" class="st-sel" aria-label="المحافظة"></select></div>
+      <div class="card span12 st-empty" id="stEmpty" hidden>اختر محافظتك من القائمة أعلاه.</div>
+      <div class="st-wrap" id="stMain" hidden>
+        <aside class="st-side" id="stSide"></aside>
+        <div class="st-panel">
+          <div class="st-cal" id="stCal"></div>
+          <div class="st-day" id="stDay"></div>
+          <div class="st-cta"><div><b>احسب البخر-نتح من بياناتك</b><div class="mini" style="color:#d5eef0">ارفع سجل محطتك (Excel) فيُحسب ET₀ وفق FAO-56 لكل يوم</div></div>
+            <div class="actions"><button class="btn st-btn" id="stCalc">احسب من بياناتك ←</button><button class="btn st-btn2" onclick="showSection('dashboard')">دخول المنصة</button></div></div>
+        </div>
+      </div>
+      <div class="mini" id="stSrc" style="margin-top:8px"></div>
+    </section>
+    <section id="dashboard" class="section">
       <div class="grid">
         <div class="card span12 welcome" id="welcomeBox" hidden>
           <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap">
@@ -150,7 +177,7 @@ button,input,select{font:inherit}.app{display:grid;grid-template-columns:270px 1
           <div class="nasa-plan" id="nasaPlanBox">اختر النطاق والفترة ثم اضغط «معاينة خطة الطلبات». في Regional ستقوم المنصة بجدولة طلب واحد لكل بارامتر ودمج النتائج آلياً.</div>
           <div class="nasa-queue" id="nasaQueue"></div>
         </div>
-        <div class="card span7"><h3>رفع ملف المناخ</h3><p>حمّل القالب، املأ <b>Station_Metadata</b> و <b>Climate_Data</b>، ثم أعد رفعه. تعمل قراءة Excel عبر مكتبة SheetJS عند توفر الاتصال؛ كما تدعم النسخة التجريبية CSV مباشرة.</p><div class="actions"><a class="btn secondary" href="data/climate_template_v0.1.xlsx" download style="text-decoration:none">⬇ تنزيل القالب</a><label class="btn primary">⬆ اختيار ملف<input id="climateFile" type="file" accept=".xlsx,.xls,.csv" style="display:none"></label><button class="btn warn" id="demoBtn">تحميل بيانات تجريبية</button></div><div id="fileName" class="mini" style="margin-top:10px">لا يوجد ملف مرفوع.</div></div>
+        <div class="card span7" id="uploadCard"><h3>رفع ملف المناخ</h3><p>حمّل القالب، املأ <b>Station_Metadata</b> و <b>Climate_Data</b>، ثم أعد رفعه. تعمل قراءة Excel عبر مكتبة SheetJS عند توفر الاتصال؛ كما تدعم النسخة التجريبية CSV مباشرة.</p><div class="actions"><a class="btn secondary" href="data/climate_template_v0.1.xlsx" download style="text-decoration:none">⬇ تنزيل القالب</a><label class="btn primary">⬆ اختيار ملف<input id="climateFile" type="file" accept=".xlsx,.xls,.csv" style="display:none"></label><button class="btn warn" id="demoBtn">تحميل بيانات تجريبية</button></div><div id="fileName" class="mini" style="margin-top:10px">لا يوجد ملف مرفوع.</div></div>
         <div class="card span5"><h3>حالة الاعتماد</h3><div id="approvalBox" class="note">لا يمكن اعتماد البيانات قبل اجتياز الفحوص الأساسية وحساب ET₀.</div><div class="actions" style="margin-top:12px"><button class="btn primary" id="approveBtn" disabled>اعتماد البيانات</button><button class="btn ghost" id="resetBtn">إلغاء/إعادة</button></div></div>
         <div class="card span6"><h3>بيانات المحطة / النقطة</h3><div class="form-row" style="grid-template-columns:repeat(2,1fr)"><div class="field"><label>Station ID</label><input id="stationId" value="SYR-TEST-01"></div><div class="field"><label>اسم المحطة</label><input id="stationName" value="نقطة اختبار"></div><div class="field"><label>خط العرض</label><input id="lat" type="number" step="0.0001" value="33.5145"></div><div class="field"><label>خط الطول</label><input id="lon" type="number" step="0.0001" value="36.4878"></div><div class="field"><label>الارتفاع m</label><input id="elev" type="number" value="650"></div><div class="field"><label>ارتفاع قياس الرياح m</label><input id="windHeight" type="number" value="2"></div></div></div>
         <div class="card span6"><h3>تقرير الجودة</h3><div id="qcSummary" class="qc-list"><div class="qc-item"><span>البنية</span><span class="status info">بانتظار ملف</span></div><div class="qc-item"><span>التواريخ</span><span class="status info">—</span></div><div class="qc-item"><span>الحرارة</span><span class="status info">—</span></div><div class="qc-item"><span>الرطوبة</span><span class="status info">—</span></div><div class="qc-item"><span>الرياح</span><span class="status info">—</span></div><div class="qc-item"><span>الإشعاع</span><span class="status info">—</span></div></div></div>
@@ -428,7 +455,7 @@ button,input,select{font:inherit}.app{display:grid;grid-template-columns:270px 1
       <div class="grid"><div class="card span12"><h3>سجل البيانات والمسار النقطي</h3><p>هذا العرض يبين كيف تُحفظ القيمة مع مصدرها وحالة اعتمادها. في النسخ القادمة سيصبح هذا الجدول أساس Field-Point Daily Record وقاعدة البيانات.</p><div class="table-wrap"><table id="dataLedger"><thead><tr><th>التاريخ</th><th>Field/Point</th><th>المتغير</th><th>القيمة</th><th>المصدر</th><th>QC</th><th>الحالة</th></tr></thead><tbody><tr><td colspan="7">لا توجد بيانات معتمدة بعد.</td></tr></tbody></table></div></div></div>
     </section>
 
-    <div class="footer">المنصة السورية لإدارة وجدولة الري — Prototype v1.5 — للاختبار والتطوير المشترك</div>
+    <div class="footer">المنصة السورية لإدارة وجدولة الري — Prototype v1.6 — للاختبار والتطوير المشترك</div>
   </main>
 </div>
 <button class="fb-fab js-feedback" title="أرسل ملاحظة">✉ ملاحظة</button>
@@ -486,6 +513,7 @@ button,input,select{font:inherit}.app{display:grid;grid-template-columns:270px 1
 <script src="js/reports-ui.js"></script>
 <script src="js/balance-ui.js"></script>
 <script src="js/guide-ui.js"></script>
+<script src="js/start-ui.js"></script>
 <script>
 const state={rows:[],station:{},qc:null,approved:false,demo:false,mapRegion:'all',showGovLabels:true,visualReviewed:false,sourceLabel:'',nasaGridLatest:[],nasaJobs:[]};
 const demoStations=[
@@ -537,7 +565,7 @@ function syncCropFromField(cropKey,sow,last,crop){const sel=document.getElementB
 /** Tbase / Tupper typed on the crop screen are copied to the field card when both screens show the same crop (one set of values). */
 function pushTempsToField(){const k=document.getElementById('cropSelect').value,w=document.getElementById('wbCrop');if(!w||w.value!==k)return;document.getElementById('wbTbase').value=document.getElementById('tbase').value;document.getElementById('wbTupper').value=document.getElementById('tupper').value}
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
-function showSection(id){document.querySelectorAll('.section').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');const navId=id==='guide'?'dashboard':id;document.querySelectorAll('.nav button[data-section]').forEach(x=>x.classList.toggle('active',x.dataset.section===navId));const nb=document.querySelector(`.nav button[data-section="${navId}"]`),ng=nb&&nb.closest('.nav-group');if(ng&&ng.classList.contains('collapsed'))navToggle(ng,true);const titles={dashboard:'لوحة التحكم',climate:'وضع الخبير › المناخ وحساب ET₀',crop:'وضع الخبير › المحصول والفينولوجيا',balance:'وضع الخبير › الموازنة المائية في منطقة الجذور وتوصيات الري',map:'خريطة سورية',data:'وضع الباحث › سجل البيانات',reports:'وضع الباحث › إنتاج التقارير — الاحتياج المائي الموسمي',guide:'لوحة التحكم › دليل الاستخدام والملاحظات'};document.getElementById('pageTitle').textContent=titles[id]; if(id==='map')renderMaps();if(id==='balance'&&window.WB)WB.onShow();}
+function showSection(id){document.querySelectorAll('.section').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');const navId=id==='guide'?'dashboard':id;document.querySelectorAll('.nav button[data-section]').forEach(x=>x.classList.toggle('active',x.dataset.section===navId));const nb=document.querySelector(`.nav button[data-section="${navId}"]`),ng=nb&&nb.closest('.nav-group');if(ng&&ng.classList.contains('collapsed'))navToggle(ng,true);const titles={start:'البداية — طقس محافظتك والبخر-نتح',dashboard:'لوحة التحكم',climate:'وضع الخبير › المناخ وحساب ET₀',crop:'وضع الخبير › المحصول والفينولوجيا',balance:'وضع الخبير › الموازنة المائية في منطقة الجذور وتوصيات الري',map:'خريطة سورية',data:'وضع الباحث › سجل البيانات',reports:'وضع الباحث › إنتاج التقارير — الاحتياج المائي الموسمي',guide:'لوحة التحكم › دليل الاستخدام والملاحظات'};document.getElementById('pageTitle').textContent=titles[id]; if(id==='map')renderMaps();if(id==='balance'&&window.WB)WB.onShow();}
 const NAVLS='gcsar.nav.v1';let navOpen={};try{navOpen=JSON.parse(localStorage.getItem(NAVLS)||'{}')}catch(e){}
 function navToggle(g,open){g.classList.toggle('collapsed',!open);const h=g.querySelector('.nav-head');if(h)h.setAttribute('aria-expanded',open);navOpen[g.dataset.group]=open;try{localStorage.setItem(NAVLS,JSON.stringify(navOpen))}catch(e){}}
 document.querySelectorAll('.nav-group').forEach(g=>{const h=g.querySelector('button.nav-head');if(!h)return;g.classList.toggle('collapsed',!navOpen[g.dataset.group]);h.setAttribute('aria-expanded',!!navOpen[g.dataset.group]);h.onclick=()=>navToggle(g,g.classList.contains('collapsed'))});

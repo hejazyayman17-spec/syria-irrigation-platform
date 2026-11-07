@@ -1,6 +1,6 @@
 {
  "schema_version": 1,
- "generated": "2026-11-01",
+ "generated": "2026-11-07",
  "source": "GCSAR — NASA POWER evaluation for Syria (nashabiyah-nasa-power)",
  "grid": {
   "meteorology": {
@@ -408,7 +408,7 @@
    "name": "Deir ez-Zor",
    "cell_lat": 35.5,
    "cell_lon": 40.0,
-   "reference_station": "Deir ez-Zor GSOD",
+   "reference_station": "Deir ez-Zor GSOD (T, Tdew) + GCSAR Al-Muraiyah 2002-2011 (wind)",
    "region": "Badia",
    "site_type": "ordinary",
    "tmax": [
@@ -433,23 +433,31 @@
     0.088
    ],
    "rs": null,
-   "u2": null,
+   "u2": [
+    0.5426,
+    0.0454,
+    0.0614,
+    -0.036,
+    0.0296
+   ],
    "et0_rmse_mm_monthly": [
-    0.269,
-    0.338,
-    0.442,
-    0.528,
-    0.57,
-    0.509,
-    0.526,
-    0.572,
-    0.508,
-    0.379,
-    0.323,
-    0.27
+    0.336,
+    0.413,
+    0.609,
+    0.938,
+    0.974,
+    1.542,
+    1.122,
+    0.854,
+    0.887,
+    0.565,
+    0.369,
+    0.295
    ],
    "validated": true,
-   "notes_ar": []
+   "notes_ar": [
+    "الرياح من محطة المريعية البحثية (مزرعة، مترين، 2002–2011): نحو 0.47 من رياح ناسا صيفاً و0.6 شتاءً؛ تحقق بترك سنة خارجاً: انحياز ET₀ السنوي +4.5% مقابل +15.5% بالمعامل الافتراضي"
+   ]
   },
   {
    "id": "34.5_40.625",

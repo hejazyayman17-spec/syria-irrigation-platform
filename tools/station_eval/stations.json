@@ -1,17 +1,111 @@
-{ "note": "GCSAR research stations 2002–2012 (coordinates only; the station records stay in the private research repository). Coordinates from the village name (wiki/gazetteer) or, where the workbook gives degrees.minutes that agree with the village, from the workbook.",
-  "start": "2002-01-01", "end": "2012-12-31",
-  "stations": [
-    { "id": "muraiyah",   "name": "المريعية (دير الزور)",   "lat": 35.333, "lon": 40.150, "elev": 204, "src": "workbook 35°20′ 40°09′, next to Deir ez-Zor airport" },
-    { "id": "maqasem",    "name": "المقاسم الخمسة (الحسكة)", "lat": 36.500, "lon": 40.750, "elev": 300, "src": "workbook (decimal, matches the stated 300 m) — village not found, low confidence" },
-    { "id": "abkhuwain",  "name": "عب الخوين (الرقة)",       "lat": 36.033, "lon": 39.250, "elev": 271, "src": "workbook 36°02′ 39°15′ — village not found, low confidence" },
-    { "id": "sarbaya",    "name": "صربايا (حلب)",            "lat": 36.040, "lon": 36.905, "elev": 295, "src": "gazetteer (bamwor)" },
-    { "id": "ketyan",     "name": "كتيان (إدلب)",            "lat": 36.054, "lon": 36.810, "elev": 295, "src": "Wikipedia (Ketyan)" },
-    { "id": "tizin",      "name": "تيزين (حماة)",            "lat": 35.126, "lon": 36.655, "elev": 307, "src": "Wikipedia (Tayzin); workbook 35°08′ 36°36′ agrees" },
-    { "id": "mukhtariya", "name": "المختارية (حمص)",         "lat": 34.750, "lon": 36.740, "elev": 487, "src": "workbook (decimal), Homs research centre" },
-    { "id": "mhasseh",    "name": "محسة (حمص)",              "lat": 34.800, "lon": 37.120, "elev": 873, "src": "workbook (decimal) — village not found, low confidence" },
-    { "id": "khanarnabah","name": "خان أرنبة (القنيطرة)",    "lat": 33.180, "lon": 35.890, "elev": 950, "src": "Wikipedia (Khan Arnabah)" },
-    { "id": "sittkhiris", "name": "ستخيرس (اللاذقية)",       "lat": 35.544, "lon": 35.876, "elev": 75,  "src": "gazetteer; workbook 35°33′ 35°52′ agrees" },
-    { "id": "akkar",      "name": "عكار (طرطوس)",            "lat": 34.667, "lon": 35.983, "elev": 11,  "src": "workbook 34°40′ 35°59′ (Akkar plain)" },
-    { "id": "nashabiyah", "name": "النشابية (ريف دمشق)",     "lat": 33.503, "lon": 36.487, "elev": 618, "src": "research repository (station survey); workbook 33°30′ 36°28′ agrees" },
-    { "id": "telhadya",   "name": "تل حديا (حلب)",           "lat": 36.017, "lon": 36.933, "elev": 284, "src": "workbook 36°56′/36°01′ read as lon/lat (ICARDA Tel Hadya)" }
-  ] }
+{
+ "note": "GCSAR research stations 2002–2012 (coordinates only; the station records stay in the private research repository). Coordinates from the village name (wiki/gazetteer) or, where the workbook gives degrees.minutes that agree with the village, from the workbook.",
+ "start": "2002-01-01",
+ "end": "2012-12-31",
+ "stations": [
+  {
+   "id": "muraiyah",
+   "name": "المريعية (دير الزور)",
+   "lat": 35.333,
+   "lon": 40.15,
+   "elev": 204,
+   "src": "workbook 35°20′ 40°09′, next to Deir ez-Zor airport"
+  },
+  {
+   "id": "maqasem_r",
+   "name": "المقاسم الخمسة (الرقة)",
+   "lat": 36.0,
+   "lon": 39.1,
+   "elev": 300,
+   "src": "user: in Raqqa (the workbook gives Hasakah city) — placed near Raqqa research lands, low confidence"
+  },
+  {
+   "id": "abkhuwain",
+   "name": "عب الخوين (الرقة)",
+   "lat": 36.033,
+   "lon": 39.25,
+   "elev": 271,
+   "src": "user: in Raqqa; workbook 36°02′ 39°15′ — village not found, medium confidence"
+  },
+  {
+   "id": "sarbaya",
+   "name": "صربايا (حلب)",
+   "lat": 36.04,
+   "lon": 36.905,
+   "elev": 295,
+   "src": "gazetteer (bamwor)"
+  },
+  {
+   "id": "ketyan",
+   "name": "كتيان (إدلب)",
+   "lat": 36.054,
+   "lon": 36.81,
+   "elev": 295,
+   "src": "Wikipedia (Ketyan)"
+  },
+  {
+   "id": "tizin",
+   "name": "تيزين (حماة)",
+   "lat": 35.126,
+   "lon": 36.655,
+   "elev": 307,
+   "src": "Wikipedia (Tayzin); workbook 35°08′ 36°36′ agrees"
+  },
+  {
+   "id": "mukhtariya_r",
+   "name": "المختارية (حمص)",
+   "lat": 34.78,
+   "lon": 36.78,
+   "elev": 487,
+   "src": "user: Homs, on the Salamiyah road — placed ~6 km NE of Homs, medium confidence"
+  },
+  {
+   "id": "mhasseh_r",
+   "name": "محسة (حمص)",
+   "lat": 34.22,
+   "lon": 36.8,
+   "elev": 873,
+   "src": "user: at the end of Rif Dimashq on the road to Homs — placed near the governorate border east of the M5, low confidence"
+  },
+  {
+   "id": "khanarnabah",
+   "name": "خان أرنبة (القنيطرة)",
+   "lat": 33.18,
+   "lon": 35.89,
+   "elev": 950,
+   "src": "Wikipedia (Khan Arnabah)"
+  },
+  {
+   "id": "sittkhiris",
+   "name": "ستخيرس (اللاذقية)",
+   "lat": 35.544,
+   "lon": 35.876,
+   "elev": 75,
+   "src": "gazetteer; workbook 35°33′ 35°52′ agrees"
+  },
+  {
+   "id": "akkar",
+   "name": "عكار (طرطوس)",
+   "lat": 34.667,
+   "lon": 35.983,
+   "elev": 11,
+   "src": "workbook 34°40′ 35°59′ (Akkar plain)"
+  },
+  {
+   "id": "nashabiyah",
+   "name": "النشابية (ريف دمشق)",
+   "lat": 33.503,
+   "lon": 36.487,
+   "elev": 618,
+   "src": "research repository (station survey); workbook 33°30′ 36°28′ agrees"
+  },
+  {
+   "id": "telhadya",
+   "name": "تل حديا (حلب)",
+   "lat": 36.017,
+   "lon": 36.933,
+   "elev": 284,
+   "src": "workbook 36°56′/36°01′ read as lon/lat (ICARDA Tel Hadya)"
+  }
+ ]
+}

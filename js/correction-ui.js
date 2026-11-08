@@ -59,10 +59,13 @@
     if (!v) return '';
     const rows = Object.entries(v.variables).filter(([k]) => VAR_AR[k]).map(([k, x]) =>
       `<tr><td style="white-space:normal;text-align:right"><b>${VAR_AR[k]}</b><br><span class="mini">${x.method || ''}</span></td>${MET.map(([m, , d]) => cellPair(m, x.raw, x.corrected, d)).join('')}</tr>`).join('');
+    // short reference record: LOYO over fewer than ~3 years of daily ET0 is statistically weak — say so
+    const nEt0 = v.variables.et0 && ((v.variables.et0.corrected || {}).n ?? (v.variables.et0.raw || {}).n);
+    const short = Number.isFinite(nEt0) && nEt0 < 1095 ? `<br><b style="color:#b45309">تنبيه:</b> سجل ET₀ المرجعي في هذه المحطة قصير (${f(nEt0, 0)} يوماً، أقل من ثلاث سنوات)، فالتحقق بترك سنة خارجاً هنا محدود إحصائياً؛ تُقرأ هذه الأرقام مع خلايا السجلات الطويلة.` : '';
     const full = v.et0_nasa_full_raw ? `<br>ET₀ ناسا الخام بكل مدخلاتها (مع الرياح) في هذه المحطة: انحياز ${f(v.et0_nasa_full_raw.bias_pct, 1)}%، RMSE ${f(v.et0_nasa_full_raw.RMSE)} مم/يوم.` : '';
     return `<h4 style="margin:14px 0 6px">مؤشرات التوافق مع المحطة المرجعية (${v.station}): ناسا الخام ← بعد التصحيح</h4>
       <div class="table-wrap" style="max-height:none"><table><thead><tr><th>المتغير</th>${MET.map(([, t]) => `<th>${t}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div>
-      <div class="mini" style="margin-top:6px">قيم يومية من التحقق في المحطة المرجعية للخلية (بيانات البحث). الأخضر تحسّن بعد التصحيح، والأحمر تراجع. الانحياز = المحسوب − المقيس (MBE بوحدة المتغير، و% نسبةً إلى متوسط المقيس). d وNSE وKGE وr كلما اقتربت من 1 كان التوافق أفضل. الخانات الفارغة لم تُحسب في البحث لهذه المحطة.${full}</div>`;
+      <div class="mini" style="margin-top:6px">قيم يومية من التحقق في المحطة المرجعية للخلية (بيانات البحث). الأخضر تحسّن بعد التصحيح، والأحمر تراجع. الانحياز = المحسوب − المقيس (MBE بوحدة المتغير، و% نسبةً إلى متوسط المقيس). d وNSE وKGE وr كلما اقتربت من 1 كان التوافق أفضل. الخانات الفارغة لم تُحسب في البحث لهذه المحطة.${full}${short}</div>`;
   }
   function seriesHtml(r) {
     const rows = state.rows.filter(x => x._corr), n = rows.length;
